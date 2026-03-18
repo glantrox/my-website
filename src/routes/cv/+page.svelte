@@ -35,7 +35,7 @@
 		rotation = { x: 0, y: 0 };
 	};
 
-	let skills = ['Flutter', 'Dart', 'Problem Solving', 'UI/UX', 'Teamwork'];
+	let skills = ['Lorem', 'Ipsum', 'Dolor', 'Sit', 'Amet'];
 </script>
 
 <div
@@ -53,6 +53,8 @@
 			on:mouseleave={handleLeave}
 			on:touchend={handleLeave}
 			class="relative w-full max-w-[420px] cursor-crosshair group"
+			role="group"
+			aria-label="Interactive CV Card"
 			style="aspect-ratio: 1 / 1.414; transform: rotateX({rotation.x}deg) rotateY({rotation.y}deg); transform-style: preserve-3d; transition: {isHovering
 				? 'none'
 				: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)'};"
@@ -79,10 +81,10 @@
 					<!-- Header / Contact -->
 					<div style="transform: translateZ(30px);">
 						<h1 class="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
-							Hamas Azizan
+							Lorem Ipsum
 						</h1>
 						<p class="text-blue-600 font-bold uppercase tracking-widest text-[10px] sm:text-xs mt-1">
-							Software Eng Student & Flutter Dev
+							Dolor Sit Amet & Consectetur
 						</p>
 
 						<div
@@ -97,7 +99,7 @@
 										d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
 									></path></svg
 								>
-								hamasazeezan@gmail.com
+								lorem.ipsum@example.com
 							</span>
 							<span class="flex items-center gap-1">
 								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -108,7 +110,7 @@
 										d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
 									></path></svg
 								>
-								+62 0895 6303 54422
+								+12 345 678 90123
 							</span>
 							<span class="flex items-center gap-1">
 								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -124,7 +126,7 @@
 										d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
 									></path></svg
 								>
-								Tangerang, ID
+								Adipiscing, ELIT
 							</span>
 						</div>
 					</div>
@@ -132,13 +134,12 @@
 					<!-- Objective Section -->
 					<div class="mt-3" style="transform: translateZ(40px);">
 						<h3 class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
-							Career Objective
+							Lorem Ipsum
 						</h3>
 						<p class="text-[9px] sm:text-[10px] text-neutral-600 leading-relaxed text-justify">
-							Focused and active Software Engineering student from Binus University with relevant
-							experience gained as a Software Developer Intern, and a Dicoding Certified Flutter
-							Expert Developer. Looking forward to a challenging position in software development
-							where I can apply my problem solving and creative skills.
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+							incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+							exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 						</p>
 					</div>
 
@@ -153,30 +154,28 @@
 									class="absolute w-2 h-2 bg-blue-500 rounded-full -left-[5px] top-1 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
 								></div>
 								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">Bina Nusantara University</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2024 - Present</span>
+									<h4 class="text-xs font-bold text-neutral-800">University X</h4>
+									<span class="text-[9px] text-neutral-500 font-medium">2020 - 2024</span>
 								</div>
-								<p class="text-[10px] text-blue-600 font-medium">Computer Science - B28</p>
+								<p class="text-[10px] text-blue-600 font-medium">B.S. in Computer Science</p>
 							</div>
 
 							<div class="relative pl-3 border-l-2 border-neutral-200">
 								<div class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"></div>
 								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">Laskar UI (Paket C)</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2023 - 2024</span>
+									<h4 class="text-xs font-bold text-neutral-800">College Y</h4>
+									<span class="text-[9px] text-neutral-500 font-medium">2018 - 2020</span>
 								</div>
-								<p class="text-[10px] text-neutral-500 font-medium">Ilmu Pengetahuan Alam</p>
+								<p class="text-[10px] text-neutral-500 font-medium">Associate Degree</p>
 							</div>
 
 							<div class="relative pl-3 border-l-2 border-neutral-200">
 								<div class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"></div>
 								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">SMKI Rabbaanii & SMK Al-Hadiid</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2022 - 2023</span>
+									<h4 class="text-xs font-bold text-neutral-800">High School Z</h4>
+									<span class="text-[9px] text-neutral-500 font-medium">2014 - 2018</span>
 								</div>
-								<p class="text-[10px] text-neutral-500 font-medium">
-									Rekayasa Perangkat Lunak / Teknik Komputer Jaringan
-								</p>
+								<p class="text-[10px] text-neutral-500 font-medium">High School Diploma</p>
 							</div>
 						</div>
 					</div>
@@ -239,7 +238,7 @@
 	</div>
 
 	<p class="mt-12 text-neutral-500 text-sm tracking-wide opacity-50 font-medium">
-		Hover or drag over the frosted glass to reveal
+		this is just a gibberish placeholder for my cv :)
 	</p>
 	
 	<div class="mt-8 text-center">

@@ -16,7 +16,7 @@
 			title: 'Work',
 			items: [
 				{ href: '/projects', label: 'Selected Projects' },
-				{ href: '/archive', label: 'Archive' }
+				{ href: '/ternakaja', label: 'TernakAja' }
 			]
 		},
 		{
