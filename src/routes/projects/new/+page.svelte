@@ -1,43 +1,33 @@
+
 <script>
+  import { invalidateAll } from '$app/navigation';
+  import { superForm } from 'sveltekit-superforms';
+  import { Book, Link, Github, CalendarDays, User, Code, ImageUp, LayoutGrid, Save, X } from 'lucide-svelte';
+
   export let data;
   const { isAdmin } = data;
 
-  import { Book, Link, Github, CalendarDays, User, Code, ImageUp, LayoutGrid, Save, X } from 'lucide-svelte';
+  // Initialize superForm
+  const { form, errors, enhance, message } = superForm(data.form, {
+    dataType: 'json',
+    onResult({ result }) {
+      if (result.type === 'success') {
+        // Optionally clear the form or show a success message
+        // For now, we just invalidate to refetch data
+        invalidateAll();
+      }
+    }
+  });
 
-  let project = {
-    title: '',
-    tagline: '',
-    date: '',
-    role: '',
-    status: '',
-    techStack: '', // Will be handled as a string for input, then split into array
-    links: {
-      live: '',
-      github: ''
-    },
-    image: '',
-    description: ''
-  };
-
-  // Helper to split techStack string into an array for display
-  $: techStackArray = project.techStack
-    ? project.techStack.split(',').map(s => s.trim()).filter(Boolean)
+  $: techStackArray = $form.techStack
+    ? $form.techStack.split(',').map(s => s.trim()).filter(Boolean)
     : [];
-
-  function handleSubmit() {
-    // In a real application, you would handle form submission here,
-    // like sending the data to a server or updating a store.
-    // For now, we'll just log the data to the console.
-    console.log('New Project Data:', {
-      ...project,
-      techStack: techStackArray
-    });
-    alert('Project data logged to console. See the browser developer tools.');
-  }
 
   function handleCancel() {
     // Redirect to projects page or show confirmation
-    window.location.href = '/projects';
+    // Note: this should be a client-side navigation
+    // You might want to use SvelteKit's `goto` function for this
+    history.back(); // Go back to the previous page
   }
 </script>
 
@@ -69,7 +59,14 @@
     </header>
 
     <main class="max-w-4xl mx-auto px-6 py-8 md:py-12">
-      <form id="project-form" on:submit|preventDefault={handleSubmit} class="space-y-8">
+      <!-- Success/Error Message Display -->
+      {#if $message}
+        <div class="p-4 mb-6 text-sm rounded-md {$message.includes('successfully') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+          {$message}
+        </div>
+      {/if}
+
+      <form id="project-form" method="POST" use:enhance class="space-y-8">
         <!-- General Information Card -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
           <h2 class="text-lg font-semibold text-slate-700 mb-5 flex items-center gap-2">
@@ -82,32 +79,38 @@
               <input
                 type="text"
                 id="title"
-                bind:value={project.title}
+                name="title"
+                bind:value={$form.title}
                 class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="e.g., My Awesome Project"
                 required
               />
+              {#if $errors.title}<p class="mt-1 text-sm text-red-600">{$errors.title}</p>{/if}
             </div>
             <div>
               <label for="tagline" class="block text-sm font-medium text-slate-700 mb-1">Tagline</label>
               <input
                 type="text"
                 id="tagline"
-                bind:value={project.tagline}
+                name="tagline"
+                bind:value={$form.tagline}
                 class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="A short, catchy description"
                 required
               />
+              {#if $errors.tagline}<p class="mt-1 text-sm text-red-600">{$errors.tagline}</p>{/if}
             </div>
             <div>
               <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
               <textarea
                 id="description"
-                bind:value={project.description}
+                name="description"
+                bind:value={$form.description}
                 rows="4"
                 class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="Detailed description of the project"
               ></textarea>
+              {#if $errors.description}<p class="mt-1 text-sm text-red-600">{$errors.description}</p>{/if}
             </div>
           </div>
         </div>
@@ -128,11 +131,13 @@
                 <input
                   type="text"
                   id="date"
-                  bind:value={project.date}
+                  name="date"
+                  bind:value={$form.date}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Jan 2023 - Present"
                 />
               </div>
+              {#if $errors.date}<p class="mt-1 text-sm text-red-600">{$errors.date}</p>{/if}
             </div>
             <div>
               <label for="role" class="block text-sm font-medium text-slate-700 mb-1">Your Role</label>
@@ -143,11 +148,13 @@
                 <input
                   type="text"
                   id="role"
-                  bind:value={project.role}
+                  name="role"
+                  bind:value={$form.role}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Lead Developer, UI/UX Designer"
                 />
               </div>
+              {#if $errors.role}<p class="mt-1 text-sm text-red-600">{$errors.role}</p>{/if}
             </div>
             <div>
               <label for="status" class="block text-sm font-medium text-slate-700 mb-1">Status</label>
@@ -158,11 +165,13 @@
                 <input
                   type="text"
                   id="status"
-                  bind:value={project.status}
+                  name="status"
+                  bind:value={$form.status}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Completed, In Progress"
                 />
               </div>
+              {#if $errors.status}<p class="mt-1 text-sm text-red-600">{$errors.status}</p>{/if}
             </div>
             <div>
               <label for="image" class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
@@ -173,11 +182,13 @@
                 <input
                   type="url"
                   id="image"
-                  bind:value={project.image}
+                  name="image"
+                  bind:value={$form.image}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://example.com/project-image.jpg"
                 />
               </div>
+              {#if $errors.image}<p class="mt-1 text-sm text-red-600">{$errors.image}</p>{/if}
             </div>
           </div>
         </div>
@@ -193,10 +204,12 @@
             <input
               type="text"
               id="techStack"
-              bind:value={project.techStack}
+              name="techStack"
+              bind:value={$form.techStack}
               class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               placeholder="e.g., React, TypeScript, Tailwind CSS"
             />
+            {#if $errors.techStack}<p class="mt-1 text-sm text-red-600">{$errors.techStack}</p>{/if}
             {#if techStackArray.length > 0}
               <div class="mt-3 flex flex-wrap gap-2">
                 {#each techStackArray as tech}
@@ -225,11 +238,13 @@
                 <input
                   type="url"
                   id="liveLink"
-                  bind:value={project.links.live}
+                  name="links.live"
+                  bind:value={$form.links.live}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://live-project.com"
                 />
               </div>
+              {#if $errors.links?.live}<p class="mt-1 text-sm text-red-600">{$errors.links.live}</p>{/if}
             </div>
             <div>
               <label for="githubLink" class="block text-sm font-medium text-slate-700 mb-1">GitHub Repository URL</label>
@@ -240,11 +255,13 @@
                 <input
                   type="url"
                   id="githubLink"
-                  bind:value={project.links.github}
+                  name="links.github"
+                  bind:value={$form.links.github}
                   class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://github.com/your/project"
                 />
               </div>
+              {#if $errors.links?.github}<p class="mt-1 text-sm text-red-600">{$errors.links.github}</p>{/if}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 <script>
 	export let data;
-	const { isAdmin } = data;
-	import { projects } from '$lib/data.js';
+	const { isAdmin, projects } = data;
+	// import { projects } from '$lib/data.js';
 	import { X, ExternalLink, Github, Calendar, User, LayoutGrid, Code2 } from 'lucide-svelte';
 	import { afterUpdate, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
