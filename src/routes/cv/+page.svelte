@@ -1,9 +1,14 @@
 <script>
+	/** @type {HTMLElement} */
 	let cardRef;
 	let rotation = { x: 0, y: 0 };
 	let isHovering = false;
 	let glarePosition = { x: 50, y: 50 };
 
+	/**
+	 * @param {number} clientX
+	 * @param {number} clientY
+	 */
 	const handleMove = (clientX, clientY) => {
 		if (!cardRef) return;
 		const rect = cardRef.getBoundingClientRect();
@@ -23,7 +28,13 @@
 		glarePosition = { x: glareX, y: glareY };
 	};
 
+	/**
+	 * @param {MouseEvent} e
+	 */
 	const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
+	/**
+	 * @param {TouchEvent} e
+	 */
 	const onTouchMove = (e) => {
 		if (isHovering) e.preventDefault();
 		handleMove(e.touches[0].clientX, e.touches[0].clientY);

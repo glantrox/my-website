@@ -48,7 +48,7 @@
 	>
 		<!-- Backdrop -->
 		<div
-			class="fixed inset-0 bg-black bg-opacity-70"
+			class="fixed inset-0 bg-gray-200 bg-opacity-50"
 			on:click={onClose}
 			aria-hidden="true"
 		></div>
@@ -61,7 +61,7 @@
 			<!-- Close Button -->
 			<button
 				on:click={onClose}
-				class="absolute top-3 right-3 text-zinc-500 hover:text-zinc-800 transition-colors"
+				class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
 				aria-label="Close modal"
 			>
 				<svg

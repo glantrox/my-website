@@ -189,8 +189,8 @@
         </div>
     </div>
     
-    <div class="d-flex flex-row w-full items-center justify-center ">
-        <a href="https://ternakaja.vercel.app" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 no-underline">
+    <div  style="display: flex; justify-content: center; margin-top: 2rem;">
+        <a href="https://ternakaja.vercel.app" target="_blank" rel="noopener noreferrer" class="text-gray hover:text-blue-700 no-underline">
             Official Website
         </a>
     </div>

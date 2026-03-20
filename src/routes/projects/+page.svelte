@@ -1,13 +1,33 @@
 <script>
+	import { page } from '$app/stores';
 	import { projects } from '$lib/data.js';
 	import { X, ExternalLink, Github, Calendar, User, LayoutGrid, Code2 } from 'lucide-svelte';
 	import { afterUpdate, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 
+	/**
+	 * @typedef {{
+	 *   id: number;
+	 *   title: string;
+	 *   tagline: string;
+	 *   date: string;
+	 *   role: string;
+	 *   status: string;
+	 *   techStack: string[];
+	 *   links: { live: string; github: string; };
+	 *   image: string;
+	 *   colSpan: number;
+	 *   description: string;
+	 * }} Project
+	 */
+
 	let showModal = false;
+	/** @type {Project | null} */
 	let selectedProject = null;
+	/** @type {string} */
 	let originalBodyOverflow;
 
+	/** @param {Project} project */
 	function openModal(project) {
 		selectedProject = project;
 		showModal = true;
@@ -18,7 +38,7 @@
 		selectedProject = null;
 	}
 
-	// Handle Escape key press
+	/** @param {KeyboardEvent} event */
 	function handleKeydown(event) {
 		if (event.key === 'Escape') {
 			closeModal();
@@ -32,7 +52,9 @@
 			document.body.style.overflow = 'hidden';
 			window.addEventListener('keydown', handleKeydown);
 		} else {
-			document.body.style.overflow = originalBodyOverflow || '';
+			if (originalBodyOverflow) {
+				document.body.style.overflow = originalBodyOverflow;
+			}
 			window.removeEventListener('keydown', handleKeydown);
 		}
 	});
@@ -40,15 +62,37 @@
 	onDestroy(() => {
 		// Clean up event listener and restore body overflow if component is destroyed while modal is open
 		window.removeEventListener('keydown', handleKeydown);
-		document.body.style.overflow = originalBodyOverflow || '';
+		if (originalBodyOverflow) {
+			document.body.style.overflow = originalBodyOverflow;
+		}
 	});
 </script>
 
 <div class="max-w-6xl mx-auto px-6 py-12 md:px-16 md:py-24">
 	<section>
-		<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase mb-12">
-			Selected Projects
-		</h2>
+		<div class="flex justify-between items-center mb-12">
+			<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+				Selected Projects
+			</h2>
+			{#if $page.url.searchParams.get('admin') === 'true'}
+				<a
+					href="/projects/new"
+					class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+					aria-label="Add new project"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+					</svg>
+				</a>
+			{/if}
+		</div>
 
 		<!-- Masonry Layout Container -->
 		<div class="columns-1 sm:columns-2 lg:columns-3 gap-x-8">
@@ -76,10 +120,10 @@
 					<div class="flex justify-between items-start text-sm px-1">
 						<div>
 							<h3 class="text-zinc-900 font-medium">{project.title}</h3>
-							<p class="text-zinc-500 mt-0.5">{project.subtitle}</p>
+							<p class="text-zinc-500 mt-0.5">{project.tagline}</p>
 						</div>
 						<div class="text-zinc-400 text-right">
-							<span>{project.year}</span>
+							<span>{project.date}</span>
 						</div>
 					</div>
 				</button>
@@ -187,9 +231,8 @@
 						Technologies Used
 					</h3>
 					<div class="flex flex-wrap gap-2">
-						{#each selectedProject.techStack as tech, index}
+						{#each selectedProject.techStack as tech}
 							<span
-								key={index}
 								class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-default"
 							>
 								{tech}
