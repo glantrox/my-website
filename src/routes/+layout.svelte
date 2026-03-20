@@ -37,9 +37,10 @@
 		{
 			title: 'Contact',
 			items: [
-				{ href: 'mailto:hamas.azizan@gmail.com', label: 'Mail' },
-				{ href: 'https://twitter.com/hamasazizan', label: 'Twitter' },
-				{ href: 'https://linkedin.com/in/hamasazizan', label: 'LinkedIn' }
+				{ href: 'mailto:hamasazeezan@gmail.com', label: 'Mail' },
+				{ href: 'https://www.instagram.com/hamasified/', label: 'Instagram' },
+				{ href: 'https://www.linkedin.com/in/hamas-azizan-6924aa266/', label: 'LinkedIn' },
+				{ href: 'https://github.com/glantrox', label: 'GitHub' }
 			]
 		}
 	];

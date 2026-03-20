@@ -2,6 +2,7 @@
 	import { afterUpdate, onDestroy } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { crossfade } from 'svelte/transition';
+	import { browser } from '$app/environment';
 
 	export let isOpen = false;
 	export let onClose = () => {};
@@ -24,20 +25,24 @@
 
 	// Disable/enable body scrolling when modal opens/closes
 	afterUpdate(() => {
-		if (isOpen) {
-			originalBodyOverflow = document.body.style.overflow;
-			document.body.style.overflow = 'hidden';
-			window.addEventListener('keydown', handleKeydown);
-		} else {
-			document.body.style.overflow = originalBodyOverflow || '';
-			window.removeEventListener('keydown', handleKeydown);
+		if (browser) {
+			if (isOpen) {
+				originalBodyOverflow = document.body.style.overflow;
+				document.body.style.overflow = 'hidden';
+				window.addEventListener('keydown', handleKeydown);
+			} else {
+				document.body.style.overflow = originalBodyOverflow || '';
+				window.removeEventListener('keydown', handleKeydown);
+			}
 		}
 	});
 
 	onDestroy(() => {
-		// Clean up event listener and restore body overflow if component is destroyed while modal is open
-		window.removeEventListener('keydown', handleKeydown);
-		document.body.style.overflow = originalBodyOverflow || '';
+		if (browser) {
+			// Clean up event listener and restore body overflow if component is destroyed while modal is open
+			window.removeEventListener('keydown', handleKeydown);
+			document.body.style.overflow = originalBodyOverflow || '';
+		}
 	});
 </script>
 

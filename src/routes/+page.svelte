@@ -15,7 +15,7 @@
 					Hamas<br />
 					<span class="text-zinc-800">Azizan</span>
 				</h1>
-				<p class="mt-4 text-zinc-400 font-serif italic text-xl">/ Designer & Developer /</p>
+				<p class="mt-4 text-zinc-400 font-serif italic text-xl">/ Undergraduate BINUS <br> Computer Science Student /</p>
 			</div>
 
 			<!-- Info Text Block -->
@@ -32,7 +32,7 @@
 						that feel natural and empowering to use.
 					</p>
 					<p>
-						Currently available for freelance opportunities. Let's build something great together.
+						Currently working on a small startup project, and open to freelance opportunities. If you're interested in collaborating, feel free to reach out!
 					</p>
 				</div>
 			</div>

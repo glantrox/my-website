@@ -1,9 +1,11 @@
 <script>
-	import { page } from '$app/stores';
+	export let data;
+	const { isAdmin } = data;
 	import { projects } from '$lib/data.js';
 	import { X, ExternalLink, Github, Calendar, User, LayoutGrid, Code2 } from 'lucide-svelte';
 	import { afterUpdate, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { browser } from '$app/environment';
 
 	/**
 	 * @typedef {{
@@ -47,23 +49,27 @@
 
 	// Disable/enable body scrolling and attach/detach keydown listener when modal opens/closes
 	afterUpdate(() => {
-		if (showModal) {
-			originalBodyOverflow = document.body.style.overflow;
-			document.body.style.overflow = 'hidden';
-			window.addEventListener('keydown', handleKeydown);
-		} else {
-			if (originalBodyOverflow) {
-				document.body.style.overflow = originalBodyOverflow;
+		if (browser) {
+			if (showModal) {
+				originalBodyOverflow = document.body.style.overflow;
+				document.body.style.overflow = 'hidden';
+				window.addEventListener('keydown', handleKeydown);
+			} else {
+				if (originalBodyOverflow) {
+					document.body.style.overflow = originalBodyOverflow;
+				}
+				window.removeEventListener('keydown', handleKeydown);
 			}
-			window.removeEventListener('keydown', handleKeydown);
 		}
 	});
 
 	onDestroy(() => {
-		// Clean up event listener and restore body overflow if component is destroyed while modal is open
-		window.removeEventListener('keydown', handleKeydown);
-		if (originalBodyOverflow) {
-			document.body.style.overflow = originalBodyOverflow;
+		if (browser) {
+			// Clean up event listener and restore body overflow if component is destroyed while modal is open
+			window.removeEventListener('keydown', handleKeydown);
+			if (originalBodyOverflow) {
+				document.body.style.overflow = originalBodyOverflow;
+			}
 		}
 	});
 </script>
@@ -74,7 +80,7 @@
 			<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
 				Selected Projects
 			</h2>
-			{#if $page.url.searchParams.get('admin') === 'true'}
+			{#if isAdmin}
 				<a
 					href="/projects/new"
 					class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"

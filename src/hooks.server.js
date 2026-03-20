@@ -1,10 +1,9 @@
 // src/hooks.server.js
-import { env } from '$env/dynamic/private';
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-	const adminSecret = env.ADMIN_SECRET_KEY;
+	const adminSecret = process.env.ADMIN_SECRET_KEY;
 
 	// Logout logic
 	if (event.url.pathname === '/logout') {

@@ -1,4 +1,3 @@
-import { env } from '$env/dynamic/private';
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').Actions} */
@@ -6,8 +5,10 @@ export const actions = {
   default: async ({ cookies, request }) => {
     const data = await request.formData();
     const password = data.get('password');
+    console.log('Password entered by user:', password);
 
-    const adminSecret = env.ADMIN_SECRET_KEY;
+    const adminSecret = process.env.ADMIN_SECRET_KEY;
+    console.log('adminSecret from env:', adminSecret);
 
     if (password === adminSecret) {
       cookies.set('sid', adminSecret, {
