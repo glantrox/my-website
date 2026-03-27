@@ -123,12 +123,12 @@ export const professionalExperience = [
 	{
 		company: 'Telkom Indonesia IoT (Antares)',
 		title: 'Software Developer',
-		duration: '2023 - Present'
+		duration: '2022 - 2023'
 	},
 	{
 		company: 'Freelance',
 		title: ' Software Engineer',
-		duration: '2021 - 2023'
+		duration: '2021 - Present'
 	},
 ];
 

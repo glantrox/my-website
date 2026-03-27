@@ -22,18 +22,15 @@
 			<div class="flex-1 lg:max-w-md pt-4 lg:pt-12">
 				<h3 class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase mb-6">Info</h3>
 				<div class="space-y-6 text-sm text-zinc-600 leading-relaxed">
-					<p>
-						I'm a designer focused on creating intuitive, human-centered interfaces for web and
-						mobile platforms.
-					</p>
-					<p>
-						For a long time, I've been designing digital spaces that people can navigate
-						seamlessly. My approach is rooted in simplicity and clarity, striving to build tools
-						that feel natural and empowering to use.
-					</p>
-					<p>
-						Currently working on a small startup project, and open to freelance opportunities. If you're interested in collaborating, feel free to reach out!
-					</p>
+				<p>
+I'm a software developer and computer science student focused on building intelligent, scalable applications and intuitive interfaces for web and mobile platforms.
+</p>
+<p>
+My approach bridges the gap between clean design and complex engineering. Whether I'm developing machine learning models for data-driven insights, or engineering full-stack solutions using tools like React, Flutter, Python, and Java, I strive to build software that is both powerful under the hood and seamless for the end user.
+</p>
+<p>
+Currently, I'm developing a B2B SaaS platform focused on financial integrity and Agritech focused on Cattle Health, alongside my ongoing academic research. I'm always open to freelance opportunities and new challenges. If you're interested in collaborating, feel free to reach out!
+</p>
 				</div>
 			</div>
 		</div>
@@ -87,7 +84,7 @@
 
 	<!-- Footer -->
 	<footer
-		class="pt-12 border-t border-zinc-100 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-400"
+		class="pt-12 border-zinc-100 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-400"
 	>
 		<p>© {new Date().getFullYear()} Hamas Azizan. All rights reserved.</p>
 		<div class="flex gap-6 mt-4 md:mt-0">
