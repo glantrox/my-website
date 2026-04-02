@@ -15,7 +15,7 @@
 			<!-- Massive Typography -->
 			<div class="flex-1">
 				<h1
-					class="text-6xl dark:text-zinc-200 md:text-8xl lg:text-9xl font-medium tracking-tighter leading-[0.9] text-zinc-300 dark:text-zinc-800/50"
+					class="text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter leading-[0.9] text-zinc-300 dark:text-zinc-200/50"
 				>
 					Hamas<br />
 					<span class="text-zinc-800 dark:text-zinc-200">Azizan</span>
