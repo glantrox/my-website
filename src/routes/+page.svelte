@@ -138,11 +138,7 @@
 	>
 		<p>© {new Date().getFullYear()} Hamas Azizan. All rights reserved.</p>
 		<div class="flex gap-6 mt-4 md:mt-0">
-			<a
-				href="https://twitter.com/hamasazizan"
-				class="hover:text-zinc-800 dark:text-zinc-200 transition-colors"
-				>Twitter</a
-			>
+		
 			<a
 				href="https://linkedin.com/in/hamasazizan"
 				class="hover:text-zinc-800 dark:text-zinc-200 transition-colors"
