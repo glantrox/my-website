@@ -77,7 +77,7 @@
 <div class="max-w-6xl mx-auto px-6 py-12 md:px-16 md:py-24">
 	<section>
 		<div class="flex justify-between items-center mb-12">
-			<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+			<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
 				Selected Projects
 			</h2>
 			{#if isAdmin}
@@ -110,10 +110,10 @@
 				>
 					<!-- Image Container with subtle gray background -->
 					<div
-						class="bg-zinc-50 rounded-xl overflow-hidden mb-5 border border-zinc-100 relative"
+						class="bg-zinc-50 dark:bg-zinc-900 rounded-xl overflow-hidden mb-5 border border-zinc-100 dark:border-zinc-800 relative"
 					>
 						<!-- Placeholder colored block to simulate loading/image presence if img fails -->
-						<div class="absolute inset-0 bg-zinc-100 animate-pulse -z-10"></div>
+						<div class="absolute inset-0 bg-zinc-100 dark:bg-zinc-800/50 animate-pulse -z-10"></div>
 						<img
 							src={project.image}
 							alt={project.title}
@@ -126,9 +126,9 @@
 					<div class="flex justify-between items-start text-sm px-1">
 						<div>
 							<h3 class="text-zinc-900 font-medium">{project.title}</h3>
-							<p class="text-zinc-500 mt-0.5">{project.tagline}</p>
+							<p class="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-0.5">{project.tagline}</p>
 						</div>
-						<div class="text-zinc-400 text-right">
+						<div class="text-zinc-400 dark:text-zinc-500 text-right">
 							<span>{project.date}</span>
 						</div>
 					</div>

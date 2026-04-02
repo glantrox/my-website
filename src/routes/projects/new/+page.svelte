@@ -31,17 +31,17 @@
   }
 </script>
 
-<div class="min-h-screen bg-slate-50">
+<div class="min-h-screen bg-slate-50 dark:bg-zinc-800/50">
   {#if isAdmin}
     <!-- Sticky Header/Action Bar -->
-    <header class="sticky top-0 bg-white border-b border-slate-200 z-10">
+    <header class="sticky top-0 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 z-10">
       <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-        <h1 class="text-xl font-bold text-slate-800">Add New Project</h1>
+        <h1 class="text-xl font-bold text-slate-800 dark:text-zinc-200">Add New Project</h1>
         <div class="flex items-center space-x-3">
           <button
             type="button"
             on:click={handleCancel}
-            class="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="inline-flex items-center px-4 py-2 border border-slate-300 dark:border-zinc-700 text-sm font-medium rounded-md text-slate-700 dark:text-zinc-200 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             <X class="w-4 h-4 mr-2" />
             Cancel
@@ -68,46 +68,46 @@
 
       <form id="project-form" method="POST" use:enhance class="space-y-8">
         <!-- General Information Card -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-5 flex items-center gap-2">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
+          <h2 class="text-lg font-semibold text-slate-700 dark:text-zinc-200 mb-5 flex items-center gap-2">
             <Book class="w-5 h-5 text-blue-500" />
             General Information
           </h2>
           <div class="space-y-5">
             <div>
-              <label for="title" class="block text-sm font-medium text-slate-700 mb-1">Project Title</label>
+              <label for="title" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Project Title</label>
               <input
                 type="text"
                 id="title"
                 name="title"
                 bind:value={$form.title}
-                class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                class="mt-1 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="e.g., My Awesome Project"
                 required
               />
               {#if $errors.title}<p class="mt-1 text-sm text-red-600">{$errors.title}</p>{/if}
             </div>
             <div>
-              <label for="tagline" class="block text-sm font-medium text-slate-700 mb-1">Tagline</label>
+              <label for="tagline" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Tagline</label>
               <input
                 type="text"
                 id="tagline"
                 name="tagline"
                 bind:value={$form.tagline}
-                class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                class="mt-1 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="A short, catchy description"
                 required
               />
               {#if $errors.tagline}<p class="mt-1 text-sm text-red-600">{$errors.tagline}</p>{/if}
             </div>
             <div>
-              <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+              <label for="description" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Description</label>
               <textarea
                 id="description"
                 name="description"
                 bind:value={$form.description}
                 rows="4"
-                class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                class="mt-1 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="Detailed description of the project"
               ></textarea>
               {#if $errors.description}<p class="mt-1 text-sm text-red-600">{$errors.description}</p>{/if}
@@ -116,14 +116,14 @@
         </div>
 
         <!-- Details Card -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-5 flex items-center gap-2">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
+          <h2 class="text-lg font-semibold text-slate-700 dark:text-zinc-200 mb-5 flex items-center gap-2">
             <LayoutGrid class="w-5 h-5 text-blue-500" />
             Details
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label for="date" class="block text-sm font-medium text-slate-700 mb-1">Date / Timeline</label>
+              <label for="date" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Date / Timeline</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <CalendarDays class="h-5 w-5 text-slate-400" />
@@ -133,14 +133,14 @@
                   id="date"
                   name="date"
                   bind:value={$form.date}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Jan 2023 - Present"
                 />
               </div>
               {#if $errors.date}<p class="mt-1 text-sm text-red-600">{$errors.date}</p>{/if}
             </div>
             <div>
-              <label for="role" class="block text-sm font-medium text-slate-700 mb-1">Your Role</label>
+              <label for="role" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Your Role</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User class="h-5 w-5 text-slate-400" />
@@ -150,14 +150,14 @@
                   id="role"
                   name="role"
                   bind:value={$form.role}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Lead Developer, UI/UX Designer"
                 />
               </div>
               {#if $errors.role}<p class="mt-1 text-sm text-red-600">{$errors.role}</p>{/if}
             </div>
             <div>
-              <label for="status" class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+              <label for="status" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Status</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Code class="h-5 w-5 text-slate-400" />
@@ -167,14 +167,14 @@
                   id="status"
                   name="status"
                   bind:value={$form.status}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="e.g., Completed, In Progress"
                 />
               </div>
               {#if $errors.status}<p class="mt-1 text-sm text-red-600">{$errors.status}</p>{/if}
             </div>
             <div>
-              <label for="image" class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+              <label for="image" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Image URL</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <ImageUp class="h-5 w-5 text-slate-400" />
@@ -184,7 +184,7 @@
                   id="image"
                   name="image"
                   bind:value={$form.image}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://example.com/project-image.jpg"
                 />
               </div>
@@ -194,19 +194,19 @@
         </div>
 
         <!-- Tech Stack Card -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-5 flex items-center gap-2">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
+          <h2 class="text-lg font-semibold text-slate-700 dark:text-zinc-200 mb-5 flex items-center gap-2">
             <Code class="w-5 h-5 text-blue-500" />
             Tech Stack
           </h2>
           <div>
-            <label for="techStack" class="block text-sm font-medium text-slate-700 mb-1">Technologies Used (comma-separated)</label>
+            <label for="techStack" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Technologies Used (comma-separated)</label>
             <input
               type="text"
               id="techStack"
               name="techStack"
               bind:value={$form.techStack}
-              class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              class="mt-1 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               placeholder="e.g., React, TypeScript, Tailwind CSS"
             />
             {#if $errors.techStack}<p class="mt-1 text-sm text-red-600">{$errors.techStack}</p>{/if}
@@ -223,14 +223,14 @@
         </div>
 
         <!-- Links Card -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-5 flex items-center gap-2">
+        <div class="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
+          <h2 class="text-lg font-semibold text-slate-700 dark:text-zinc-200 mb-5 flex items-center gap-2">
             <Link class="w-5 h-5 text-blue-500" />
             Project Links
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label for="liveLink" class="block text-sm font-medium text-slate-700 mb-1">Live Site URL</label>
+              <label for="liveLink" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Live Site URL</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Link class="h-5 w-5 text-slate-400" />
@@ -240,14 +240,14 @@
                   id="liveLink"
                   name="links.live"
                   bind:value={$form.links.live}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://live-project.com"
                 />
               </div>
               {#if $errors.links?.live}<p class="mt-1 text-sm text-red-600">{$errors.links.live}</p>{/if}
             </div>
             <div>
-              <label for="githubLink" class="block text-sm font-medium text-slate-700 mb-1">GitHub Repository URL</label>
+              <label for="githubLink" class="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">GitHub Repository URL</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Github class="h-5 w-5 text-slate-400" />
@@ -257,7 +257,7 @@
                   id="githubLink"
                   name="links.github"
                   bind:value={$form.links.github}
-                  class="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  class="pl-10 block w-full rounded-md border-slate-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="https://github.com/your/project"
                 />
               </div>
@@ -270,7 +270,7 @@
   {:else}
     <div class="text-center py-20">
       <h1 class="text-3xl font-bold text-red-600 mb-4">Access Denied</h1>
-      <p class="text-lg text-slate-600">You do not have permission to view this page. Please log in as an administrator.</p>
+      <p class="text-lg text-slate-600 dark:text-zinc-300">You do not have permission to view this page. Please log in as an administrator.</p>
     </div>
   {/if}
 </div>
