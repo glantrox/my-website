@@ -1,0 +1,251 @@
+[
+    {
+        "createdAt": "2024-06-14T11:20:23.159230Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/Yp8c7X9.png",
+        "links": {
+            "github": "https://github.com/Izan2020/silambatshoot_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Landing Page Website",
+        "techStack": [
+            "Web"
+        ],
+        "title": "Silambat Shoot"
+    },
+    {
+        "createdAt": "2024-06-14T11:22:02.992529Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/nIdh5M8.png",
+        "links": {
+            "github": "https://github.com/Izan2020/imageintelligence_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Landing Page Website",
+        "techStack": [
+            "Web"
+        ],
+        "title": "IMINT"
+    },
+    {
+        "createdAt": "2024-06-14T11:24:07.075580Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/MaLPL4W.png",
+        "links": {
+            "github": "",
+            "live": "https://www.figma.com/design/qiagKkIkPenPYbVPeetc55/Cleanify-UI%2FUX?node-id=0-1&t=gmQpn08H7OufU7nu-1"
+        },
+        "role": "Lead Designer",
+        "status": "Completed",
+        "tagline": "App UI/UX Concept",
+        "techStack": [
+            "Figma",
+            "UI/UX"
+        ],
+        "title": "Cleanify"
+    },
+    {
+        "createdAt": "2024-06-16T11:38:46.092713Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/zgXMsET.png",
+        "links": {
+            "github": "https://github.com/Izan2020/rbconstruction_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Landing Page Website",
+        "techStack": [
+            "Web"
+        ],
+        "title": "RBConstruction"
+    },
+    {
+        "createdAt": "2024-06-14T11:33:02.668746Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/HLhSQ9m.png",
+        "links": {
+            "github": "https://github.com/Izan2020/mooshaf_app",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Android Quran App",
+        "techStack": [
+            "Android",
+            "Mobile"
+        ],
+        "title": "Mooshaf"
+    },
+    {
+        "createdAt": "2024-06-19T20:38:54.156324Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/8OEL4VJ.png",
+        "links": {
+            "github": "https://github.com/Izan2020/attendme_app",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Flutter Attendance App",
+        "techStack": [
+            "Flutter",
+            "iOS",
+            "Android",
+            "Mobile"
+        ],
+        "title": "AttendMe App"
+    },
+    {
+        "createdAt": "2024-06-14T11:09:19.443033Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/ZL7qIaU.jpeg",
+        "links": {
+            "github": "https://github.com/Izan2020/attendance_app",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Android Attendance App",
+        "techStack": [
+            "Android",
+            "Mobile"
+        ],
+        "title": "Attendance App"
+    },
+    {
+        "createdAt": "2024-06-14T11:14:34.403121Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/ItAbq9l.png",
+        "links": {
+            "github": "",
+            "live": "https://www.figma.com/design/1tKqi6OJdMk7lJ3WAH0bwj/Fishermate?node-id=0-1&t=Ayrw44boYucLCJeb-1"
+        },
+        "role": "Lead Designer",
+        "status": "Completed",
+        "tagline": "App UI/UX Concept",
+        "techStack": [
+            "Figma",
+            "UI/UX"
+        ],
+        "title": "Fishermate"
+    },
+    {
+        "createdAt": "2024-06-27T10:00:52.054230Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/VIGs50o.png",
+        "links": {
+            "github": "https://github.com/Izan2020/meal_planner_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Meal Planning Website",
+        "techStack": [
+            "Web"
+        ],
+        "title": "Meal Planner"
+    },
+    {
+        "createdAt": "2024-06-16T11:26:28.961536Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/aqNyo6G.png",
+        "links": {
+            "github": "https://github.com/Izan2020/noots_app",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Flutter Notes App",
+        "techStack": [
+            "Flutter",
+            "iOS",
+            "Android",
+            "Mobile"
+        ],
+        "title": "Noots App"
+    },
+    {
+        "createdAt": "2024-07-29T11:33:38.518546Z",
+        "date": "Jul 2024",
+        "description": "",
+        "image": "https://i.imgur.com/t43IHzd.png",
+        "links": {
+            "github": "",
+            "live": "https://www.figma.com/design/QoWdHesKG6JSwdxDlQPMa6/Event-Ticket-Website---UI%2FUX?node-id=0-1&t=u6U0yJhTBQo8z9fe-1"
+        },
+        "role": "Lead Designer",
+        "status": "Completed",
+        "tagline": "Web UI/UX Design Concept",
+        "techStack": [
+            "Figma",
+            "UI/UX"
+        ],
+        "title": "Ticket Website"
+    },
+    {
+        "createdAt": "2024-06-14T11:18:36.791080Z",
+        "date": "Jun 2024",
+        "description": "",
+        "image": "https://i.imgur.com/jQCXu9P.png",
+        "links": {
+            "github": "https://github.com/Izan2020/makanan_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Website Landing Page",
+        "techStack": [
+            "Web"
+        ],
+        "title": "Makanan Website"
+    },
+    {
+        "createdAt": "2025-02-08T13:09:25.852703Z",
+        "date": "Feb 2025",
+        "description": "",
+        "image": "https://i.imgur.com/rrFMi8w.png",
+        "links": {
+            "github": "https://github.com/glantrox/clymate-web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Weather & Forecast Web",
+        "techStack": [
+            "Web"
+        ],
+        "title": "Clymate Website"
+    },
+    {
+        "createdAt": "2025-05-18T06:06:44.692315Z",
+        "date": "May 2025",
+        "description": "",
+        "image": "https://i.imgur.com/nwC64tZ.jpeg",
+        "links": {
+            "github": "https://github.com/glantrox/vphone_web",
+            "live": ""
+        },
+        "role": "Lead Developer",
+        "status": "Completed",
+        "tagline": "Smartphone Company Web",
+        "techStack": [
+            "Web"
+        ],
+        "title": "vPhone Website"
+    }
+]

@@ -46,14 +46,17 @@
 		rotation = { x: 0, y: 0 };
 	};
 
-	let skills = ['Lorem', 'Ipsum', 'Dolor', 'Sit', 'Amet'];
+	let skills = ["Lorem", "Ipsum", "Dolor", "Sit", "Amet"];
 </script>
 
 <div
-	class="min-h-screen  flex flex-col items-center justify-center p-6 sm:p-12 font-sans overflow-hidden text-neutral-900"
+	class="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 font-sans overflow-hidden text-neutral-900"
 >
 	<!-- Perspective Container -->
-	<div class="relative w-full flex justify-center items-center" style="perspective: 1200px;">
+	<div
+		class="relative w-full flex justify-center items-center"
+		style="perspective: 1200px;"
+	>
 		<!-- 3D Transform Wrapper -->
 		<div
 			bind:this={cardRef}
@@ -91,18 +94,21 @@
 				>
 					<!-- Header / Contact -->
 					<div style="transform: translateZ(30px);">
-						<h1 class="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
+						<h1
+							class="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight"
+						>
 							Lorem Ipsum
 						</h1>
-						<p class="text-blue-600 font-bold uppercase tracking-widest text-[10px] sm:text-xs mt-1">
-							Dolor Sit Amet & Consectetur
-						</p>
 
 						<div
 							class="flex flex-wrap gap-x-3 gap-y-1 text-[9px] sm:text-[10px] text-neutral-500 mt-3 border-b border-neutral-200/80 pb-3"
 						>
 							<span class="flex items-center gap-1">
-								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+								<svg
+									class="w-3 h-3"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
 									><path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -113,7 +119,11 @@
 								lorem.ipsum@example.com
 							</span>
 							<span class="flex items-center gap-1">
-								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+								<svg
+									class="w-3 h-3"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
 									><path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -124,7 +134,11 @@
 								+12 345 678 90123
 							</span>
 							<span class="flex items-center gap-1">
-								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+								<svg
+									class="w-3 h-3"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
 									><path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -144,49 +158,109 @@
 
 					<!-- Objective Section -->
 					<div class="mt-3" style="transform: translateZ(40px);">
-						<h3 class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
+						<h3
+							class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5"
+						>
 							Lorem Ipsum
 						</h3>
-						<p class="text-[9px] sm:text-[10px] text-neutral-600 leading-relaxed text-justify">
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-							incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-							exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+						<p
+							class="text-[9px] sm:text-[10px] text-neutral-600 leading-relaxed text-justify"
+						>
+							Lorem ipsum dolor sit amet, consectetur adipiscing
+							elit. Sed do eiusmod tempor incididunt ut labore et
+							dolore magna aliqua. Ut enim ad minim veniam, quis
+							nostrud exercitation ullamco laboris nisi ut aliquip
+							ex ea commodo consequat.
 						</p>
 					</div>
 
 					<!-- Education Section -->
-					<div class="mt-3 flex-1" style="transform: translateZ(50px);">
-						<h3 class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-2.5">
+					<div
+						class="mt-3 flex-1"
+						style="transform: translateZ(50px);"
+					>
+						<h3
+							class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-2.5"
+						>
 							Education
 						</h3>
 						<div class="space-y-2.5">
-							<div class="relative pl-3 border-l-2 border-blue-200">
+							<div
+								class="relative pl-3 border-l-2 border-blue-200"
+							>
 								<div
 									class="absolute w-2 h-2 bg-blue-500 rounded-full -left-[5px] top-1 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
 								></div>
-								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">University X</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2020 - 2024</span>
+								<div
+									class="flex justify-between items-baseline"
+								>
+									<h4
+										class="text-xs font-bold text-neutral-800"
+									>
+										University X
+									</h4>
+									<span
+										class="text-[9px] text-neutral-500 font-medium"
+										>XXXX - XXXX</span
+									>
 								</div>
-								<p class="text-[10px] text-blue-600 font-medium">B.S. in Computer Science</p>
+								<p
+									class="text-[10px] text-blue-600 font-medium"
+								>
+									B.S. in Computer Science
+								</p>
 							</div>
 
-							<div class="relative pl-3 border-l-2 border-neutral-200">
-								<div class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"></div>
-								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">College Y</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2018 - 2020</span>
+							<div
+								class="relative pl-3 border-l-2 border-neutral-200"
+							>
+								<div
+									class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"
+								></div>
+								<div
+									class="flex justify-between items-baseline"
+								>
+									<h4
+										class="text-xs font-bold text-neutral-800"
+									>
+										College Y
+									</h4>
+									<span
+										class="text-[9px] text-neutral-500 font-medium"
+										>XXXX - XXXX</span
+									>
 								</div>
-								<p class="text-[10px] text-neutral-500 font-medium">Associate Degree</p>
+								<p
+									class="text-[10px] text-neutral-500 font-medium"
+								>
+									Associate Degree
+								</p>
 							</div>
 
-							<div class="relative pl-3 border-l-2 border-neutral-200">
-								<div class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"></div>
-								<div class="flex justify-between items-baseline">
-									<h4 class="text-xs font-bold text-neutral-800">High School Z</h4>
-									<span class="text-[9px] text-neutral-500 font-medium">2014 - 2018</span>
+							<div
+								class="relative pl-3 border-l-2 border-neutral-200"
+							>
+								<div
+									class="absolute w-2 h-2 bg-neutral-300 rounded-full -left-[5px] top-1"
+								></div>
+								<div
+									class="flex justify-between items-baseline"
+								>
+									<h4
+										class="text-xs font-bold text-neutral-800"
+									>
+										High School Z
+									</h4>
+									<span
+										class="text-[9px] text-neutral-500 font-medium"
+										>XXXX - XXXX</span
+									>
 								</div>
-								<p class="text-[10px] text-neutral-500 font-medium">High School Diploma</p>
+								<p
+									class="text-[10px] text-neutral-500 font-medium"
+								>
+									High School Diploma
+								</p>
 							</div>
 						</div>
 					</div>
@@ -197,7 +271,9 @@
 						style="transform: translateZ(20px);"
 					>
 						<div>
-							<h3 class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">
+							<h3
+								class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5"
+							>
 								Core Skills
 							</h3>
 							<div class="flex flex-wrap gap-1 max-w-[200px]">
@@ -212,7 +288,9 @@
 						</div>
 
 						<!-- Simulated Barcode -->
-						<div class="flex gap-[2px] opacity-30 mix-blend-multiply pb-1">
+						<div
+							class="flex gap-[2px] opacity-30 mix-blend-multiply pb-1"
+						>
 							{#each Array(12) as _, i}
 								<div
 									class="h-5 sm:h-6 bg-neutral-800"
@@ -248,13 +326,17 @@
 		</div>
 	</div>
 
-	<p class="mt-12 text-neutral-500 text-sm tracking-wide opacity-50 font-medium">
+	<p
+		class="mt-12 text-neutral-500 text-sm tracking-wide opacity-50 font-medium"
+	>
 		this is just a gibberish placeholder for my cv :)
 	</p>
-	
+
 	<div class="mt-8 text-center">
-		<a href="/CV.pdf" download
-		   class="inline-block bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-medium text-sm py-3 px-6 rounded-lg transition-colors duration-200"
+		<a
+			href="/CV.pdf"
+			download
+			class="inline-block bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700/50 text-zinc-800 dark:text-zinc-200 font-medium text-sm py-3 px-6 rounded-lg transition-colors duration-200"
 		>
 			Download CV
 		</a>

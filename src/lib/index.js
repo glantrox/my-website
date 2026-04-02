@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 import 'dotenv/config'; // Ensure environment variables are loaded
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -16,5 +16,5 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;

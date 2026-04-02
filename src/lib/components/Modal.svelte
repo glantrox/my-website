@@ -53,7 +53,7 @@
 	>
 		<!-- Backdrop -->
 		<div
-			class="fixed inset-0 bg-gray-200 bg-opacity-50"
+			class="fixed inset-0 bg-gray-200 dark:bg-zinc-950 bg-opacity-50"
 			on:click={onClose}
 			aria-hidden="true"
 		></div>
@@ -61,12 +61,12 @@
 		<!-- Modal Content -->
 		<div
 			use:receive
-			class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
+			class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
 		>
 			<!-- Close Button -->
 			<button
 				on:click={onClose}
-				class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
+				class="absolute top-3 right-3 text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
 				aria-label="Close modal"
 			>
 				<svg
