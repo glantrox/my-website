@@ -4,6 +4,7 @@ import { redirect } from '@sveltejs/kit';
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
 	const adminSecret = process.env.ADMIN_SECRET_KEY;
+	event.locals.isAdmin = false;
 
 	// Logout logic
 	if (event.url.pathname === '/logout') {
@@ -13,7 +14,7 @@ export async function handle({ event, resolve }) {
 
 	// Check for the session cookie on every request
 	const sid = event.cookies.get('sid');
-	if (sid === adminSecret) {
+	if (adminSecret && sid && sid === adminSecret) {
 		event.locals.isAdmin = true;
 	}
 

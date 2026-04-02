@@ -125,7 +125,7 @@
 					<!-- Project Details -->
 					<div class="flex justify-between items-start text-sm px-1">
 						<div>
-							<h3 class="text-zinc-900 font-medium">{project.title}</h3>
+							<h3 class="text-zinc-900 font-medium  dark:text-white">{project.title}</h3>
 							<p class="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-0.5">{project.tagline}</p>
 						</div>
 						<div class="text-zinc-400 dark:text-zinc-500 text-right">

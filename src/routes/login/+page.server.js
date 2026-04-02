@@ -10,6 +10,12 @@ export const actions = {
     const adminSecret = process.env.ADMIN_SECRET_KEY;
     console.log('adminSecret from env:', adminSecret);
 
+    if (!adminSecret) {
+      return {
+        error: 'Admin authentication is not configured on the server.'
+      };
+    }
+
     if (password === adminSecret) {
       cookies.set('sid', adminSecret, {
         path: '/',
