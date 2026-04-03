@@ -15,7 +15,7 @@
 			<!-- Massive Typography -->
 			<div class="flex-1">
 				<h1
-					class="text-6xl dark:text-zinc-200 md:text-8xl lg:text-9xl font-medium tracking-tighter leading-[0.9] text-zinc-300 dark:text-zinc-800/50"
+					class="text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter leading-[0.9] text-zinc-300 dark:text-zinc-200/50"
 				>
 					Hamas<br />
 					<span class="text-zinc-800 dark:text-zinc-200">Azizan</span>
@@ -138,11 +138,7 @@
 	>
 		<p>© {new Date().getFullYear()} Hamas Azizan. All rights reserved.</p>
 		<div class="flex gap-6 mt-4 md:mt-0">
-			<a
-				href="https://twitter.com/hamasazizan"
-				class="hover:text-zinc-800 dark:text-zinc-200 transition-colors"
-				>Twitter</a
-			>
+		
 			<a
 				href="https://linkedin.com/in/hamasazizan"
 				class="hover:text-zinc-800 dark:text-zinc-200 transition-colors"

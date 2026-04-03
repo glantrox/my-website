@@ -1,13 +1,14 @@
 <script>
 	import { afterUpdate, onDestroy } from 'svelte';
 	import { quintOut } from 'svelte/easing';
-	import { crossfade } from 'svelte/transition';
+	import { crossfade, fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 
 	export let isOpen = false;
 	export let onClose = () => {};
 
 	// Store original overflow to restore it
+	/** @type {string} */
 	let originalBodyOverflow;
 
 	// Crossfade transition for modal content
@@ -16,7 +17,10 @@
 		easing: quintOut
 	});
 
-	// Handle Escape key press
+	/**
+	 * Handle Escape key press
+	 * @param {KeyboardEvent} event
+	 */
 	function handleKeydown(event) {
 		if (event.key === 'Escape') {
 			onClose();
@@ -81,12 +85,13 @@
 				</svg>
 			</button>
 
-			<div use:send class="p-6">
+			<div class="p-6">
 				<slot />
 			</div>
 		</div>
 	</div>
 {/if}
+
 
 <style>
 	/* You might need global styles for fade transition if Svelte's built-in isn't enough */

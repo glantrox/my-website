@@ -28,7 +28,7 @@
 				<p class="relative z-10 mt-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-500 leading-relaxed">
 					{post.summary}
 				</p>
-				<a
+				<!-- <a
 					href={'/blog/' + post.id}
 					class="relative z-10 mt-4 flex items-center text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:text-zinc-600 dark:hover:text-zinc-300 dark:text-zinc-400 dark:text-zinc-500 transition-colors"
 					aria-label={`Read more: "${post.title}"`}
@@ -46,7 +46,7 @@
 							clip-rule="evenodd"
 						></path>
 					</svg>
-				</a>
+				</a> -->
 			</article>
 		{/each}
 	</div>

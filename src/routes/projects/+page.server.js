@@ -31,13 +31,13 @@ export async function load({ locals }) {
 
     return {
       projects,
-      isAdmin: locals.isAdmin 
+      isAdmin: Boolean(locals.isAdmin)
     };
   } catch (error) {
     console.error("Error fetching projects:", error);
     return {
       projects: [],
-      isAdmin: locals.isAdmin,
+      isAdmin: Boolean(locals.isAdmin),
       error: "Failed to load projects"
     };
   }
