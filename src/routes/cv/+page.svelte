@@ -1,4 +1,6 @@
 <script>
+	import CV from "$lib/CV_Hamas_Azizan.pdf";
+
 	/** @type {HTMLElement} */
 	let cardRef;
 	let rotation = { x: 0, y: 0 };
@@ -334,7 +336,7 @@
 
 	<div class="mt-8 text-center">
 		<a
-			href="/CV.pdf"
+			href={CV}
 			download
 			class="inline-block bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700/50 text-zinc-800 dark:text-zinc-200 font-medium text-sm py-3 px-6 rounded-lg transition-colors duration-200"
 		>
