@@ -15,17 +15,21 @@ export async function load({ locals }) {
       const data = doc.data();
       return {
         id: doc.id,
-        ...data,
-        // Ensure default values for missing fields if any
-        colSpan: data.colSpan || 1,
-        // Handle potentially missing fields gracefully
-        techStack: data.techStack || [],
-        links: data.links || { live: '#', github: '#' },
-        // Convert Firestore timestamp to serializable date if needed, 
-        // though we stored it as ISO string or Date object in current implementation
-        // If it's a Firestore Timestamp, we need to convert toMillis or similar.
-        // In new/+page.server.js we stored: createdAt: new Date().toISOString() (actually I changed it to this in my last memory update)
-        // Wait, let me check the last edit to new/+page.server.js
+        title: data.title ?? '',
+        tagline: data.tagline ?? '',
+        date: data.date ?? '',
+        role: data.role ?? '',
+        status: data.status ?? '',
+        image: data.image ?? '',
+        description: data.description ?? '',
+        colSpan: Number(data.colSpan ?? 1),
+        techStack: Array.isArray(data.techStack)
+          ? data.techStack.filter((item) => typeof item === 'string')
+          : [],
+        links: {
+          live: data.links?.live ?? '#',
+          github: data.links?.github ?? '#'
+        }
       };
     });
 
