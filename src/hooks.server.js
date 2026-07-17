@@ -18,7 +18,7 @@ export async function handle({ event, resolve }) {
 		event.locals.isAdmin = true;
 	}
 
-	if (event.url.pathname.startsWith('/projects/new') && !event.locals.isAdmin) {
+	if ((event.url.pathname.startsWith('/projects/new') || event.url.pathname.startsWith('/dashboard')) && !event.locals.isAdmin) {
 		throw redirect(303, '/login');
 	}
 

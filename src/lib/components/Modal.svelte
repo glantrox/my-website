@@ -64,7 +64,8 @@
 
 		<!-- Modal Content -->
 		<div
-			use:receive
+			in:receive={{ key: "modal" }}
+			out:send={{ key: "modal" }}
 			class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
 		>
 			<!-- Close Button -->

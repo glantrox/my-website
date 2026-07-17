@@ -1,8 +1,30 @@
 <script>
 	import "../app.css";
 	import favicon from "$lib/assets/favicon.svg";
+	import Label from "$lib/components/ui/label/label.svelte";
+	import { page } from "$app/stores";
 
-	let { children } = $props();
+	let { data, children } = $props();
+
+	let hasDraftCookie = $state(false);
+
+	function checkDraftCookie() {
+		if (typeof document !== 'undefined') {
+			hasDraftCookie = document.cookie.includes("contactName=") || 
+			                 document.cookie.includes("contactEmail=") ||
+			                 document.cookie.includes("companyName=") ||
+			                 document.cookie.includes("projectTitle=");
+		}
+	}
+
+	$effect(() => {
+		// Recheck draft status on page transitions
+		const _url = $page.url;
+		checkDraftCookie();
+	});
+
+	// Derive final draft status from server-side and client-side checks
+	const hasDraft = $derived(data.hasDraft || hasDraftCookie);
 
 	const sidebarSections = [
 		{
@@ -20,6 +42,13 @@
 			],
 		},
 		{
+			title: "Services",
+			items: [
+				{href:"/mobile-app-service", label:'Mobile App'},
+				{href:"/website-service", label:'Website'}
+			]
+		},
+		{
 			title: "Contact",
 			items: [
 				{ href: "mailto:hamasazeezan@gmail.com", label: "Mail" },
@@ -34,6 +63,7 @@
 				{ href: "https://github.com/glantrox", label: "GitHub" },
 			],
 		},
+		
 	];
 
 	// Theme Toggle Logic
@@ -177,10 +207,54 @@
 									</a>
 								</li>
 							{/each}
+
+							<!-- Dynamically display Continue Order link under Services if draft exists -->
+							{#if section.title === 'Services' && hasDraft}
+								<li>
+									<a
+										href="/order"
+										class="text-blue-500 dark:text-blue-400 font-medium hover:text-blue-600 dark:hover:text-blue-300 transition-colors duration-200"
+									>
+										Continue Order
+									</a>
+								</li>
+							{/if}
 						</ul>
 					</div>
 				{/each}
 			</nav>
+
+			<!-- Admin Section (visible only to admin) -->
+			{#if data.isAdmin}
+				<div class="mb-10 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+					<h4
+						class="text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase mb-4"
+					>
+						Admin
+					</h4>
+					<ul class="space-y-2.5 text-sm">
+						<li>
+							<a
+								href="/dashboard"
+								class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors duration-200 flex items-center gap-2"
+							>
+								Dashboard
+								{#if data.pendingCount > 0}
+									<span class="text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">{data.pendingCount}</span>
+								{/if}
+							</a>
+						</li>
+						<li>
+							<a
+								href="/logout"
+								class="text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 cursor-pointer transition-colors duration-200"
+							>
+								Logout
+							</a>
+						</li>
+					</ul>
+				</div>
+			{/if}
 		</div>
 	</aside>
 

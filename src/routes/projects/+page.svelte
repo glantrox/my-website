@@ -72,6 +72,21 @@
 			}
 		}
 	});
+
+	/**
+	 * @param {string[]} techStack
+	 * @returns {string[]}
+	 */
+	function formatTechStack(techStack) {
+		if (!techStack || techStack.length === 0) return ['SvelteKit', 'Tailwind CSS'];
+		if (techStack.length === 1 && techStack[0] === 'Web') {
+			return ['SvelteKit', 'Tailwind CSS', 'Firebase', 'Nodemailer'];
+		}
+		if (techStack.length === 1 && techStack[0] === 'Mobile') {
+			return ['React Native', 'Expo', 'Firebase', 'Tailwind CSS'];
+		}
+		return techStack;
+	}
 </script>
 
 <div class="max-w-6xl mx-auto px-6 py-12 md:px-16 md:py-24">
@@ -80,24 +95,6 @@
 			<h2 class="text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
 				Selected Projects
 			</h2>
-			{#if isAdmin}
-				<a
-					href="/projects/new"
-					class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-					aria-label="Add new project"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-6 w-6"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-					</svg>
-				</a>
-			{/if}
 		</div>
 
 		<!-- Masonry Layout Container -->
@@ -143,35 +140,53 @@
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" transition:fade={{ duration: 150 }}>
 		<!-- Backdrop -->
 		<div
-			class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+			class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
 			on:click={closeModal}
 			aria-hidden="true"
 		></div>
 
 		<!-- Modal Content -->
 		<div
-			class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200"
+			class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-zinc-950 text-white rounded-2xl border border-zinc-900 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200"
 			role="dialog"
 			aria-modal="true"
 		>
 			<!-- Close Button -->
 			<button
 				on:click={closeModal}
-				class="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 dark:bg-white/10 dark:hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-md"
+				class="absolute top-4 right-4 z-30 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors backdrop-blur-md"
 				aria-label="Close modal"
 			>
 				<X size={20} />
 			</button>
 
-			<!-- Header Image -->
-			<div class="w-full h-48 sm:h-64 relative shrink-0">
-				<img src={selectedProject.image} alt={selectedProject.title} class="w-full h-full object-cover" />
-				<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-				<div class="absolute bottom-4 left-6 right-6">
-					<h2 class="text-2xl sm:text-3xl font-bold text-white mb-1">
+			<!-- Header Image Area with Asymmetric Typography and Mockup alignment -->
+			<div class="w-full h-56 sm:h-72 relative shrink-0 overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-b border-zinc-900">
+				<!-- Large Typographical Backdrop Watermark -->
+				<div class="absolute inset-0 select-none overflow-hidden flex flex-col justify-center pl-6 sm:pl-8 opacity-[0.05] pointer-events-none font-extrabold uppercase tracking-tighter leading-none text-white">
+					<span class="text-6xl sm:text-7xl block">{selectedProject.title}</span>
+					<span class="text-5xl sm:text-6xl block">{selectedProject.tagline?.split(' ')?.[0] || 'Project'}</span>
+					<span class="text-4xl sm:text-5xl block">{selectedProject.tagline?.split(' ')?.[1] || 'Design'}</span>
+				</div>
+
+				<!-- Mockup Image positioned on the right -->
+				{#if selectedProject.image}
+					<img
+						src={selectedProject.image}
+						alt={selectedProject.title}
+						class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 h-[90%] w-[55%] sm:w-[50%] object-contain z-10 transition-transform duration-700 hover:scale-105"
+					/>
+				{/if}
+
+				<!-- Dark gradient overlay for text readability -->
+				<div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/85 to-transparent z-10"></div>
+
+				<!-- Project Title and Tagline left-aligned -->
+				<div class="absolute bottom-6 left-6 sm:left-8 z-20 max-w-[45%]">
+					<h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-none mb-2">
 						{selectedProject.title}
 					</h2>
-					<p class="text-slate-200 text-sm sm:text-base font-medium">
+					<p class="text-zinc-400 text-xs sm:text-sm font-medium tracking-wide">
 						{selectedProject.tagline}
 					</p>
 				</div>
@@ -181,50 +196,37 @@
 			<div class="p-6 sm:p-8 flex flex-col gap-8">
 				<!-- Main Description -->
 				<section>
-					<h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-						<LayoutGrid size={20} class="text-blue-500" />
+					<h3 class="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+						<LayoutGrid size={18} class="text-blue-500" />
 						About the Project
 					</h3>
-					<p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+					<p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
 						{selectedProject.description}
 					</p>
 				</section>
 
-				<!-- Details Grid -->
-				<div
-					class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-100 dark:border-slate-800"
-				>
-					<div class="space-y-4">
-						<div>
-							<span
-								class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-1"
-							>
-								<Calendar size={16} /> Timeline
-							</span>
-							<p class="text-slate-900 dark:text-white font-medium">{selectedProject.date}</p>
-						</div>
-						<div>
-							<span
-								class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-1"
-							>
-								<User size={16} /> My Role
-							</span>
-							<p class="text-slate-900 dark:text-white font-medium">{selectedProject.role}</p>
-						</div>
+				<!-- Details Row (Flat 3-column layout on main background) -->
+				<div class="grid grid-cols-3 gap-4 py-6 border-y border-zinc-900">
+					<div>
+						<span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+							<Calendar size={13} class="text-zinc-500" /> Timeline
+						</span>
+						<p class="text-zinc-200 font-semibold text-xs sm:text-sm">{selectedProject.date}</p>
+					</div>
+					
+					<div>
+						<span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+							<User size={13} class="text-zinc-500" /> Role
+						</span>
+						<p class="text-zinc-200 font-semibold text-xs sm:text-sm">{selectedProject.role}</p>
 					</div>
 
-					<div class="space-y-4">
+					<div>
+						<span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+							<Code2 size={13} class="text-zinc-500" /> Status
+						</span>
 						<div>
-							<span
-								class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-1"
-							>
-								<Code2 size={16} /> Status
-							</span>
-							<span
-								class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {selectedProject.status && selectedProject.status.includes('Completed')
-									? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
-									: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'}"
-							>
+							<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
 								{selectedProject.status}
 							</span>
 						</div>
@@ -232,15 +234,13 @@
 				</div>
 
 				<!-- Tech Stack -->
-				<section>
-					<h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-3 uppercase tracking-wider">
+				<section class="space-y-3">
+					<h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
 						Technologies Used
 					</h3>
 					<div class="flex flex-wrap gap-2">
-						{#each selectedProject.techStack as tech}
-							<span
-								class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-default"
-							>
+						{#each formatTechStack(selectedProject.techStack) as tech}
+							<span class="px-2.5 py-1 bg-zinc-900 text-zinc-300 rounded-md text-xs font-medium select-none">
 								{tech}
 							</span>
 						{/each}
@@ -249,17 +249,15 @@
 
 				<!-- Action Links -->
 				{#if selectedProject.links}
-					<div
-						class="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-4 mt-auto"
-					>
+					<div class="pt-6 border-t border-zinc-900 flex flex-wrap gap-4 mt-auto">
 						{#if selectedProject.links.live}
 							<a
 								href={selectedProject.links.live}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors shadow-sm shadow-blue-600/20"
+								class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-sm text-xs"
 							>
-								<ExternalLink size={18} />
+								<ExternalLink size={16} />
 								View Live Site
 							</a>
 						{/if}
@@ -268,9 +266,9 @@
 								href={selectedProject.links.github}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-medium rounded-xl transition-colors shadow-sm"
+								class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-zinc-900 hover:bg-zinc-850 text-white font-semibold rounded-xl border border-zinc-850 transition-colors shadow-sm text-xs"
 							>
-								<Github size={18} />
+								<Github size={16} />
 								Source Code
 							</a>
 						{/if}

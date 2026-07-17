@@ -20,11 +20,12 @@
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
 
+  /** @type {import('./$types').PageData} */
   export let data;
   const { isAdmin } = data;
 
   // Initialize superForm
-  const { form, errors, enhance, message } = superForm(data.form, {
+  const { form, errors, enhance, message } = superForm(/** @type {any} */(data.form), {
     dataType: "json",
     onResult({ result }) {
       if (result.type === "success") {
@@ -36,9 +37,13 @@
   $: techStackArray = $form.techStack
     ? $form.techStack
         .split(",")
-        .map((s) => s.trim())
+        .map((/** @type {string} */ s) => s.trim())
         .filter(Boolean)
     : [];
+
+  /** @type {any} */
+  let errorsLinks;
+  $: errorsLinks = ($errors).links;
 
   function handleCancel() {
     history.back();
@@ -304,14 +309,14 @@
                     type="url"
                     id="liveLink"
                     name="links.live"
-                    bind:value={$form.links.live}
+                    bind:value={/** @type {any} */($form).links.live}
                     class="pl-10"
                     placeholder="https://live-project.com"
                   />
                 </div>
-                {#if $errors.links?.live}
+                {#if errorsLinks?.live}
                   <p class="text-[0.8rem] font-medium text-destructive">
-                    {$errors.links.live}
+                    {errorsLinks.live}
                   </p>
                 {/if}
               </div>
@@ -328,14 +333,14 @@
                     type="url"
                     id="githubLink"
                     name="links.github"
-                    bind:value={$form.links.github}
+                    bind:value={/** @type {any} */($form).links.github}
                     class="pl-10"
                     placeholder="https://github.com/your/project"
                   />
                 </div>
-                {#if $errors.links?.github}
+                {#if errorsLinks?.github}
                   <p class="text-[0.8rem] font-medium text-destructive">
-                    {$errors.links.github}
+                    {errorsLinks.github}
                   </p>
                 {/if}
               </div>

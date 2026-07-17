@@ -10,7 +10,7 @@ export async function load({ locals }) {
   // Use the default zod adapter but force v3 compatibility if needed, or try zod(projectSchema)
   // The error says "If using Zod v4, import { zod4 }". Let's try importing zod as is first, maybe the issue is just the adapter usage.
   // Wait, I am already importing { zod }. The error says "import { zod4 } from ... instead of { zod }".
-  const form = await superValidate(zod(projectSchema));
+  const form = /** @type {any} */(await superValidate(zod(/** @type {any} */(projectSchema))));
   return { 
     form,
     isAdmin: locals.isAdmin 
@@ -25,7 +25,7 @@ export const actions = {
       return fail(403, { error: 'Unauthorized access' });
     }
 
-    const form = await superValidate(request, zod(projectSchema));
+    const form = /** @type {any} */(await superValidate(request, zod(/** @type {any} */(projectSchema))));
 
     if (!form.valid) {
       return fail(400, { form });
@@ -33,7 +33,7 @@ export const actions = {
 
     // Transform techStack string to array for storage
     const techStackArray = form.data.techStack
-      ? form.data.techStack.split(',').map(s => s.trim()).filter(Boolean)
+      ? form.data.techStack.split(',').map((/** @type {string} */ s) => s.trim()).filter(Boolean)
       : [];
 
     const projectData = {
