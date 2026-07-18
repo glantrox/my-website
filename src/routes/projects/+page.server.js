@@ -1,37 +1,15 @@
-import { app } from '$lib';
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { dbService } from '$lib/services/db/firestore';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  const db = getFirestore(app);
-  const projectsCollection = collection(db, 'selected-projects');
-  
-  // Order by creation date descending
-  const q = query(projectsCollection, orderBy('createdAt', 'desc'));
-  
   try {
-    const querySnapshot = await getDocs(q);
-    const projects = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        title: data.title ?? '',
-        tagline: data.tagline ?? '',
-        date: data.date ?? '',
-        role: data.role ?? '',
-        status: data.status ?? '',
-        image: data.image ?? '',
-        description: data.description ?? '',
-        colSpan: Number(data.colSpan ?? 1),
-        techStack: Array.isArray(data.techStack)
-          ? data.techStack.filter((item) => typeof item === 'string')
-          : [],
-        links: {
-          live: data.links?.live ?? '#',
-          github: data.links?.github ?? '#'
-        }
-      };
-    });
+    const projectsData = await dbService.getProjects();
+    const projects = projectsData.map(p => ({
+      ...p,
+      image: p.imageUrl, // Map imageUrl to image for client layout compat
+      date: p.timeline, // Map timeline to date for client layout compat
+      colSpan: 1 // default value
+    }));
 
     return {
       projects,
@@ -46,3 +24,4 @@ export async function load({ locals }) {
     };
   }
 }
+

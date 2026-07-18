@@ -1,5 +1,5 @@
 <script>
-	import { blogPosts } from "$lib/data.js";
+	let { data } = $props();
 </script>
 
 <div class="max-w-4xl mx-auto px-6 py-12 md:px-16 md:py-24">
@@ -18,7 +18,7 @@
 	</header>
 
 	<div class="space-y-12">
-		{#each blogPosts as post (post.id)}
+		{#each data.blogPosts as post (post.id)}
 			<article class="group relative flex flex-col items-start">
 				<h2
 					class="text-xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-200"

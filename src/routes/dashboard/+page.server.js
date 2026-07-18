@@ -1,8 +1,5 @@
-import { app } from '$lib';
-import { getFirestore, collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { dbService } from '$lib/services/db/firestore';
 import { redirect, fail } from '@sveltejs/kit';
-
-const db = getFirestore(app);
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
@@ -11,45 +8,26 @@ export async function load({ locals }) {
   }
 
   try {
-    // 1. Fetch consultations (leads)
-    const consultationsQuery = query(collection(db, 'pending_consultations'), orderBy('createdAt', 'desc'));
-    const consultationsSnapshot = await getDocs(consultationsQuery);
-    const consultations = consultationsSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        projectTitle: data.projectTitle || '',
-        companyName: data.companyName || '',
-        contactName: data.contactName || '',
-        contactEmail: data.contactEmail || '',
-        industry: data.industry || '',
-        websiteUrl: data.websiteUrl || '',
-        serviceType: data.serviceType || '',
-        projectTier: data.projectTier || '',
-        status: data.status || 'pending',
-        createdAt: data.createdAt?.toDate
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt || null
-      };
-    });
+    // 1. Fetch consultations
+    const consultations = await dbService.getPendingConsultations();
 
-    // 2. Fetch portfolio projects
-    const projectsQuery = query(collection(db, 'selected-projects'), orderBy('createdAt', 'desc'));
-    const projectsSnapshot = await getDocs(projectsQuery);
-    const projects = projectsSnapshot.docs.map((doc) => {
-      const data = doc.data();
+    // 2. Fetch portfolio projects & map field names to support legacy dashboard layout keys
+    const projectsData = await dbService.getProjects();
+    const projects = projectsData.map((p) => {
       return {
-        id: doc.id,
-        title: data.title ?? '',
-        tagline: data.tagline ?? '',
-        description: data.description ?? '',
-        role: data.role ?? '',
-        timeline: data.date ?? '', // map date to timeline range
-        status: data.status ?? 'In Progress',
-        imageUrl: data.image ?? '', // map image to imageUrl
-        techStack: data.techStack ?? [],
-        links: data.links ?? { live: '', github: '' },
-        createdAt: data.createdAt ?? null
+        id: p.id,
+        title: p.title,
+        tagline: p.tagline,
+        description: p.description,
+        role: p.role,
+        timeline: p.timeline,
+        date: p.timeline, // legacy compat
+        status: p.status,
+        imageUrl: p.imageUrl,
+        image: p.imageUrl, // legacy compat
+        techStack: p.techStack,
+        links: p.links,
+        createdAt: p.createdAt
       };
     });
 
@@ -99,19 +77,18 @@ export const actions = {
       tagline,
       description,
       role,
-      date: timeline, // map to database field
+      timeline,
       status,
-      image: imageUrl, // map to database field
+      imageUrl,
       techStack,
       links: {
         live: liveLink,
         github: githubLink
-      },
-      createdAt: new Date().toISOString()
+      }
     };
 
     try {
-      await addDoc(collection(db, 'selected-projects'), projectData);
+      await dbService.createProject(projectData);
       return { success: true, message: 'Project created successfully' };
     } catch (e) {
       console.error('Error creating project:', e);
@@ -150,20 +127,18 @@ export const actions = {
       tagline,
       description,
       role,
-      date: timeline, // map to database field
+      timeline,
       status,
-      image: imageUrl, // map to database field
+      imageUrl,
       techStack,
       links: {
         live: liveLink,
         github: githubLink
-      },
-      updatedAt: new Date().toISOString()
+      }
     };
 
     try {
-      const docRef = doc(db, 'selected-projects', id);
-      await updateDoc(docRef, projectData);
+      await dbService.updateProject(id, projectData);
       return { success: true, message: 'Project updated successfully' };
     } catch (e) {
       console.error('Error updating project:', e);
@@ -183,8 +158,7 @@ export const actions = {
     }
 
     try {
-      const docRef = doc(db, 'selected-projects', id);
-      await deleteDoc(docRef);
+      await dbService.deleteProject(id);
       return { success: true, message: 'Project deleted successfully' };
     } catch (e) {
       console.error('Error deleting project:', e);

@@ -161,7 +161,7 @@
     return status.replace(/_/g, ' ').replace(/\b\w/g, (/** @type {string} */ c) => c.toUpperCase());
   }
 
-  /** @param {string} dateStr */
+  /** @param {string | null | undefined} dateStr */
   function formatDate(dateStr) {
     if (!dateStr) return '—';
     try {
@@ -333,7 +333,7 @@
           <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Total Projects</span>
           <span class="text-3xl font-extrabold text-zinc-900 dark:text-white block">{totalProjects}</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 flex items-center justify-center text-zinc-500 dark:text-zinc-400 shadow-inner">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 shadow-inner">
           <Folder size={20} />
         </div>
       </div>
@@ -351,7 +351,7 @@
             {/if}
           </div>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner">
           <Clock size={20} />
         </div>
       </div>
@@ -362,7 +362,7 @@
           <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Completed Case Studies</span>
           <span class="text-3xl font-extrabold text-zinc-900 dark:text-white block">{completedCaseStudies}</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 flex items-center justify-center text-zinc-500 dark:text-zinc-400 shadow-inner">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 shadow-inner">
           <CheckCircle2 size={20} />
         </div>
       </div>
@@ -370,7 +370,7 @@
 
     <!-- Search Bar -->
     <div class="relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-450" />
+      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
       <input
         type="text"
         bind:value={searchQuery}
@@ -390,7 +390,7 @@
               <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   onclick={() => openEditModal(project)}
-                  class="p-2 rounded-lg bg-white/95 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors shadow-sm"
+                  class="p-2 rounded-lg bg-white/95 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors shadow-sm"
                   title="Edit Project"
                 >
                   <Edit2 size={12} />
@@ -402,11 +402,11 @@
                     confirmDeleteOpen = true;
                   }}
                   disabled={deletingProjectId === project.id}
-                  class="p-2 rounded-lg bg-white/95 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-450 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="p-2 rounded-lg bg-white/95 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Delete Project"
                 >
                   {#if deletingProjectId === project.id}
-                    <div class="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-850 dark:border-zinc-600 dark:border-t-zinc-300"></div>
+                    <div class="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-800 dark:border-zinc-600 dark:border-t-zinc-300"></div>
                   {:else}
                     <Trash2 size={12} />
                   {/if}
@@ -510,7 +510,7 @@
           class="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors duration-150
             {activeFilter === filter.key
               ? 'bg-zinc-900 dark:bg-zinc-200 text-white dark:text-zinc-900'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'}"
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'}"
         >
           {filter.label}
           <span class="ml-1 opacity-60 font-bold">{consultationCounts[filter.key] || 0}</span>
@@ -520,7 +520,7 @@
 
     <!-- Search Bar -->
     <div class="relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-450" />
+      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
       <input
         type="text"
         bind:value={searchQuery}
@@ -597,7 +597,7 @@
                   {/if}
 
                   <!-- Date -->
-                  <div class="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-650">
+                  <div class="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
                     <Calendar class="w-3.5 h-3.5 flex-shrink-0" />
                     <span>{formatDate(lead.createdAt)}</span>
                   </div>
@@ -668,7 +668,7 @@
           onclick={() => (modalActiveTab = 'core')}
           class="flex-1 pb-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all {modalActiveTab === 'core' 
             ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white' 
-            : 'border-transparent text-zinc-450 hover:text-zinc-900 dark:hover:text-white'}"
+            : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}"
         >
           Core Details
         </button>
@@ -677,7 +677,7 @@
           onclick={() => (modalActiveTab = 'assets')}
           class="flex-1 pb-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all {modalActiveTab === 'assets' 
             ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white' 
-            : 'border-transparent text-zinc-450 hover:text-zinc-900 dark:hover:text-white'}"
+            : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}"
         >
           Assets & Links
         </button>
@@ -896,11 +896,11 @@
         </div>
 
         <!-- Footer actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-zinc-150 dark:border-zinc-900">
+        <div class="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-900">
           <button
             type="button"
             onclick={() => (isModalOpen = false)}
-            class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-550 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 transition-colors"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-colors"
           >
             Cancel
           </button>
@@ -964,13 +964,13 @@
         <button
           type="button"
           onclick={() => { confirmDeleteOpen = false; projectToDelete = null; }}
-          class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-550 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 transition-colors"
+          class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-650 hover:bg-rose-700 transition-colors shadow-sm shadow-rose-600/20"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm shadow-rose-600/20"
         >
           Yes, Delete Project
         </button>

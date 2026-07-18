@@ -1,5 +1,4 @@
-import { app } from '$lib';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { dbService } from '$lib/services/db/firestore';
 
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load({ locals, cookies }) {
@@ -15,10 +14,7 @@ export async function load({ locals, cookies }) {
   let pendingCount = 0;
   if (locals.isAdmin) {
     try {
-      const db = getFirestore(app);
-      const q = query(collection(db, 'pending_consultations'), where('status', '==', 'pending'));
-      const snapshot = await getDocs(q);
-      pendingCount = snapshot.size;
+      pendingCount = await dbService.getPendingConsultationsCount();
     } catch (e) {
       // Silently fail — badge just won't show count
     }

@@ -2,20 +2,16 @@ import { fail } from '@sveltejs/kit';
 import { superValidate, message } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { projectSchema } from './schema.js';
-import { app } from '$lib';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { dbService } from '$lib/services/db/firestore';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-  // Use the default zod adapter but force v3 compatibility if needed, or try zod(projectSchema)
-  // The error says "If using Zod v4, import { zod4 }". Let's try importing zod as is first, maybe the issue is just the adapter usage.
-  // Wait, I am already importing { zod }. The error says "import { zod4 } from ... instead of { zod }".
   const form = /** @type {any} */(await superValidate(zod(/** @type {any} */(projectSchema))));
   return { 
     form,
     isAdmin: locals.isAdmin 
   };
-};
+}
 
 /** @type {import('./$types').Actions} */
 export const actions = {
@@ -37,14 +33,22 @@ export const actions = {
       : [];
 
     const projectData = {
-      ...form.data,
-      techStack: techStackArray, 
-      createdAt: new Date().toISOString()
+      title: form.data.title,
+      tagline: form.data.tagline,
+      description: form.data.description || '',
+      role: form.data.role || '',
+      timeline: form.data.date || '', // Map form date to timeline
+      status: form.data.status || 'In Progress',
+      imageUrl: form.data.image || '', // Map form image to imageUrl
+      techStack: techStackArray,
+      links: {
+        live: form.data.links?.live || '',
+        github: form.data.links?.github || ''
+      }
     };
 
     try {
-      const db = getFirestore(app);
-      await addDoc(collection(db, 'selected-projects'), projectData);
+      await dbService.createProject(projectData);
       return message(form, 'Project added successfully!');
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -52,3 +56,4 @@ export const actions = {
     }
   }
 };
+

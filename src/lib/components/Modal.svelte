@@ -1,15 +1,21 @@
-<script>
-	import { afterUpdate, onDestroy } from 'svelte';
+<script lang="ts">
 	import { quintOut } from 'svelte/easing';
 	import { crossfade, fade } from 'svelte/transition';
-	import { browser } from '$app/environment';
 
-	export let isOpen = false;
-	export let onClose = () => {};
+	interface Props {
+		isOpen?: boolean;
+		onClose?: () => void;
+		children?: import('svelte').Snippet;
+		class?: string;
+	}
 
-	// Store original overflow to restore it
-	/** @type {string} */
-	let originalBodyOverflow;
+	// Define props with Svelte 5 runes
+	let { 
+		isOpen = false, 
+		onClose = () => {}, 
+		children,
+		class: className = 'max-w-lg w-full'
+	}: Props = $props();
 
 	// Crossfade transition for modal content
 	const [send, receive] = crossfade({
@@ -17,35 +23,24 @@
 		easing: quintOut
 	});
 
-	/**
-	 * Handle Escape key press
-	 * @param {KeyboardEvent} event
-	 */
-	function handleKeydown(event) {
+	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			onClose();
 		}
 	}
 
-	// Disable/enable body scrolling when modal opens/closes
-	afterUpdate(() => {
-		if (browser) {
-			if (isOpen) {
-				originalBodyOverflow = document.body.style.overflow;
-				document.body.style.overflow = 'hidden';
-				window.addEventListener('keydown', handleKeydown);
-			} else {
+	// Modern Svelte 5 effect for reactive side-effects (body scroll and keydown listener)
+	$effect(() => {
+		if (isOpen) {
+			const originalBodyOverflow = document.body.style.overflow;
+			document.body.style.overflow = 'hidden';
+			window.addEventListener('keydown', handleKeydown);
+
+			// Clean up function runs when effect is destroyed or isOpen changes to false
+			return () => {
 				document.body.style.overflow = originalBodyOverflow || '';
 				window.removeEventListener('keydown', handleKeydown);
-			}
-		}
-	});
-
-	onDestroy(() => {
-		if (browser) {
-			// Clean up event listener and restore body overflow if component is destroyed while modal is open
-			window.removeEventListener('keydown', handleKeydown);
-			document.body.style.overflow = originalBodyOverflow || '';
+			};
 		}
 	});
 </script>
@@ -56,21 +51,21 @@
 		transition:fade={{ duration: 150 }}
 	>
 		<!-- Backdrop -->
-		<div
-			class="fixed inset-0 bg-gray-200 dark:bg-zinc-950 bg-opacity-50"
-			on:click={onClose}
-			aria-hidden="true"
-		></div>
+		<button
+			class="fixed inset-0 bg-gray-200 dark:bg-zinc-950 bg-opacity-50 w-full h-full border-0 cursor-default focus:outline-none"
+			onclick={onClose}
+			aria-label="Close modal"
+		></button>
 
 		<!-- Modal Content -->
 		<div
 			in:receive={{ key: "modal" }}
 			out:send={{ key: "modal" }}
-			class="relative bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
+			class="relative bg-white dark:bg-zinc-900 shadow-xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out z-10 {className}"
 		>
 			<!-- Close Button -->
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="absolute top-3 right-3 text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
 				aria-label="Close modal"
 			>
@@ -87,13 +82,12 @@
 			</button>
 
 			<div class="p-6">
-				<slot />
+				{@render children?.()}
 			</div>
 		</div>
 	</div>
 {/if}
 
-
 <style>
-	/* You might need global styles for fade transition if Svelte's built-in isn't enough */
+	/* Custom styles can go here if needed */
 </style>

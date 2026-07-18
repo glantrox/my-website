@@ -2,8 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { intakeSchema } from './schema.js';
-import { app } from '$lib';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { dbService } from '$lib/services/db/firestore';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, cookies }) {
@@ -58,10 +57,8 @@ export const actions = {
     }
 
     try {
-      const db = getFirestore(app);
-      await addDoc(collection(db, 'pending_consultations'), {
+      await dbService.createConsultation({
         ...form.data,
-        createdAt: new Date().toISOString(),
         status: 'pending'
       });
     } catch (e) {
@@ -89,3 +86,4 @@ export const actions = {
     throw redirect(303, `/order/success?name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}`);
   }
 };
+
