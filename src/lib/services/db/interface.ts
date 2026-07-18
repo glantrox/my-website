@@ -78,6 +78,7 @@ export interface IDatabaseService {
   getConsultation(id: string): Promise<Consultation | null>;
   createConsultation(data: Omit<Consultation, 'id'>): Promise<string>;
   updateConsultation(id: string, data: Partial<Consultation>): Promise<void>;
+  deleteConsultation(id: string): Promise<void>;
   
   getProjects(): Promise<Project[]>;
   createProject(data: Omit<Project, 'id'>): Promise<string>;

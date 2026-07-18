@@ -17,20 +17,45 @@
     import { Label } from "$lib/components/ui/label";
     import * as Card from "$lib/components/ui/card";
     import { initConsultationState } from "$lib/entities/consultation/context";
+    import { toast } from "$lib/entities/toast";
+    import Spinner from "$lib/components/ui/spinner.svelte";
 
     let { data } = $props();
+
+    let isSubmitting = $state(false);
+    let activeToastId = $state("");
 
     // Initialize superForm
     const { form, errors, enhance, message } = superForm(data.form, {
         dataType: "json",
-        validators: false // handled via custom client validation + server side Zod schema validation
+        validators: false, // handled via custom client validation + server side Zod schema validation
+        onSubmit: () => {
+            isSubmitting = true;
+            activeToastId = toast.loading("Mengirimkan briefing dan menyimpan jadwal...");
+        },
+        onResult: ({ result }) => {
+            isSubmitting = false;
+            if (result.type === "redirect") {
+                toast.update(activeToastId, {
+                    type: "success",
+                    message: "Briefing dan jadwal berhasil disimpan! Mengalihkan...",
+                    duration: 2000
+                });
+            } else if (result.type === "failure" || result.type === "error") {
+                toast.update(activeToastId, {
+                    type: "error",
+                    message: "Gagal menyimpan pengajuan. Silakan coba lagi.",
+                    duration: 4000
+                });
+            }
+        }
     });
 
     // Initialize domain state class with superform store
-    const state = initConsultationState(form);
+    const consultationState = initConsultationState(form);
 
     function goBack() {
-        state.step = 1;
+        consultationState.step = 1;
         if (typeof window !== 'undefined') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -54,16 +79,16 @@
             </div>
 
             <!-- Step 2: Requirements -->
-            <div class="space-y-2 {state.step === 1 ? '' : 'opacity-60'}">
-                <div class="h-0.5 rounded-full transition-all duration-300 {state.step === 1 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
+            <div class="space-y-2 {consultationState.step === 1 ? '' : 'opacity-60'}">
+                <div class="h-0.5 rounded-full transition-all duration-300 {consultationState.step === 1 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
                 <div class="text-[10px] md:text-xs">
                     <span class="font-medium text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Requirements</span>
                 </div>
             </div>
 
             <!-- Step 3: Schedule -->
-            <div class="space-y-2 {state.step === 2 ? '' : 'opacity-40'}">
-                <div class="h-0.5 rounded-full transition-all duration-300 {state.step === 2 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
+            <div class="space-y-2 {consultationState.step === 2 ? '' : 'opacity-40'}">
+                <div class="h-0.5 rounded-full transition-all duration-300 {consultationState.step === 2 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
                 <div class="text-[10px] md:text-xs">
                     <span class="font-medium text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Schedule</span>
                 </div>
@@ -89,7 +114,7 @@
         {/if}
 
         <form method="POST" use:enhance class="space-y-8">
-            {#if state.step === 1}
+            {#if consultationState.step === 1}
                 <!-- SECTION 1: Intake Form Details -->
                 <div class="space-y-8">
                     <!-- Section A: Corporate Context -->
@@ -110,13 +135,13 @@
                                             type="text" 
                                             id="contactNameInput" 
                                             name="contactName" 
-                                            bind:value={state.contactName} 
+                                            bind:value={consultationState.contactName} 
                                             placeholder="e.g. Hamas Azizan" 
                                         />
                                         <span class="absolute right-3 top-3 text-zinc-400"><User size={16} /></span>
                                     </div>
-                                    {#if state.errors.contactName || $errors.contactName}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.contactName || $errors.contactName}</p>
+                                    {#if consultationState.errors.contactName || $errors.contactName}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.contactName || $errors.contactName}</p>
                                     {/if}
                                 </div>
 
@@ -127,13 +152,13 @@
                                             type="email" 
                                             id="contactEmailInput" 
                                             name="contactEmail" 
-                                            bind:value={state.contactEmail} 
+                                            bind:value={consultationState.contactEmail} 
                                             placeholder="e.g. client@company.com" 
                                         />
                                         <span class="absolute right-3 top-3 text-zinc-400"><Mail size={16} /></span>
                                     </div>
-                                    {#if state.errors.contactEmail || $errors.contactEmail}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.contactEmail || $errors.contactEmail}</p>
+                                    {#if consultationState.errors.contactEmail || $errors.contactEmail}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.contactEmail || $errors.contactEmail}</p>
                                     {/if}
                                 </div>
                             </div>
@@ -145,11 +170,11 @@
                                         type="text" 
                                         id="companyNameInput" 
                                         name="companyName" 
-                                        bind:value={state.companyName} 
+                                        bind:value={consultationState.companyName} 
                                         placeholder="e.g. TernakAja Group" 
                                     />
-                                    {#if state.errors.companyName || $errors.companyName}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.companyName || $errors.companyName}</p>
+                                    {#if consultationState.errors.companyName || $errors.companyName}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.companyName || $errors.companyName}</p>
                                     {/if}
                                 </div>
 
@@ -159,11 +184,11 @@
                                         type="text" 
                                         id="industryInput" 
                                         name="industry" 
-                                        bind:value={state.industry} 
+                                        bind:value={consultationState.industry} 
                                         placeholder="e.g. AgTech, FinTech, E-commerce" 
                                     />
-                                    {#if state.errors.industry || $errors.industry}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.industry || $errors.industry}</p>
+                                    {#if consultationState.errors.industry || $errors.industry}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.industry || $errors.industry}</p>
                                     {/if}
                                 </div>
                             </div>
@@ -175,13 +200,13 @@
                                         type="text" 
                                         id="websiteUrlInput" 
                                         name="websiteUrl" 
-                                        bind:value={state.websiteUrl} 
+                                        bind:value={consultationState.websiteUrl} 
                                         placeholder="https://company.com" 
                                     />
                                     <span class="absolute right-3 top-3 text-zinc-400"><Globe size={16} /></span>
                                 </div>
-                                {#if state.errors.websiteUrl || $errors.websiteUrl}
-                                    <p class="text-xs text-destructive mt-1">{state.errors.websiteUrl || $errors.websiteUrl}</p>
+                                {#if consultationState.errors.websiteUrl || $errors.websiteUrl}
+                                    <p class="text-xs text-destructive mt-1">{consultationState.errors.websiteUrl || $errors.websiteUrl}</p>
                                 {/if}
                             </div>
                         </Card.Content>
@@ -203,8 +228,8 @@
                                     <select 
                                         id="serviceTypeSelect"
                                         name="serviceType" 
-                                        bind:value={state.serviceType} 
-                                        onchange={() => state.resetFeatures()}
+                                        bind:value={consultationState.serviceType} 
+                                        onchange={() => consultationState.resetFeatures()}
                                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
                                     >
                                         <option value="web_service">Website & Web Applications</option>
@@ -217,8 +242,8 @@
                                     <select 
                                         id="projectTierSelect"
                                         name="projectTier" 
-                                        bind:value={state.projectTier} 
-                                        onchange={() => state.resetFeatures()}
+                                        bind:value={consultationState.projectTier} 
+                                        onchange={() => consultationState.resetFeatures()}
                                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
                                     >
                                         <option value="basic">Basic MVP Package</option>
@@ -234,11 +259,11 @@
                                     type="text" 
                                     id="projectTitleInput" 
                                     name="projectTitle" 
-                                    bind:value={state.projectTitle} 
+                                    bind:value={consultationState.projectTitle} 
                                     placeholder="e.g. Redesign Web TernakAja / Mobile App AttendMe" 
                                 />
-                                {#if state.errors.projectTitle || $errors.projectTitle}
-                                    <p class="text-xs text-destructive mt-1">{state.errors.projectTitle || $errors.projectTitle}</p>
+                                {#if consultationState.errors.projectTitle || $errors.projectTitle}
+                                    <p class="text-xs text-destructive mt-1">{consultationState.errors.projectTitle || $errors.projectTitle}</p>
                                 {/if}
                             </div>
 
@@ -247,12 +272,12 @@
                                 <textarea 
                                     id="coreObjectiveInput" 
                                     name="coreObjective" 
-                                    bind:value={state.coreObjective} 
+                                    bind:value={consultationState.coreObjective} 
                                     placeholder="Masalah apa yang ingin Anda selesaikan lewat aplikasi/website ini bagi bisnis atau target user Anda?" 
                                     class="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
                                 ></textarea>
-                                {#if state.errors.coreObjective || $errors.coreObjective}
-                                    <p class="text-xs text-destructive mt-1">{state.errors.coreObjective || $errors.coreObjective}</p>
+                                {#if consultationState.errors.coreObjective || $errors.coreObjective}
+                                    <p class="text-xs text-destructive mt-1">{consultationState.errors.coreObjective || $errors.coreObjective}</p>
                                 {/if}
                             </div>
 
@@ -260,21 +285,21 @@
                             <div class="space-y-3" id="keyFeatures">
                                 <Label class="block mb-1">Pilih Fitur yang Dibutuhkan (Sesuai Paket Tier):</Label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {#each state.currentFeaturesPreset as feature}
+                                    {#each consultationState.currentFeaturesPreset as feature}
                                         <label class="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/40 cursor-pointer hover:border-blue-500/20 dark:hover:border-blue-500/20 hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-all select-none">
                                             <input 
                                                 type="checkbox" 
                                                 name="keyFeatures" 
                                                 value={feature} 
-                                                bind:group={state.keyFeatures} 
+                                                bind:group={consultationState.keyFeatures} 
                                                 class="mt-1 rounded text-blue-500 focus:ring-blue-500 border-zinc-300 dark:border-zinc-700 bg-transparent" 
                                             />
                                             <span class="text-xs text-zinc-600 dark:text-zinc-300 leading-normal">{feature}</span>
                                         </label>
                                     {/each}
                                 </div>
-                                {#if state.errors.keyFeatures || $errors.keyFeatures}
-                                    <p class="text-xs text-destructive mt-1">{state.errors.keyFeatures || $errors.keyFeatures}</p>
+                                {#if consultationState.errors.keyFeatures || $errors.keyFeatures}
+                                    <p class="text-xs text-destructive mt-1">{consultationState.errors.keyFeatures || $errors.keyFeatures}</p>
                                 {/if}
                             </div>
 
@@ -284,7 +309,7 @@
                                     <select 
                                         id="targetTimelineSelect"
                                         name="targetTimeline" 
-                                        bind:value={state.targetTimeline} 
+                                        bind:value={consultationState.targetTimeline} 
                                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
                                     >
                                         <option value="under_1_month">Di bawah 1 Bulan (Sangat Cepat)</option>
@@ -300,7 +325,7 @@
                                         <input 
                                             type="checkbox" 
                                             name="infrastructureAck" 
-                                            bind:checked={state.infrastructureAck} 
+                                            bind:checked={consultationState.infrastructureAck} 
                                             class="mt-1 rounded text-blue-500 focus:ring-blue-500 border-zinc-300 dark:border-zinc-700 bg-transparent" 
                                         />
                                         <div class="space-y-0.5">
@@ -308,8 +333,8 @@
                                             <p class="text-[10px] text-zinc-500 dark:text-zinc-400 leading-normal">Saya memahami bahwa biaya domain dan VPS/Cloud hosting berkelanjutan adalah tanggung jawab klien langsung.</p>
                                         </div>
                                     </label>
-                                    {#if state.errors.infrastructureAck || $errors.infrastructureAck}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.infrastructureAck || $errors.infrastructureAck}</p>
+                                    {#if consultationState.errors.infrastructureAck || $errors.infrastructureAck}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.infrastructureAck || $errors.infrastructureAck}</p>
                                     {/if}
                                 </div>
 
@@ -319,7 +344,7 @@
                                         <input 
                                             type="checkbox" 
                                             name="termsAck" 
-                                            bind:checked={state.termsAck} 
+                                            bind:checked={consultationState.termsAck} 
                                             class="mt-1 rounded text-blue-500 focus:ring-blue-500 border-zinc-300 dark:border-zinc-700 bg-transparent" 
                                         />
                                         <div class="space-y-0.5">
@@ -327,8 +352,8 @@
                                             <p class="text-[10px] text-zinc-500 dark:text-zinc-400 leading-normal">Saya menyetujui pengumpulan data kebutuhan proyek ini untuk keperluan analisis sebelum sesi konsultasi.</p>
                                         </div>
                                     </label>
-                                    {#if state.errors.termsAck || $errors.termsAck}
-                                        <p class="text-xs text-destructive mt-1">{state.errors.termsAck || $errors.termsAck}</p>
+                                    {#if consultationState.errors.termsAck || $errors.termsAck}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.termsAck || $errors.termsAck}</p>
                                     {/if}
                                 </div>
                             </div>
@@ -337,13 +362,13 @@
 
                     <!-- Submit Details to go to Step 2 Calendar -->
                     <div class="flex justify-end pt-4">
-                        <Button type="button" class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium" onclick={() => state.validateStep1()}>
+                        <Button type="button" class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium" onclick={() => consultationState.validateStep1()}>
                             Lanjut Pilih Jadwal
                             <ArrowRight size={16} class="group-hover:translate-x-0.5 transition-transform" />
                         </Button>
                     </div>
                 </div>
-            {:else if state.step === 2}
+            {:else if consultationState.step === 2}
                 <!-- SECTION 2: Calendar & Submit Form -->
                 <div class="space-y-8">
                     <Card.Root class="border border-zinc-100 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-900/10">
@@ -371,7 +396,7 @@
                             <!-- Embedded Cal.com scheduler -->
                             <div class="w-full h-[600px] border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950">
                                 <iframe 
-                                    src={state.calIframeUrl} 
+                                    src={consultationState.calIframeUrl} 
                                     title="Konsultasi Pertemuan Hamas Azizan" 
                                     class="w-full h-full border-0"
                                 ></iframe>
@@ -386,9 +411,18 @@
                             Kembali Edit Briefing
                         </Button>
 
-                        <Button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium">
-                            Kirim Briefing & Simpan Jadwal
-                            <ChevronRight size={16} class="group-hover:translate-x-0.5 transition-transform" />
+                        <Button 
+                            type="submit" 
+                            disabled={isSubmitting} 
+                            class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {#if isSubmitting}
+                                <Spinner size={16} class="text-white mr-1" />
+                                Memproses...
+                            {:else}
+                                Kirim Briefing & Simpan Jadwal
+                                <ChevronRight size={16} class="group-hover:translate-x-0.5 transition-transform" />
+                            {/if}
                         </Button>
                     </div>
                 </div>

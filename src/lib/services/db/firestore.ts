@@ -80,6 +80,11 @@ export class FirestoreDatabaseService implements IDatabaseService {
     await updateDoc(docRef, cleanedData);
   }
 
+  async deleteConsultation(id: string): Promise<void> {
+    const docRef = doc(db, 'pending_consultations', id);
+    await deleteDoc(docRef);
+  }
+
   async getProjects(): Promise<Project[]> {
     const q = query(collection(db, 'selected-projects'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);

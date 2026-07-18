@@ -3,6 +3,7 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import Label from "$lib/components/ui/label/label.svelte";
 	import { page } from "$app/stores";
+	import Toaster from "$lib/components/ui/toast/Toaster.svelte";
 
 	let { data, children } = $props();
 
@@ -264,4 +265,6 @@
 	>
 		{@render children()}
 	</main>
+
+	<Toaster />
 </div>

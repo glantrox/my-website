@@ -307,9 +307,9 @@ export const actions = {
     }
 
     try {
-      await dbService.deleteProject(params.id);
+      await dbService.deleteConsultation(params.id);
     } catch (e) {
-      console.error('Error deleting project:', e);
+      console.error('Error deleting consultation lead:', e);
       throw error(500, 'Database delete failed');
     }
 

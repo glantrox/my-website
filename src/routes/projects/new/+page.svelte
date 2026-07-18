@@ -20,30 +20,51 @@
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
 
-  /** @type {import('./$types').PageData} */
-  export let data;
-  const { isAdmin } = data;
+  import { toast } from "$lib/entities/toast";
+  import Spinner from "$lib/components/ui/spinner.svelte";
+
+  let { data } = $props();
+  const isAdmin = $derived(data.isAdmin);
+
+  let isSubmitting = $state(false);
+  let activeToastId = $state("");
 
   // Initialize superForm
   const { form, errors, enhance, message } = superForm(/** @type {any} */(data.form), {
     dataType: "json",
+    onSubmit: () => {
+      isSubmitting = true;
+      activeToastId = toast.loading("Membuat proyek baru...");
+    },
     onResult({ result }) {
+      isSubmitting = false;
       if (result.type === "success") {
         invalidateAll();
+      }
+      if (result.type === "redirect") {
+        toast.update(activeToastId, {
+          type: "success",
+          message: "Proyek berhasil ditambahkan!",
+          duration: 2000
+        });
+      } else if (result.type === "failure" || result.type === "error") {
+        toast.update(activeToastId, {
+          type: "error",
+          message: "Gagal membuat proyek. Silakan periksa kembali form Anda.",
+          duration: 4000
+        });
       }
     },
   });
 
-  $: techStackArray = $form.techStack
+  const techStackArray = $derived($form.techStack
     ? $form.techStack
         .split(",")
         .map((/** @type {string} */ s) => s.trim())
         .filter(Boolean)
-    : [];
+    : []);
 
-  /** @type {any} */
-  let errorsLinks;
-  $: errorsLinks = ($errors).links;
+  const errorsLinks = $derived(/** @type {any} */($errors).links);
 
   function handleCancel() {
     history.back();
@@ -62,9 +83,14 @@
             <X class="w-4 h-4 mr-2" />
             Cancel
           </Button>
-          <Button type="submit" form="project-form">
-            <Save class="w-4 h-4 mr-2" />
-            Save Project
+          <Button type="submit" form="project-form" disabled={isSubmitting}>
+            {#if isSubmitting}
+              <Spinner size={16} class="mr-2" />
+              Saving...
+            {:else}
+              <Save class="w-4 h-4 mr-2" />
+              Save Project
+            {/if}
           </Button>
         </div>
       </div>

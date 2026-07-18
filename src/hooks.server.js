@@ -25,3 +25,24 @@ export async function handle({ event, resolve }) {
 	const response = await resolve(event);
 	return response;
 }
+
+import { TelemetryLogger } from './lib/services/logger';
+
+/** @type {import('@sveltejs/kit').HandleServerError} */
+export function handleError({ error, event, status, message }) {
+	// Skip logging of client redirects / 404s to telemetry
+	if (status !== 404 && status !== 303 && status !== 302 && status !== 307 && status !== 308) {
+		TelemetryLogger.logError(error, {
+			route: event.url.pathname,
+			payload: {
+				params: event.params,
+				status,
+				message
+			}
+		});
+	}
+
+	return {
+		message: "We're having trouble connecting to our servers. Please check your internet connection or try again in a few moments."
+	};
+}

@@ -33,7 +33,131 @@
 	let { data } = $props();
 	const project = $derived(data.project);
 
-	const { form, enhance: superEnhance } = superForm(data.form);
+	import { toast } from '$lib/entities/toast';
+	import Spinner from '$lib/components/ui/spinner.svelte';
+
+	let isSavingLead = $state(false);
+	let isScheduling = $state(false);
+	let isSendingProposal = $state(false);
+	let isPushingProgress = $state(false);
+	let isRequestingSignoff = $state(false);
+	let isSendingHandover = $state(false);
+	let isRestoring = $state(false);
+	let isDeleting = $state(false);
+
+	const { form, enhance: superEnhance } = superForm(data.form, {
+		onSubmit: () => {
+			isSavingLead = true;
+		},
+		onResult: ({ result }) => {
+			isSavingLead = false;
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.success('Lead detail berhasil diperbarui!');
+			} else if (result.type === 'failure' || result.type === 'error') {
+				toast.error('Gagal memperbarui lead detail.');
+			}
+		}
+	});
+
+	function handleScheduleEnhance() {
+		isScheduling = true;
+		const toastId = toast.loading('Menjadwalkan meeting...');
+		return async ({ result, update }: any) => {
+			isScheduling = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Meeting berhasil dijadwalkan!', duration: 3000 });
+				isRescheduling = false;
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal menjadwalkan meeting.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleProposalEnhance() {
+		isSendingProposal = true;
+		const toastId = toast.loading('Mengirim proposal...');
+		return async ({ result, update }: any) => {
+			isSendingProposal = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Proposal berhasil dikirim!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal mengirim proposal.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleProgressEnhance() {
+		isPushingProgress = true;
+		const toastId = toast.loading('Menambahkan progress update...');
+		return async ({ result, update }: any) => {
+			isPushingProgress = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Progress update berhasil ditambahkan!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal menambahkan progress update.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleSignoffEnhance() {
+		isRequestingSignoff = true;
+		const toastId = toast.loading('Mengirim permintaan sign-off...');
+		return async ({ result, update }: any) => {
+			isRequestingSignoff = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Permintaan sign-off berhasil dikirim!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal mengirim permintaan sign-off.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleHandoverEnhance() {
+		isSendingHandover = true;
+		const toastId = toast.loading('Mengirim paket handover...');
+		return async ({ result, update }: any) => {
+			isSendingHandover = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Paket handover berhasil dikirim!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal mengirim paket handover.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleRestoreEnhance() {
+		isRestoring = true;
+		const toastId = toast.loading('Memulihkan lead ke aktif...');
+		return async ({ result, update }: any) => {
+			isRestoring = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Lead berhasil dipulihkan!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal memulihkan lead.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleDeleteEnhance() {
+		isDeleting = true;
+		showDeleteModal = false;
+		const toastId = toast.loading('Menghapus lead secara permanen...');
+		return async ({ result, update }: any) => {
+			isDeleting = false;
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Lead berhasil dihapus!', duration: 3000 });
+				await update();
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal menghapus lead.', duration: 4000 });
+			}
+		};
+	}
 
 	// Delete Confirmation state
 	let showDeleteModal = $state(false);
@@ -155,13 +279,13 @@
 </svelte:head>
 
 <!-- Separate invisible forms for SvelteKit named actions to avoid form nesting -->
-<form id="schedule-form" method="POST" action="?/scheduleMeeting" use:enhance></form>
-<form id="proposal-form" method="POST" action="?/sendProposal" use:enhance></form>
-<form id="progress-form" method="POST" action="?/pushProgressUpdate" use:enhance></form>
-<form id="signoff-form" method="POST" action="?/requestSignOff" use:enhance></form>
-<form id="handover-form" method="POST" action="?/sendHandover" use:enhance></form>
-<form id="restore-form" method="POST" action="?/restoreLead" use:enhance></form>
-<form id="delete-form" method="POST" action="?/deleteProject" use:enhance></form>
+<form id="schedule-form" method="POST" action="?/scheduleMeeting" use:enhance={handleScheduleEnhance}></form>
+<form id="proposal-form" method="POST" action="?/sendProposal" use:enhance={handleProposalEnhance}></form>
+<form id="progress-form" method="POST" action="?/pushProgressUpdate" use:enhance={handleProgressEnhance}></form>
+<form id="signoff-form" method="POST" action="?/requestSignOff" use:enhance={handleSignoffEnhance}></form>
+<form id="handover-form" method="POST" action="?/sendHandover" use:enhance={handleHandoverEnhance}></form>
+<form id="restore-form" method="POST" action="?/restoreLead" use:enhance={handleRestoreEnhance}></form>
+<form id="delete-form" method="POST" action="?/deleteProject" use:enhance={handleDeleteEnhance}></form>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 	<!-- Sleek Navigation Header -->
@@ -185,11 +309,16 @@
 			<button
 				type="submit"
 				form="update-lead-form"
-				disabled={!isFormChanged}
-				class="bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+				disabled={isSavingLead || !isFormChanged}
+				class="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
 			>
-				<CheckCircle2 class="h-4 w-4" />
-				Simpan Perubahan
+				{#if isSavingLead}
+					<Spinner size={14} class="text-white dark:text-zinc-950" />
+					Menyimpan...
+				{:else}
+					<CheckCircle2 class="h-4 w-4" />
+					Simpan Perubahan
+				{/if}
 			</button>
 		</div>
 	</div>
@@ -617,10 +746,16 @@
 								<Button
 									type="submit"
 									form="schedule-form"
-									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+									disabled={isScheduling}
+									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									<Mail class="h-4 w-4" />
-									Schedule & Send Email
+									{#if isScheduling}
+										<Spinner size={16} class="text-white" />
+										Scheduling...
+									{:else}
+										<Mail class="h-4 w-4" />
+										Schedule & Send Email
+									{/if}
 								</Button>
 							</Card.Content>
 						</Card.Root>
@@ -697,10 +832,16 @@
 							<Button
 								type="submit"
 								form="proposal-form"
-								class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+								disabled={isSendingProposal}
+								class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<Briefcase class="h-4 w-4" />
-								Send Proposal & DP Invoice
+								{#if isSendingProposal}
+									<Spinner size={16} class="text-white" />
+									Sending...
+								{:else}
+									<Briefcase class="h-4 w-4" />
+									Send Proposal & DP Invoice
+								{/if}
 							</Button>
 						</Card.Content>
 					</Card.Root>
@@ -772,10 +913,16 @@
 							<Button
 								type="submit"
 								form="progress-form"
-								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+								disabled={isPushingProgress}
+								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<Rocket class="h-4 w-4" />
-								Push Progress Update
+								{#if isPushingProgress}
+									<Spinner size={16} class="text-white" />
+									Updating...
+								{:else}
+									<Rocket class="h-4 w-4" />
+									Push Progress Update
+								{/if}
 							</Button>
 						</Card.Content>
 					</Card.Root>
@@ -866,10 +1013,16 @@
 							<Button
 								type="submit"
 								form="signoff-form"
-								class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+								disabled={isRequestingSignoff}
+								class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<Beaker class="h-4 w-4" />
-								Request Form Sign-Off
+								{#if isRequestingSignoff}
+									<Spinner size={16} class="text-white" />
+									Requesting...
+								{:else}
+									<Beaker class="h-4 w-4" />
+									Request Form Sign-Off
+								{/if}
 							</Button>
 						</Card.Content>
 					</Card.Root>
@@ -930,10 +1083,16 @@
 							<Button
 								type="submit"
 								form="handover-form"
-								class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+								disabled={isSendingHandover}
+								class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<Gift class="h-4 w-4" />
-								Send Handover Package
+								{#if isSendingHandover}
+									<Spinner size={16} class="text-white" />
+									Sending...
+								{:else}
+									<Gift class="h-4 w-4" />
+									Send Handover Package
+								{/if}
 							</Button>
 						</Card.Content>
 					</Card.Root>
@@ -973,10 +1132,16 @@
 							<Button
 								type="submit"
 								form="restore-form"
-								class="w-full bg-zinc-800 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+								disabled={isRestoring}
+								class="w-full bg-zinc-800 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<FolderArchive class="h-4 w-4" />
-								Restore to Active Leads
+								{#if isRestoring}
+									<Spinner size={16} class="text-white dark:text-zinc-950" />
+									Restoring...
+								{:else}
+									<FolderArchive class="h-4 w-4" />
+									Restore to Active Leads
+								{/if}
 							</Button>
 						</Card.Content>
 					</Card.Root>
@@ -1105,10 +1270,15 @@
 				<button
 					type="submit"
 					form="delete-form"
-					disabled={!isDeleteValid}
-					class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+					disabled={isDeleting || !isDeleteValid}
+					class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
 				>
-					Hapus Permanen
+					{#if isDeleting}
+						<Spinner size={12} class="text-white" />
+						Menghapus...
+					{:else}
+						Hapus Permanen
+					{/if}
 				</button>
 			</div>
 		</div>

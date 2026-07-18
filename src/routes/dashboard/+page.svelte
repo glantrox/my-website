@@ -1,6 +1,8 @@
 <script>
   import { fade } from 'svelte/transition';
   import { enhance } from '$app/forms';
+  import { toast } from '$lib/entities/toast';
+  import Spinner from '$lib/components/ui/spinner.svelte';
   import { z } from 'zod';
   import * as Card from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
@@ -689,15 +691,31 @@
         action={editingProject ? '?/updateProject' : '?/createProject'}
         use:enhance={() => {
           isSubmitting = true;
+          const toastId = toast.loading(editingProject ? 'Memperbarui proyek...' : 'Membuat proyek...');
           return async ({ result, update }) => {
             isSubmitting = false;
             if (result.type === 'success') {
               isModalOpen = false;
+              toast.update(toastId, {
+                type: 'success',
+                message: editingProject ? 'Proyek berhasil diperbarui!' : 'Proyek berhasil dibuat!',
+                duration: 3000
+              });
               await update();
             } else if (result.type === 'failure') {
               validationErrors = result.data?.errors || { _server: 'Gagal memproses data. Silakan periksa input Anda.' };
+              toast.update(toastId, {
+                type: 'error',
+                message: 'Gagal memproses data. Silakan periksa input Anda.',
+                duration: 4000
+              });
             } else {
               validationErrors = { _server: 'Terjadi kesalahan sistem. Silakan coba lagi nanti.' };
+              toast.update(toastId, {
+                type: 'error',
+                message: 'Terjadi kesalahan sistem. Silakan coba lagi nanti.',
+                duration: 4000
+              });
             }
           };
         }}
@@ -910,7 +928,7 @@
             class="px-4 py-2 rounded-xl text-xs font-bold text-white dark:text-zinc-950 bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
           >
             {#if isSubmitting}
-              <div class="h-3 w-3 animate-spin rounded-full border-2 border-white/50 border-t-white dark:border-zinc-950/50 dark:border-t-zinc-950"></div>
+              <Spinner size={12} class="text-white dark:text-zinc-950" />
               Saving...
             {:else}
               Save Project
@@ -954,8 +972,23 @@
           deletingProjectId = targetId;
           confirmDeleteOpen = false;
           projectToDelete = null;
-          return async ({ result }) => {
+          const toastId = toast.loading('Menghapus proyek...');
+          return async ({ result, update }) => {
             deletingProjectId = null;
+            if (result.type === 'success') {
+              toast.update(toastId, {
+                type: 'success',
+                message: 'Proyek berhasil dihapus!',
+                duration: 3000
+              });
+              await update();
+            } else {
+              toast.update(toastId, {
+                type: 'error',
+                message: 'Gagal menghapus proyek. Silakan coba lagi.',
+                duration: 4000
+              });
+            }
           };
         }}
         class="flex gap-3 justify-center pt-2"

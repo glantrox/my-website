@@ -3,9 +3,25 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
+  import { enhance } from "$app/forms";
+  import { toast } from "$lib/entities/toast";
+  import Spinner from "$lib/components/ui/spinner.svelte";
 
-  /** @type {import('./$types').ActionData} */
-  export let form;
+  let { form } = $props();
+
+  let isSubmitting = $state(false);
+
+  /** @type {import('@sveltejs/kit').SubmitFunction} */
+  function handleLoginSubmit() {
+    isSubmitting = true;
+    return async ({ result, update }) => {
+      isSubmitting = false;
+      await update();
+      if (result.type === "failure" && result.data?.error) {
+        toast.error(result.data.error);
+      }
+    };
+  }
 </script>
 
 <div class="flex items-center justify-center h-screen">
@@ -17,7 +33,7 @@
       </Card.Description>
     </Card.Header>
 
-    <form method="POST">
+    <form method="POST" use:enhance={handleLoginSubmit}>
       <Card.Content>
         <div class="flex flex-col gap-6">
           <div class="grid gap-2">
@@ -40,7 +56,14 @@
       </Card.Content>
 
       <Card.Footer class="flex-col gap-2">
-        <Button type="submit" class="w-full">Login</Button>
+        <Button type="submit" class="w-full" disabled={isSubmitting}>
+          {#if isSubmitting}
+            <Spinner size={16} class="mr-2" />
+            Logging in...
+          {:else}
+            Login
+          {/if}
+        </Button>
       </Card.Footer>
     </form>
   </Card.Root>
