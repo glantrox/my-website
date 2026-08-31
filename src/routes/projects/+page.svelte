@@ -101,8 +101,8 @@
 
 			<div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/85 to-transparent z-10"></div>
 
-			<div class="absolute bottom-6 left-6 sm:left-8 z-20 max-w-[45%]">
-				<h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-none mb-2">
+			<div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-8 z-20 max-w-[65%] sm:max-w-[50%]">
+				<h2 class="text-xl sm:text-3xl font-extrabold text-white tracking-tight leading-none mb-1 sm:mb-2">
 					{selectedProject.title}
 				</h2>
 				<p class="text-zinc-400 text-xs sm:text-sm font-medium tracking-wide">
@@ -112,19 +112,19 @@
 		</div>
 
 		<!-- Body Container -->
-		<div class="p-6 sm:p-8 flex flex-col gap-8 text-left">
+		<div class="p-4 sm:p-8 flex flex-col gap-6 sm:gap-8 text-left">
 			<section>
-				<h3 class="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+				<h3 class="text-sm sm:text-lg font-bold text-white mb-2 sm:mb-3 flex items-center gap-2">
 					<LayoutGrid size={18} class="text-blue-500" />
 					About the Project
 				</h3>
-				<p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+				<p class="text-zinc-300 text-xs sm:text-base leading-relaxed">
 					{selectedProject.description}
 				</p>
 			</section>
 
 			<!-- Details Row -->
-			<div class="grid grid-cols-3 gap-4 py-6 border-y border-zinc-900">
+			<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 sm:py-6 border-y border-zinc-900">
 				<div>
 					<span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
 						<Calendar size={13} class="text-zinc-500" /> Timeline
