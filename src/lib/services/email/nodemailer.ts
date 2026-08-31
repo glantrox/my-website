@@ -13,6 +13,32 @@ const readableLabels: Record<string, string> = {
   flexible: "Flexible"
 };
 
+// HTML Escaping Utility
+function escapeHtml(str: string | number | null | undefined): string {
+  if (str === null || str === undefined) return '';
+  const s = String(str);
+  return s.replace(/[&<>"']/g, (match) => {
+    switch (match) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#39;';
+      default: return match;
+    }
+  });
+}
+
+// URL Sanitizer to prevent injection of javascript: or data: URIs
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  const cleanUrl = url.trim();
+  if (cleanUrl.toLowerCase().startsWith('javascript:') || cleanUrl.toLowerCase().startsWith('data:')) {
+    return 'about:blank';
+  }
+  return escapeHtml(cleanUrl);
+}
+
 export class NodemailerEmailService implements IEmailService {
   private getTransporter() {
     return nodemailer.createTransport({
@@ -108,7 +134,7 @@ export class NodemailerEmailService implements IEmailService {
             <td style="padding: 40px 40px 32px 40px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #ffffff;">Let's build something<br />exceptional together.</h1>
               <p style="margin: 12px 0 0 0; font-size: 14px; color: #a1a1aa; line-height: 1.6;">
-                Hi ${clientName}, your project consultation session has been successfully locked in.
+                Hi ${escapeHtml(clientName)}, your project consultation session has been successfully locked in.
               </p>
             </td>
           </tr>
@@ -118,17 +144,17 @@ export class NodemailerEmailService implements IEmailService {
                 <tr>
                   <td>
                     <span style="font-size: 11px; color: #71717a; text-transform: uppercase;">Proposed Project</span>
-                    <span style="font-size: 15px; font-weight: 600; color: #ffffff; display: block; margin-top: 4px;">${projectTitleStr}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: #ffffff; display: block; margin-top: 4px;">${escapeHtml(projectTitleStr)}</span>
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 16px;">
                       <tr>
                         <td class="stack-column" valign="top" width="48%">
                           <span style="font-size: 11px; color: #71717a; text-transform: uppercase;">Consultation Date</span>
-                          <span style="font-size: 13px; font-weight: 500; color: #e4e4e7; display: block;">${formattedDate}</span>
+                          <span style="font-size: 13px; font-weight: 500; color: #e4e4e7; display: block;">${escapeHtml(formattedDate)}</span>
                         </td>
                         <td class="column-gap" width="4%"></td>
                         <td class="stack-column" valign="top" width="48%">
                           <span style="font-size: 11px; color: #71717a; text-transform: uppercase;">Service Package</span>
-                          <span style="font-size: 13px; font-weight: 500; color: #e4e4e7; display: block;">${servicePackage}</span>
+                          <span style="font-size: 13px; font-weight: 500; color: #e4e4e7; display: block;">${escapeHtml(servicePackage)}</span>
                         </td>
                       </tr>
                     </table>
@@ -139,7 +165,7 @@ export class NodemailerEmailService implements IEmailService {
           </tr>
           <tr>
             <td align="center" style="padding: 24px 40px 32px 40px;">
-              <a href="${meetLink}" target="_blank" style="display: block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; text-decoration: none; padding: 14px; border-radius: 8px; text-align: center;">Enter Google Meet Space</a>
+              <a href="${sanitizeUrl(meetLink)}" target="_blank" style="display: block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; text-decoration: none; padding: 14px; border-radius: 8px; text-align: center;">Enter Google Meet Space</a>
             </td>
           </tr>
         </table>
@@ -162,14 +188,14 @@ export class NodemailerEmailService implements IEmailService {
   ): Promise<void> {
     const emailHtml = `<div style="background-color: #09090b; color: #ffffff; padding: 40px; font-family: sans-serif; border-radius: 16px;">
       <h2>Project Proposal & Quotation Prepared</h2>
-      <p>Hi ${clientName},</p>
-      <p>We have finalized the proposal and quotation details for <strong>${projectTitle}</strong>.</p>
+      <p>Hi ${escapeHtml(clientName)},</p>
+      <p>We have finalized the proposal and quotation details for <strong>${escapeHtml(projectTitle)}</strong>.</p>
       <div style="background-color: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 12px; margin: 20px 0;">
         <p style="margin: 4px 0;"><strong>Finalized Price:</strong> Rp ${quotedPrice.toLocaleString('id-ID')}</p>
-        <p style="margin: 4px 0;"><strong>Down Payment Required:</strong> ${downPaymentRequirement}</p>
+        <p style="margin: 4px 0;"><strong>Down Payment Required:</strong> ${escapeHtml(downPaymentRequirement)}</p>
       </div>
       <p>You can review the full project proposal/scope specification by clicking below:</p>
-      <a href="${proposalUrl}" target="_blank" style="display: inline-block; background-color: #ffffff; color: #09090b; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">View Project Proposal</a>
+      <a href="${sanitizeUrl(proposalUrl)}" target="_blank" style="display: inline-block; background-color: #ffffff; color: #09090b; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">View Project Proposal</a>
     </div>`;
 
     await this.sendMail(to, `Project Proposal & Down Payment Invoice: ${projectTitle}`, emailHtml);
@@ -185,13 +211,13 @@ export class NodemailerEmailService implements IEmailService {
   ): Promise<void> {
     const emailHtml = `<div style="background-color: #09090b; color: #ffffff; padding: 40px; font-family: sans-serif; border-radius: 16px;">
       <h2>Development Progress Update</h2>
-      <p>Hi ${clientName},</p>
-      <p>Development is actively underway for <strong>${projectTitle}</strong>!</p>
+      <p>Hi ${escapeHtml(clientName)},</p>
+      <p>Development is actively underway for <strong>${escapeHtml(projectTitle)}</strong>!</p>
       <p>Here are your active engineering workspace links to track progress in real-time:</p>
       <ul>
-        <li><strong>Staging Environment:</strong> <a href="${stagingUrl}" style="color: #60a5fa;">${stagingUrl}</a></li>
-        <li><strong>Git Repository:</strong> <a href="${repoLink}" style="color: #60a5fa;">${repoLink}</a></li>
-        <li><strong>Task Board:</strong> <a href="${managementBoardUrl}" style="color: #60a5fa;">${managementBoardUrl}</a></li>
+        <li><strong>Staging Environment:</strong> <a href="${sanitizeUrl(stagingUrl)}" style="color: #60a5fa;">${escapeHtml(stagingUrl)}</a></li>
+        <li><strong>Git Repository:</strong> <a href="${sanitizeUrl(repoLink)}" style="color: #60a5fa;">${escapeHtml(repoLink)}</a></li>
+        <li><strong>Task Board:</strong> <a href="${sanitizeUrl(managementBoardUrl)}" style="color: #60a5fa;">${escapeHtml(managementBoardUrl)}</a></li>
       </ul>
     </div>`;
 
@@ -206,11 +232,11 @@ export class NodemailerEmailService implements IEmailService {
   ): Promise<void> {
     const emailHtml = `<div style="background-color: #09090b; color: #ffffff; padding: 40px; font-family: sans-serif; border-radius: 16px;">
       <h2>Staging Environment Sign-Off Request</h2>
-      <p>Hi ${clientName},</p>
-      <p>The core features for <strong>${projectTitle}</strong> are ready on our staging server for QA and review.</p>
+      <p>Hi ${escapeHtml(clientName)},</p>
+      <p>The core features for <strong>${escapeHtml(projectTitle)}</strong> are ready on our staging server for QA and review.</p>
       <p>Please test the staging environment and submit any feedback through the Loom or Notion tracker link:</p>
       <div style="margin: 20px 0;">
-        <a href="${feedbackTrackerUrl}" style="background-color: #ffffff; color: #09090b; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">Open Feedback Tracker</a>
+        <a href="${sanitizeUrl(feedbackTrackerUrl)}" style="background-color: #ffffff; color: #09090b; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">Open Feedback Tracker</a>
       </div>
       <p>Once you are happy, please authorize the final sign-off.</p>
     </div>`;
@@ -234,13 +260,13 @@ export class NodemailerEmailService implements IEmailService {
 
     const emailHtml = `<div style="background-color: #09090b; color: #ffffff; padding: 40px; font-family: sans-serif; border-radius: 16px;">
       <h2>Project Handover Package</h2>
-      <p>Hi ${clientName},</p>
-      <p>Congratulations! We have officially deployed <strong>${projectTitle}</strong> to production.</p>
+      <p>Hi ${escapeHtml(clientName)},</p>
+      <p>Congratulations! We have officially deployed <strong>${escapeHtml(projectTitle)}</strong> to production.</p>
       <p>Here are your final project access credentials and downloadable source files:</p>
       <ul>
-        <li><strong>Live Application:</strong> <a href="${productionUrl}" style="color: #60a5fa;">${productionUrl}</a></li>
-        <li><strong>ZIP Archive / Repository Transfer:</strong> <a href="${codebaseTransferUrl}" style="color: #60a5fa;">${codebaseTransferUrl}</a></li>
-        <li><strong>Support / Warranty Window Ends:</strong> ${warrantyDateStr}</li>
+        <li><strong>Live Application:</strong> <a href="${sanitizeUrl(productionUrl)}" style="color: #60a5fa;">${escapeHtml(productionUrl)}</a></li>
+        <li><strong>ZIP Archive / Repository Transfer:</strong> <a href="${sanitizeUrl(codebaseTransferUrl)}" style="color: #60a5fa;">${escapeHtml(codebaseTransferUrl)}</a></li>
+        <li><strong>Support / Warranty Window Ends:</strong> ${escapeHtml(warrantyDateStr)}</li>
       </ul>
     </div>`;
 

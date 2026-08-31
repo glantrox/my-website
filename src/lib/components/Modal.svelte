@@ -88,6 +88,3 @@
 	</div>
 {/if}
 
-<style>
-	/* Custom styles can go here if needed */
-</style>

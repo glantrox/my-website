@@ -1,5 +1,18 @@
 import { dbService } from '$lib/services/db/firestore';
 import { redirect, fail } from '@sveltejs/kit';
+import { z } from 'zod';
+
+const ProjectFormSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  tagline: z.string().min(10, 'Tagline must be at least 10 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
+  role: z.string().min(2, 'Role must be at least 2 characters'),
+  timeline: z.string().min(1, 'Timeline range is required'),
+  status: z.enum(['In Progress', 'Completed']),
+  imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  liveLink: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  githubLink: z.string().url('Must be a valid URL').optional().or(z.literal(''))
+});
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
@@ -68,6 +81,24 @@ export const actions = {
     const liveLink = data.get('liveLink')?.toString() || '';
     const githubLink = data.get('githubLink')?.toString() || '';
 
+    // Validate using Zod
+    const parseResult = ProjectFormSchema.safeParse({
+      title,
+      tagline,
+      description,
+      role,
+      timeline,
+      status,
+      imageUrl,
+      liveLink,
+      githubLink
+    });
+
+    if (!parseResult.success) {
+      const errorMsg = parseResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return fail(400, { error: `Validation failed: ${errorMsg}` });
+    }
+
     const techStack = techStackRaw
       ? techStackRaw.split(',').map(s => s.trim()).filter(Boolean)
       : ['Web'];
@@ -117,6 +148,24 @@ export const actions = {
     const techStackRaw = data.get('techStack')?.toString() || '';
     const liveLink = data.get('liveLink')?.toString() || '';
     const githubLink = data.get('githubLink')?.toString() || '';
+
+    // Validate using Zod
+    const parseResult = ProjectFormSchema.safeParse({
+      title,
+      tagline,
+      description,
+      role,
+      timeline,
+      status,
+      imageUrl,
+      liveLink,
+      githubLink
+    });
+
+    if (!parseResult.success) {
+      const errorMsg = parseResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return fail(400, { error: `Validation failed: ${errorMsg}` });
+    }
 
     const techStack = techStackRaw
       ? techStackRaw.split(',').map(s => s.trim()).filter(Boolean)

@@ -36,6 +36,10 @@ export class TelemetryLogger {
     };
 
     // Centralized logging endpoint / Sentry pipeline mock
-    console.error('[TELEMETRY_ERROR]', JSON.stringify(logData, null, 2));
+    if (typeof window !== 'undefined') {
+      console.error('[Application Error]', errObj.message);
+    } else {
+      console.error('[TELEMETRY_ERROR]', JSON.stringify(logData, null, 2));
+    }
   }
 }
