@@ -1,11 +1,11 @@
 // src/hooks.server.js
 import { redirect } from '@sveltejs/kit';
-import { ADMIN_SECRET_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import crypto from 'crypto';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-	const adminSecret = ADMIN_SECRET_KEY;
+	const adminSecret = env.ADMIN_SECRET_KEY || process.env.ADMIN_SECRET_KEY || '';
 	event.locals.isAdmin = false;
 
 	// Logout logic

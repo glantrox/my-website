@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { ADMIN_SECRET_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { dev } from '$app/environment';
 import crypto from 'crypto';
 
@@ -9,7 +9,7 @@ export const actions = {
     const data = await request.formData();
     const password = data.get('password');
 
-    const adminSecret = ADMIN_SECRET_KEY;
+    const adminSecret = env.ADMIN_SECRET_KEY || process.env.ADMIN_SECRET_KEY || '';
 
     if (!adminSecret) {
       return {
