@@ -514,7 +514,7 @@
 
 	<!-- Main Content Area -->
 	<main
-		class="flex-1 md:ml-64 bg-white dark:bg-zinc-900 min-h-screen transition-colors duration-200 w-full overflow-x-hidden"
+		class="flex-1 md:ml-64 bg-white dark:bg-zinc-900 min-h-screen transition-colors duration-200 w-full min-w-0"
 	>
 		{@render children()}
 	</main>

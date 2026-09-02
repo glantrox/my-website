@@ -70,7 +70,7 @@
     <!-- Progress Indicator Header -->
     <div class="w-full mb-12">
         <div class="grid grid-cols-3 gap-6 text-left">
-            <!-- Step 1: Selection -->
+            <!-- Step 1: Selection (Completed) -->
             <div class="space-y-2 opacity-60">
                 <div class="h-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-full"></div>
                 <div class="text-[10px] md:text-xs">
@@ -78,19 +78,19 @@
                 </div>
             </div>
 
-            <!-- Step 2: Requirements -->
-            <div class="space-y-2 {consultationState.step === 1 ? '' : 'opacity-60'}">
-                <div class="h-0.5 rounded-full transition-all duration-300 {consultationState.step === 1 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
+            <!-- Step 2: Requirements (Active on Step 1, Completed on Step 2) -->
+            <div class="space-y-2 transition-opacity duration-300 {consultationState.step === 1 ? 'opacity-100' : 'opacity-60'}">
+                <div class="h-0.5 rounded-full transition-all duration-300 bg-zinc-900 dark:bg-zinc-100"></div>
                 <div class="text-[10px] md:text-xs">
-                    <span class="font-medium text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Requirements</span>
+                    <span class="font-medium uppercase tracking-wider {consultationState.step === 1 ? 'text-zinc-900 dark:text-zinc-100 font-semibold' : 'text-zinc-500 dark:text-zinc-400'}">Requirements</span>
                 </div>
             </div>
 
-            <!-- Step 3: Schedule -->
-            <div class="space-y-2 {consultationState.step === 2 ? '' : 'opacity-40'}">
-                <div class="h-0.5 rounded-full transition-all duration-300 {consultationState.step === 2 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
+            <!-- Step 3: Schedule (Active on Step 2, Pending on Step 1) -->
+            <div class="space-y-2 transition-opacity duration-300 {consultationState.step >= 2 ? 'opacity-100' : 'opacity-40'}">
+                <div class="h-0.5 rounded-full transition-all duration-300 {consultationState.step >= 2 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}"></div>
                 <div class="text-[10px] md:text-xs">
-                    <span class="font-medium text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Schedule</span>
+                    <span class="font-medium uppercase tracking-wider {consultationState.step >= 2 ? 'text-zinc-900 dark:text-zinc-100 font-semibold' : 'text-zinc-500 dark:text-zinc-400'}">Schedule</span>
                 </div>
             </div>
         </div>
@@ -369,37 +369,100 @@
                     </div>
                 </div>
             {:else if consultationState.step === 2}
-                <!-- SECTION 2: Calendar & Submit Form -->
+                <!-- SECTION 2: Meeting Schedule & Direct Submission -->
                 <div class="space-y-8">
+                    <!-- Project Briefing Summary Card -->
+                    <Card.Root class="border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/20">
+                        <Card.Header class="pb-3">
+                            <Card.Title class="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                                <Building2 class="w-4 h-4 text-blue-500" />
+                                Ringkasan Briefing Proyek
+                            </Card.Title>
+                        </Card.Header>
+                        <Card.Content class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40">
+                                <span class="text-zinc-400 dark:text-zinc-500 block mb-1">Klien & Perusahaan</span>
+                                <span class="font-medium text-zinc-800 dark:text-zinc-200">{consultationState.contactName || '—'} ({consultationState.companyName || '—'})</span>
+                            </div>
+                            <div class="p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40">
+                                <span class="text-zinc-400 dark:text-zinc-500 block mb-1">Layanan & Tier</span>
+                                <span class="font-medium text-zinc-800 dark:text-zinc-200 capitalize">{consultationState.serviceType.replace('_', ' ')} • {consultationState.projectTier}</span>
+                            </div>
+                            <div class="p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40">
+                                <span class="text-zinc-400 dark:text-zinc-500 block mb-1">Judul Proyek</span>
+                                <span class="font-medium text-zinc-800 dark:text-zinc-200 truncate block">{consultationState.projectTitle || '—'}</span>
+                            </div>
+                        </Card.Content>
+                    </Card.Root>
+
+                    <!-- Schedule Picker Card -->
                     <Card.Root class="border border-zinc-100 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-900/10">
                         <Card.Header>
                             <Card.Title class="flex items-center gap-2 text-lg text-zinc-800 dark:text-zinc-200">
                                 <Calendar class="w-5 h-5 text-blue-500" />
-                                Sinkronisasi Jadwal Pertemuan
+                                Pilih Jadwal Pertemuan Konsultasi
                             </Card.Title>
                             <Card.Description>
-                                Pilih waktu konsultasi 1-on-1 gratis selama 15 menit menggunakan widget Cal.com di bawah.
+                                Tentukan tanggal dan waktu yang nyaman bagi Anda untuk sesi diskusi teknis 1-on-1 (via Google Meet).
                             </Card.Description>
                         </Card.Header>
                         <Card.Content class="space-y-6">
-                            <!-- Notice -->
-                            <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3">
-                                <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
-                                    <p class="font-semibold text-zinc-700 dark:text-zinc-300">Bagaimana cara booking?</p>
-                                    <p>1. Pilih slot waktu Anda langsung di dalam widget kalender di bawah.</p>
-                                    <p>2. Data nama, email, dan deskripsi kebutuhan Anda akan langsung tersinkronisasi otomatis.</p>
-                                    <p>3. Setelah memilih slot, klik tombol <strong>"Kirim Briefing & Simpan Jadwal"</strong> di bawah untuk menyimpan pengajuan Anda di database kami.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Date Input -->
+                                <div class="space-y-2">
+                                    <Label for="consultationDateInput">Tanggal Pertemuan yang Diinginkan <span class="text-red-500">*</span></Label>
+                                    <Input 
+                                        type="date" 
+                                        id="consultationDateInput" 
+                                        name="consultationDate" 
+                                        bind:value={consultationState.consultationDate} 
+                                        min={new Date().toISOString().split('T')[0]}
+                                        required
+                                        class="cursor-pointer"
+                                    />
+                                    {#if $errors.consultationDate}
+                                        <p class="text-xs text-destructive mt-1">{$errors.consultationDate}</p>
+                                    {/if}
+                                </div>
+
+                                <!-- Time Slot Selection -->
+                                <div class="space-y-2">
+                                    <Label for="consultationTimeSelect">Pilihan Jam / Slot Waktu (WIB)</Label>
+                                    <select 
+                                        id="consultationTimeSelect"
+                                        name="consultationTime" 
+                                        bind:value={consultationState.consultationTime} 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800 cursor-pointer"
+                                    >
+                                        <option value="09:00 - 10:00 WIB">Pagi (09:00 - 10:00 WIB)</option>
+                                        <option value="10:00 - 11:00 WIB">Pagi (10:00 - 11:00 WIB)</option>
+                                        <option value="13:30 - 14:30 WIB">Siang (13:30 - 14:30 WIB)</option>
+                                        <option value="15:30 - 16:30 WIB">Sore (15:30 - 16:30 WIB)</option>
+                                        <option value="19:30 - 20:30 WIB">Malam (19:30 - 20:30 WIB)</option>
+                                        <option value="flexible">Fleksibel / Sesuai Kesepakatan</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- Embedded Cal.com scheduler -->
-                            <div class="w-full h-[600px] border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950">
-                                <iframe 
-                                    src={consultationState.calIframeUrl} 
-                                    title="Konsultasi Pertemuan Hamas Azizan" 
-                                    class="w-full h-full border-0"
-                                ></iframe>
+                            <!-- Meeting Notes -->
+                            <div class="space-y-2">
+                                <Label for="meetingNotesInput">Catatan / Topik Khusus yang Ingin Dibahas (Opsional)</Label>
+                                <textarea 
+                                    id="meetingNotesInput" 
+                                    name="meetingNotes" 
+                                    bind:value={consultationState.meetingNotes} 
+                                    placeholder="Contoh: Kami sudah punya wireframe Figma / Butuh integrasi khusus dengan payment gateway..." 
+                                    class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
+                                ></textarea>
+                            </div>
+
+                            <!-- Notice Box -->
+                            <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3">
+                                <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
+                                    <p class="font-semibold text-zinc-700 dark:text-zinc-300">Konfirmasi Pertemuan</p>
+                                    <p>Setelah Anda mengirimkan formulir ini, briefing dan jadwal pilihan Anda akan tersimpan langsung ke sistem kami. Kami akan mengonfirmasi tautan Google Meet melalui email <strong>{consultationState.contactEmail || 'kontak Anda'}</strong>.</p>
+                                </div>
                             </div>
                         </Card.Content>
                     </Card.Root>
@@ -414,7 +477,7 @@
                         <Button 
                             type="submit" 
                             disabled={isSubmitting} 
-                            class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 group py-5 px-6 rounded-xl text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             {#if isSubmitting}
                                 <Spinner size={16} class="text-white mr-1" />

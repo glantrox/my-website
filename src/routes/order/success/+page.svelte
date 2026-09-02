@@ -18,6 +18,8 @@
     $: email = $page.url.searchParams.get("email") || "";
     $: tier = $page.url.searchParams.get("tier") || "basic";
     $: serviceType = $page.url.searchParams.get("service_type") || "web_service";
+    $: consultationDate = $page.url.searchParams.get("date") || "";
+    $: consultationTime = $page.url.searchParams.get("time") || "";
 
     // Format human-readable names
     $: formattedTier = {
@@ -30,6 +32,21 @@
         web_service: "Website & Web Applications",
         mobile_service: "Mobile App Development"
     }[serviceType] || "Web Engineering";
+
+    /** @param {string | null | undefined} d */
+    function formatDateDisplay(d) {
+        if (!d) return "Sesuai kesepakatan";
+        try {
+            return new Date(d).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        } catch {
+            return d;
+        }
+    }
 
     $: accentColorClass = serviceType === "mobile_service" ? "text-emerald-500" : "text-blue-500";
     $: accentBorderClass = serviceType === "mobile_service" ? "border-emerald-500/20 bg-emerald-500/5" : "border-blue-500/20 bg-blue-500/5";
@@ -50,7 +67,7 @@
         Konsultasi Berhasil Terjadwalkan!
     </h1>
     <p class="text-base text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto mb-12">
-        Briefing kebutuhan teknis Anda telah disimpan. Detail undangan kalender dan briefing lengkap telah dikirimkan ke email Anda.
+        Briefing kebutuhan teknis dan jadwal pertemuan Anda telah disimpan langsung ke database. Kami akan segera menghubungi Anda untuk konfirmasi link Google Meet.
     </p>
 
     <!-- Briefing Summary Card -->
@@ -71,7 +88,7 @@
 
             {#if email}
                 <div class="space-y-1">
-                    <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Email Sinkronisasi</span>
+                    <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Email Kontak</span>
                     <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                         <Mail size={14} class="text-zinc-400" />
                         {email}
@@ -80,17 +97,18 @@
             {/if}
 
             <div class="space-y-1">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Jenis Layanan</span>
-                <span class="font-medium text-zinc-700 dark:text-zinc-300">
-                    {formattedService}
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Jenis Layanan & Tier</span>
+                <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <Sparkles size={14} class={accentColorClass} />
+                    {formattedService} ({formattedTier})
                 </span>
             </div>
 
             <div class="space-y-1">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Paket Tier Layanan</span>
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Jadwal Pertemuan</span>
                 <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    <Sparkles size={14} class={accentColorClass} />
-                    {formattedTier}
+                    <Calendar size={14} class="text-blue-500" />
+                    {formatDateDisplay(consultationDate)} {consultationTime ? `(${consultationTime})` : ''}
                 </span>
             </div>
         </div>
@@ -98,7 +116,7 @@
         <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3 mt-4">
             <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
             <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-normal">
-                Pastikan Anda memeriksa folder masuk atau folder spam email Anda untuk menerima undangan link zoom/meet (Cal.com Invite) dan detail agenda pengerjaan. Harap persiapkan wireframe atau dokumentasi sistem saat sesi konsultasi berlangsung.
+                Jadwal konsultasi Anda telah dicatat di sistem kami. Undangan kalender dan tautan Google Meet akan dikirimkan ke email Anda sebelum sesi dimulai. Harap persiapkan brief dokumen atau wireframe jika tersedia.
             </p>
         </div>
     </div>

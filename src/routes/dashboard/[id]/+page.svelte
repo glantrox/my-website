@@ -288,8 +288,8 @@
 <form id="delete-form" method="POST" action="?/deleteProject" use:enhance={handleDeleteEnhance}></form>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-	<!-- Sleek Navigation Header -->
-	<div class="flex items-center justify-between pb-6 mb-8 border-b border-zinc-200 dark:border-zinc-800">
+	<!-- Sleek Sticky Navigation Header -->
+	<div class="sticky top-14 md:top-0 z-30 flex items-center justify-between py-4 mb-8 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md transition-colors">
 		<a
 			href="/dashboard"
 			class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"

@@ -114,6 +114,15 @@ export class ConsultationState {
   get termsAck() { return this.getVal('termsAck', false); }
   set termsAck(v) { this.setVal('termsAck', v); }
 
+  get consultationDate() { return this.getVal('consultationDate', ''); }
+  set consultationDate(v) { this.setVal('consultationDate', v); }
+
+  get consultationTime() { return this.getVal('consultationTime', '10:00 - 11:00 WIB'); }
+  set consultationTime(v) { this.setVal('consultationTime', v); }
+
+  get meetingNotes() { return this.getVal('meetingNotes', ''); }
+  set meetingNotes(v) { this.setVal('meetingNotes', v); }
+
   // Derived properties
   get currentFeaturesPreset(): string[] {
     const service = this.serviceType;
@@ -125,10 +134,6 @@ export class ConsultationState {
 
   get briefingText(): string {
     return `Briefing Awal:\n- Perusahaan: ${this.companyName} (${this.industry})\n- Proyek: ${this.projectTitle} (Tier: ${this.projectTier})\n- Tujuan: ${this.coreObjective}\n- Fitur Utama: ${this.keyFeatures.join(", ")}`;
-  }
-
-  get calIframeUrl(): string {
-    return `https://cal.com/hamasazeezan/15min?name=${encodeURIComponent(this.contactName)}&email=${encodeURIComponent(this.contactEmail)}&notes=${encodeURIComponent(this.briefingText)}`;
   }
 
   // Mutator Actions
@@ -201,5 +206,8 @@ export class ConsultationState {
     setCookie('projectTier', val.projectTier || 'basic');
     setCookie('coreObjective', val.coreObjective || '');
     setCookie('keyFeatures', JSON.stringify(val.keyFeatures || []));
+    setCookie('consultationDate', val.consultationDate || '');
+    setCookie('consultationTime', val.consultationTime || '');
+    setCookie('meetingNotes', val.meetingNotes || '');
   }
 }

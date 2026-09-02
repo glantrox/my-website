@@ -21,6 +21,9 @@ export async function load({ url, cookies }) {
   form.data.serviceType = serviceType === 'mobile_service' ? 'mobile_service' : 'web_service';
   form.data.projectTier = ['basic', 'intermediate', 'industrial'].includes(tier) ? tier : 'basic';
   form.data.coreObjective = cookies.get('coreObjective') || '';
+  form.data.consultationDate = cookies.get('consultationDate') || '';
+  form.data.consultationTime = cookies.get('consultationTime') || '10:00 - 11:00 WIB';
+  form.data.meetingNotes = cookies.get('meetingNotes') || '';
   
   const savedFeatures = cookies.get('keyFeatures');
   try {
@@ -77,13 +80,16 @@ export const actions = {
       'serviceType', 
       'projectTier', 
       'coreObjective', 
-      'keyFeatures'
+      'keyFeatures',
+      'consultationDate',
+      'consultationTime',
+      'meetingNotes'
     ];
     draftCookies.forEach(name => cookies.delete(name, { path: '/' }));
 
     // Redirect to success page
     const formData = /** @type {any} */(form.data);
-    throw redirect(303, `/order/success?name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}`);
+    throw redirect(303, `/order/success?name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}&date=${encodeURIComponent(formData.consultationDate || '')}&time=${encodeURIComponent(formData.consultationTime || '')}`);
   }
 };
 

@@ -43,6 +43,8 @@ export interface Consultation {
   archiveReason?: string;
   archiveDate?: string;
   consultationDate?: string;
+  consultationTime?: string;
+  meetingNotes?: string;
   googleMeetLink?: string;
   meetingId?: string;
   proposalUrl?: string;

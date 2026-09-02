@@ -15,7 +15,8 @@
 		Calendar,
 		ArrowRight,
 		Rocket,
-		ChevronRight
+		ChevronRight,
+		Coins
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -334,132 +335,15 @@
 			</div>
 		</div>
 
-		<!-- Assets & Link Deliverable -->
+		<!-- Right Column: Finance, Assets & Deliverables -->
 		<div class="space-y-6">
-			<h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-				Aset & Link Deliverable
-			</h3>
-
-			<div class="border border-zinc-100 dark:border-zinc-800/80 p-6 rounded-xl bg-zinc-50/20 dark:bg-zinc-900/10 space-y-6">
-				
-				<!-- Links List -->
-				<div class="space-y-3">
-					{#if project.stagingUrl}
-						<a
-							href={project.stagingUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
-						>
-							<span class="flex items-center gap-2">
-								<Rocket class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-								Server Staging
-							</span>
-							<ExternalLink class="w-3.5 h-3.5 opacity-60" />
-						</a>
-					{/if}
-
-					{#if project.proposalUrl}
-						<a
-							href={project.proposalUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
-						>
-							<span class="flex items-center gap-2">
-								<FileText class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-								Dokumen Proposal
-							</span>
-							<ExternalLink class="w-3.5 h-3.5 opacity-60" />
-						</a>
-					{/if}
-
-					{#if project.repoLink}
-						<a
-							href={project.repoLink}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
-						>
-							<span class="flex items-center gap-2">
-								<Github class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-								Source Code (Git)
-							</span>
-							<ExternalLink class="w-3.5 h-3.5 opacity-60" />
-						</a>
-					{/if}
-
-					{#if !project.stagingUrl && !project.proposalUrl && !project.repoLink}
-						<div class="text-center py-6 text-zinc-400 dark:text-zinc-500 text-xs font-light italic">
-							Link deliverable belum diterbitkan.
-						</div>
-					{/if}
-				</div>
-
-				<!-- Secure credentials vault -->
-				{#if project.stagingUrl}
-					<div class="pt-4 border-t border-zinc-105 dark:border-zinc-800/80 space-y-3">
-						<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 flex items-center gap-1.5">
-							<Lock size={12} class="text-zinc-400 dark:text-zinc-500" /> Staging Secure Access
-						</span>
-						<div class="bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-lg p-4 text-xs space-y-2 relative">
-							<button
-								onclick={() => revealCredentials = !revealCredentials}
-								class="absolute top-3.5 right-3.5 text-zinc-400 hover:text-zinc-700 transition-colors"
-								title={revealCredentials ? "Hide credentials" : "Show credentials"}
-							>
-								{#if revealCredentials}
-									<EyeOff size={13} />
-								{:else}
-									<Eye size={13} />
-								{/if}
-							</button>
-
-							<div>
-								<span class="text-[9px] text-zinc-500 dark:text-zinc-500 block">Staging User</span>
-								<span class="text-zinc-750 dark:text-zinc-200 select-all font-mono">admin@hamasazizan.com</span>
-							</div>
-							<div>
-								<span class="text-[9px] text-zinc-500 dark:text-zinc-500 block">Password</span>
-								<span class="text-zinc-750 dark:text-zinc-200 select-all font-mono">
-									{revealCredentials ? "ha_agency_staging_2026!" : "••••••••••••••••"}
-								</span>
-							</div>
-						</div>
-					</div>
-				{/if}
-			</div>
-		</div>
-	</section>
-
-	<hr class="border-zinc-100 dark:border-zinc-800/80" />
-
-	<!-- ==========================================
-	    FINANCIALS, LOGS, TIM PARTNER
-	    ========================================== -->
-	<section class="grid grid-cols-1 md:grid-cols-3 gap-12">
-		
-		<!-- Financial & Invoice status -->
-		<div class="space-y-4 text-left">
-			<h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-				Keuangan & Invoice
-			</h3>
-
-			<div class="border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/20 dark:bg-zinc-900/10 p-5 rounded-xl space-y-3.5 text-xs">
-				<div class="flex justify-between items-center py-1.5 border-b border-zinc-100 dark:border-zinc-800/50">
-					<span class="text-zinc-500 dark:text-zinc-400">Nilai Kontrak</span>
-					<span class="text-zinc-800 dark:text-zinc-200 font-medium">
-						{project.quotedPrice ? `Rp ${project.quotedPrice.toLocaleString('id-ID')}` : '—'}
-					</span>
-				</div>
-
-				<div class="flex justify-between items-center py-1.5 border-b border-zinc-100 dark:border-zinc-800/50">
-					<span class="text-zinc-500 dark:text-zinc-400">Ketentuan DP</span>
-					<span class="text-zinc-800 dark:text-zinc-200 font-medium">{project.downPaymentRequirement || '30% DP'}</span>
-				</div>
-
-				<div class="flex justify-between items-center py-1.5">
-					<span class="text-zinc-500 dark:text-zinc-400">Status Bayar</span>
+			<!-- Keuangan & Invoice (Top of Right Column) -->
+			<div class="space-y-3 text-left">
+				<div class="flex items-center justify-between">
+					<h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
+						<Coins class="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
+						Keuangan & Invoice
+					</h3>
 					<span class="px-2 py-0.5 rounded text-[8px] font-bold uppercase border
 						{project.paymentStatus === 'settled' 
 							? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
@@ -469,9 +353,135 @@
 						{project.paymentStatus === 'settled' ? 'Lunas' : project.paymentStatus === 'dp_paid' ? 'DP Dibayar' : 'Belum Lunas'}
 					</span>
 				</div>
+
+				<div class="border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/20 dark:bg-zinc-900/10 p-5 rounded-xl space-y-4 text-xs">
+					<div>
+						<span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Nilai Kontrak</span>
+						<div class="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+							{project.quotedPrice ? `Rp ${Number(project.quotedPrice).toLocaleString('id-ID')}` : 'Menunggu Penawaran'}
+						</div>
+					</div>
+
+					<div class="flex justify-between items-center py-2 border-t border-zinc-100 dark:border-zinc-800/50">
+						<span class="text-zinc-500 dark:text-zinc-400 font-medium">Ketentuan DP</span>
+						<span class="text-zinc-800 dark:text-zinc-200 font-semibold">{project.downPaymentRequirement || '30% DP'}</span>
+					</div>
+
+					<div class="flex justify-between items-center py-1 border-t border-zinc-100 dark:border-zinc-800/50">
+						<span class="text-zinc-500 dark:text-zinc-400 font-medium">Status Bayar</span>
+						<span class="text-zinc-800 dark:text-zinc-200 font-semibold">
+							{project.paymentStatus === 'settled' ? 'Lunas (100%)' : project.paymentStatus === 'dp_paid' ? 'DP Terbayar' : 'Belum Lunas'}
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Assets & Link Deliverable -->
+			<div class="space-y-3 text-left">
+				<h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+					Aset & Link Deliverable
+				</h3>
+
+				<div class="border border-zinc-100 dark:border-zinc-800/80 p-6 rounded-xl bg-zinc-50/20 dark:bg-zinc-900/10 space-y-6">
+					
+					<!-- Links List -->
+					<div class="space-y-3">
+						{#if project.stagingUrl}
+							<a
+								href={project.stagingUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
+							>
+								<span class="flex items-center gap-2">
+									<Rocket class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+									Server Staging
+								</span>
+								<ExternalLink class="w-3.5 h-3.5 opacity-60" />
+							</a>
+						{/if}
+
+						{#if project.proposalUrl}
+							<a
+								href={project.proposalUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
+							>
+								<span class="flex items-center gap-2">
+									<FileText class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+									Dokumen Proposal
+								</span>
+								<ExternalLink class="w-3.5 h-3.5 opacity-60" />
+							</a>
+						{/if}
+
+						{#if project.repoLink}
+							<a
+								href={project.repoLink}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg transition-all text-xs font-medium"
+							>
+								<span class="flex items-center gap-2">
+									<Github class="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+									Source Code (Git)
+								</span>
+								<ExternalLink class="w-3.5 h-3.5 opacity-60" />
+							</a>
+						{/if}
+
+						{#if !project.stagingUrl && !project.proposalUrl && !project.repoLink}
+							<div class="text-center py-6 text-zinc-400 dark:text-zinc-500 text-xs font-light italic">
+								Link deliverable belum diterbitkan.
+							</div>
+						{/if}
+					</div>
+
+					<!-- Secure credentials vault -->
+					{#if project.stagingUrl}
+						<div class="pt-4 border-t border-zinc-105 dark:border-zinc-800/80 space-y-3">
+							<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 flex items-center gap-1.5">
+								<Lock size={12} class="text-zinc-400 dark:text-zinc-500" /> Staging Secure Access
+							</span>
+							<div class="bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-lg p-4 text-xs space-y-2 relative">
+								<button
+									onclick={() => revealCredentials = !revealCredentials}
+									class="absolute top-3.5 right-3.5 text-zinc-400 hover:text-zinc-700 transition-colors"
+									title={revealCredentials ? "Hide credentials" : "Show credentials"}
+								>
+									{#if revealCredentials}
+										<EyeOff size={13} />
+									{:else}
+										<Eye size={13} />
+									{/if}
+								</button>
+
+								<div>
+									<span class="text-[9px] text-zinc-500 dark:text-zinc-500 block">Staging User</span>
+									<span class="text-zinc-750 dark:text-zinc-200 select-all font-mono">admin@hamasazizan.com</span>
+								</div>
+								<div>
+									<span class="text-[9px] text-zinc-500 dark:text-zinc-500 block">Password</span>
+									<span class="text-zinc-750 dark:text-zinc-200 select-all font-mono">
+										{revealCredentials ? "ha_agency_staging_2026!" : "••••••••••••••••"}
+									</span>
+								</div>
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
+	</section>
 
+	<hr class="border-zinc-100 dark:border-zinc-800/80" />
+
+	<!-- ==========================================
+	    LOGS & TIM PARTNER
+	    ========================================== -->
+	<section class="grid grid-cols-1 md:grid-cols-2 gap-12">
+		
 		<!-- Activity log notes -->
 		<div class="space-y-4 text-left">
 			<h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">

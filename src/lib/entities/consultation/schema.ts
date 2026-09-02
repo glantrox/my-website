@@ -21,5 +21,10 @@ export const intakeSchema = z.object({
   infrastructureAck: z.boolean(),
   
   // Terms of Service acknowledgement
-  termsAck: z.boolean()
+  termsAck: z.boolean(),
+
+  // Meeting Schedule
+  consultationDate: z.string().min(1, "Pilih tanggal pertemuan konsultasi"),
+  consultationTime: z.string().optional().default(''),
+  meetingNotes: z.string().optional().default('')
 });

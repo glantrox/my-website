@@ -273,9 +273,9 @@
 <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-10 selection:bg-zinc-200 dark:selection:bg-zinc-800">
   
   <!-- ==========================================
-      HEADER & TABS
+      HEADER & TABS (STICKY)
       ========================================== -->
-  <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+  <header class="sticky top-14 md:top-0 z-30 flex flex-col md:flex-row md:items-end justify-between gap-6 -mx-6 md:-mx-10 px-6 md:px-10 py-5 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md transition-colors">
     <div class="space-y-1">
       <h1 class="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
         Project Management
@@ -310,16 +310,6 @@
           {/if}
         </button>
       </div>
-
-      {#if activeTab === 'projects'}
-        <button
-          onclick={openAddModal}
-          class="inline-flex items-center justify-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-bold text-xs py-2 px-4 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm"
-        >
-          <Plus size={14} strokeWidth={2.5} />
-          Add Project
-        </button>
-      {/if}
     </div>
   </header>
 
@@ -370,15 +360,24 @@
       </div>
     </section>
 
-    <!-- Search Bar -->
-    <div class="relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-      <input
-        type="text"
-        bind:value={searchQuery}
-        placeholder="Search projects by title, tagline, or role..."
-        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/20 text-sm text-zinc-900 dark:text-zinc-105 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 focus:bg-white dark:focus:bg-zinc-900/40 focus:ring-1 focus:ring-zinc-400 transition-colors"
-      />
+    <!-- Search Bar & Add Project Action -->
+    <div class="flex items-center gap-3">
+      <div class="relative flex-1">
+        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="Search projects by title, tagline, or role..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/20 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 focus:bg-white dark:focus:bg-zinc-900/40 focus:ring-1 focus:ring-zinc-400 transition-colors"
+        />
+      </div>
+      <button
+        onclick={openAddModal}
+        class="inline-flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-sm shrink-0 cursor-pointer"
+      >
+        <Plus size={14} strokeWidth={2.5} />
+        Add Project
+      </button>
     </div>
 
     <!-- Component-driven Projects Bento Grid -->
