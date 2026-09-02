@@ -108,15 +108,10 @@
 	    BREADCRUMB & HEADER
 	    ========================================== -->
 	<header class="space-y-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-8">
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-				<span>Client Portal</span>
-				<span class="text-zinc-300 dark:text-zinc-700">/</span>
-				<span>Project Status</span>
-			</div>
-			<div class="text-[9px] font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">
-				Live Update Active
-			</div>
+		<div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
+			<span>Client Portal</span>
+			<span class="text-zinc-300 dark:text-zinc-700">/</span>
+			<span>Project Status</span>
 		</div>
 
 		<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-2">
@@ -145,7 +140,7 @@
 	    ACTION REQUIRED BLOCK
 	    ========================================== -->
 	{#if isClientBlocker}
-		<section class="p-6 rounded-xl border-l-2 border-amber-500 bg-amber-500/[0.02] border-y border-r border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-in fade-in duration-300">
+		<section class="p-6 rounded-2xl bg-amber-500/5 dark:bg-amber-500/[0.03] space-y-4 animate-in fade-in duration-300">
 			<div class="flex items-start gap-3">
 				<div class="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg shrink-0 mt-0.5">
 					<AlertTriangle size={16} />
