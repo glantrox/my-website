@@ -171,7 +171,7 @@
                                         id="companyNameInput" 
                                         name="companyName" 
                                         bind:value={consultationState.companyName} 
-                                        placeholder="e.g. TernakAja Group" 
+                                        placeholder="e.g. Jaya Group" 
                                     />
                                     {#if consultationState.errors.companyName || $errors.companyName}
                                         <p class="text-xs text-destructive mt-1">{consultationState.errors.companyName || $errors.companyName}</p>
@@ -260,7 +260,7 @@
                                     id="projectTitleInput" 
                                     name="projectTitle" 
                                     bind:value={consultationState.projectTitle} 
-                                    placeholder="e.g. Redesign Web TernakAja / Mobile App AttendMe" 
+                                    placeholder="e.g. Redesign Web Venue / Mobile App AttendMe" 
                                 />
                                 {#if consultationState.errors.projectTitle || $errors.projectTitle}
                                     <p class="text-xs text-destructive mt-1">{consultationState.errors.projectTitle || $errors.projectTitle}</p>

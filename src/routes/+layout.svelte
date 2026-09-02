@@ -75,6 +75,7 @@
 	// Derive final draft status from server-side and client-side checks
 	const hasDraft = $derived(data.hasDraft || hasDraftCookie);
 
+	/** @type {Array<{ title?: string, items: Array<{ href: string, label: string, isTracking?: boolean }> }>} */
 	const sidebarSections = [
 		{
 			items: [
@@ -94,7 +95,8 @@
 			title: "Services",
 			items: [
 				{ href: "/mobile-app-service", label: "Mobile App" },
-				{ href: "/website-service", label: "Website" }
+				{ href: "/website-service", label: "Website" },
+				{ href: "/status", label: "Track Project" }
 			]
 		},
 		{

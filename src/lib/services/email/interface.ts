@@ -1,4 +1,16 @@
 export interface IEmailService {
+  sendOrderSubmissionEmail(
+    to: string,
+    clientName: string,
+    projectTitle: string,
+    serviceType: string,
+    projectTier: string,
+    consultationDate: string,
+    consultationTime: string,
+    projectId: string,
+    trackingUrl: string
+  ): Promise<void>;
+
   sendMeetingConfirmation(
     to: string,
     clientName: string,

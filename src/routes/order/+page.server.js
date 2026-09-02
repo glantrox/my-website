@@ -3,6 +3,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { intakeSchema } from './schema.js';
 import { dbService } from '$lib/services/db/firestore';
+import { emailService } from '$lib/services/email/nodemailer';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, cookies }) {
@@ -37,7 +38,7 @@ export async function load({ url, cookies }) {
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request, cookies, url }) => {
     const form = /** @type {any} */(await superValidate(request, zod(/** @type {any} */(intakeSchema))));
 
     if (!form.valid) {
@@ -59,14 +60,35 @@ export const actions = {
       return fail(400, { form: formWithErrors });
     }
 
+    let consultationId = '';
     try {
-      await dbService.createConsultation({
+      consultationId = await dbService.createConsultation({
         ...form.data,
         status: 'pending'
       });
     } catch (e) {
       console.error('Error saving consultation request:', e);
       return fail(500, { form, error: 'Database write failed' });
+    }
+
+    // Send project submission confirmation email with tracking ID & URL
+    if (form.data.contactEmail && consultationId) {
+      try {
+        const trackingUrl = `${url.origin}/status/${consultationId}`;
+        await emailService.sendOrderSubmissionEmail(
+          form.data.contactEmail,
+          form.data.contactName,
+          form.data.projectTitle || 'Project Specification',
+          form.data.serviceType,
+          form.data.projectTier,
+          form.data.consultationDate || '',
+          form.data.consultationTime || '',
+          consultationId,
+          trackingUrl
+        );
+      } catch (emailErr) {
+        console.error('Failed to send order confirmation email:', emailErr);
+      }
     }
 
     // Clear draft cookies on successful submission
@@ -87,9 +109,9 @@ export const actions = {
     ];
     draftCookies.forEach(name => cookies.delete(name, { path: '/' }));
 
-    // Redirect to success page
+    // Redirect to success page with Project ID
     const formData = /** @type {any} */(form.data);
-    throw redirect(303, `/order/success?name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}&date=${encodeURIComponent(formData.consultationDate || '')}&time=${encodeURIComponent(formData.consultationTime || '')}`);
+    throw redirect(303, `/order/success?id=${encodeURIComponent(consultationId)}&name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&title=${encodeURIComponent(formData.projectTitle || '')}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}&date=${encodeURIComponent(formData.consultationDate || '')}&time=${encodeURIComponent(formData.consultationTime || '')}`);
   }
 };
 
