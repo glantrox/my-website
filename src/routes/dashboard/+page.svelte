@@ -28,7 +28,8 @@
     Trash2,
     X,
     AlertTriangle,
-    Image as ImageIcon
+    Image as ImageIcon,
+    FileCheck
   } from 'lucide-svelte';
 
   // 1. Zod Validation Schema
@@ -585,6 +586,13 @@
                     {#if lead.projectTier}
                       <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {getTierColor(lead.projectTier)}">
                         {lead.projectTier}
+                      </span>
+                    {/if}
+
+                    {#if lead.paymentProofUrl}
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <FileCheck class="w-3 h-3" />
+                        Bukti Bayar
                       </span>
                     {/if}
                   </div>

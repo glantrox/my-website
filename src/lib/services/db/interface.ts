@@ -60,6 +60,11 @@ export interface Consultation {
   productionUrl?: string;
   codebaseTransferUrl?: string;
   warrantyEndDate?: string;
+  paymentProofUrl?: string;
+  paymentProofUploadedAt?: string;
+  paymentProofNotes?: string;
+  paymentProofBank?: string;
+  paymentProofSenderName?: string;
 }
 
 export interface Meeting {
@@ -88,4 +93,5 @@ export interface IDatabaseService {
   deleteProject(id: string): Promise<void>;
   
   createMeeting(data: Omit<Meeting, 'id'>): Promise<string>;
+  uploadPaymentProof(consultationId: string, fileBuffer: Buffer | Uint8Array, fileName: string, contentType: string): Promise<string>;
 }

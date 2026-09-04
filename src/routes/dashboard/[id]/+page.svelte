@@ -23,7 +23,12 @@
 		FolderArchive,
 		ExternalLink,
 		Github,
-		Share2
+		Share2,
+		CreditCard,
+		Maximize2,
+		X,
+		FileCheck,
+		Check
 	} from 'lucide-svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -44,6 +49,8 @@
 	let isSendingHandover = $state(false);
 	let isRestoring = $state(false);
 	let isDeleting = $state(false);
+	let isVerifyingPayment = $state(false);
+	let showProofLightbox = $state(false);
 
 	const { form, enhance: superEnhance } = superForm(data.form, {
 		onSubmit: () => {
@@ -155,6 +162,20 @@
 				await update();
 			} else {
 				toast.update(toastId, { type: 'error', message: 'Gagal menghapus lead.', duration: 4000 });
+			}
+		};
+	}
+
+	function handleVerifyPaymentEnhance() {
+		isVerifyingPayment = true;
+		const toastId = toast.loading('Memperbarui status pembayaran...');
+		return async ({ result, update }: any) => {
+			isVerifyingPayment = false;
+			await update();
+			if (result.type === 'redirect' || result.type === 'success') {
+				toast.update(toastId, { type: 'success', message: 'Status pembayaran berhasil diverifikasi!', duration: 3000 });
+			} else {
+				toast.update(toastId, { type: 'error', message: 'Gagal memverifikasi pembayaran.', duration: 4000 });
 			}
 		};
 	}
@@ -278,7 +299,6 @@
 	<title>{project.projectTitle || 'Detail Proyek'} — Dashboard</title>
 </svelte:head>
 
-<!-- Separate invisible forms for SvelteKit named actions to avoid form nesting -->
 <form id="schedule-form" method="POST" action="?/scheduleMeeting" use:enhance={handleScheduleEnhance}></form>
 <form id="proposal-form" method="POST" action="?/sendProposal" use:enhance={handleProposalEnhance}></form>
 <form id="progress-form" method="POST" action="?/pushProgressUpdate" use:enhance={handleProgressEnhance}></form>
@@ -286,6 +306,12 @@
 <form id="handover-form" method="POST" action="?/sendHandover" use:enhance={handleHandoverEnhance}></form>
 <form id="restore-form" method="POST" action="?/restoreLead" use:enhance={handleRestoreEnhance}></form>
 <form id="delete-form" method="POST" action="?/deleteProject" use:enhance={handleDeleteEnhance}></form>
+<form id="verify-payment-dp-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentStatus" value="dp_paid" />
+</form>
+<form id="verify-payment-settled-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentStatus" value="settled" />
+</form>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 	<!-- Sleek Sticky Navigation Header -->
@@ -507,6 +533,119 @@
 								</select>
 							</div>
 						</div>
+					</div>
+
+					<!-- Bukti Pembayaran Klien Section -->
+					<div class="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-3">
+						<div class="flex items-center justify-between">
+							<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
+								<FileCheck class="w-3.5 h-3.5 text-zinc-400" />
+								Bukti Transfer dari Klien
+							</span>
+							{#if project.paymentProofUrl}
+								<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase
+									{project.paymentStatus === 'settled' || project.paymentStatus === 'dp_paid'
+										? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+										: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}">
+									{project.paymentStatus === 'settled' || project.paymentStatus === 'dp_paid' ? 'Terverifikasi' : 'Menunggu Verifikasi'}
+								</span>
+							{/if}
+						</div>
+
+						{#if project.paymentProofUrl}
+							<div class="p-4 bg-zinc-50/50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4">
+								<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+									<!-- Proof Thumbnail with Zoom -->
+									<div class="relative group">
+										{#if project.paymentProofUrl.startsWith('data:application/pdf') || project.paymentProofUrl.endsWith('.pdf')}
+											<div class="w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center text-zinc-500 shrink-0">
+												<FileText size={28} />
+												<span class="text-[9px] font-bold uppercase mt-1">PDF</span>
+											</div>
+										{:else}
+											<button
+												type="button"
+												onclick={() => (showProofLightbox = true)}
+												class="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 relative cursor-pointer bg-zinc-100 dark:bg-zinc-800 block"
+												title="Klik untuk memperbesar bukti transfer"
+											>
+												<img
+													src={project.paymentProofUrl}
+													alt="Bukti Transfer Klien"
+													class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+												/>
+												<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+													<Maximize2 size={16} />
+												</div>
+											</button>
+										{/if}
+									</div>
+
+									<!-- Metadata & Sender info -->
+									<div class="space-y-1.5 flex-1 min-w-0 text-xs">
+										<div class="flex items-center gap-2">
+											<span class="font-bold text-zinc-900 dark:text-white">
+												{project.paymentProofBank || 'Bank Transfer'}
+											</span>
+											{#if project.paymentProofSenderName}
+												<span class="text-zinc-400">·</span>
+												<span class="text-zinc-600 dark:text-zinc-300 font-medium">{project.paymentProofSenderName}</span>
+											{/if}
+										</div>
+
+										<p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+											Diunggah pada: <span class="text-zinc-700 dark:text-zinc-300 font-medium">{formatMeetingDateTime(project.paymentProofUploadedAt)}</span>
+										</p>
+
+										{#if project.paymentProofNotes}
+											<p class="text-[11px] text-zinc-600 dark:text-zinc-300 italic bg-white dark:bg-zinc-900 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+												"{project.paymentProofNotes}"
+											</p>
+										{/if}
+
+										{#if project.paymentProofUrl.startsWith('http')}
+											<a
+												href={project.paymentProofUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
+											>
+												<ExternalLink size={12} />
+												Buka file di tab baru
+											</a>
+										{/if}
+									</div>
+								</div>
+
+								<!-- Quick Verification Buttons -->
+								<div class="pt-3 border-t border-zinc-200/60 dark:border-zinc-800 flex flex-wrap items-center gap-2.5">
+									<button
+										type="submit"
+										form="verify-payment-dp-form"
+										disabled={isVerifyingPayment || project.paymentStatus === 'dp_paid'}
+										class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+									>
+										<Check size={13} />
+										Setujui & Tandai DP Dibayar
+									</button>
+
+									<button
+										type="submit"
+										form="verify-payment-settled-form"
+										disabled={isVerifyingPayment || project.paymentStatus === 'settled'}
+										class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+									>
+										<CheckCircle2 size={13} />
+										Setujui & Tandai Lunas (100%)
+									</button>
+								</div>
+							</div>
+						{:else}
+							<div class="p-3.5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+								<CreditCard size={14} class="shrink-0" />
+								<span>Klien belum mengunggah bukti transfer melalui portal status proyek.</span>
+							</div>
+						{/if}
 					</div>
 				</div>
 
@@ -1281,6 +1420,30 @@
 					{/if}
 				</button>
 			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- ==========================================
+    MODAL: LIGHTBOX ZOOM BUKTI PEMBAYARAN
+    ========================================== -->
+{#if showProofLightbox && project.paymentProofUrl}
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" transition:fade={{ duration: 150 }}>
+		<button
+			type="button"
+			onclick={() => (showProofLightbox = false)}
+			class="absolute top-5 right-5 text-white/80 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all z-20 cursor-pointer"
+			aria-label="Tutup"
+		>
+			<X size={20} />
+		</button>
+
+		<div class="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl">
+			<img
+				src={project.paymentProofUrl}
+				alt="Bukti Transfer Klien"
+				class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+			/>
 		</div>
 	</div>
 {/if}

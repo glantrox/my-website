@@ -314,5 +314,26 @@ export const actions = {
     }
 
     throw redirect(303, '/dashboard');
+  },
+
+  verifyPayment: async ({ request, params, locals }) => {
+    if (!locals.isAdmin) {
+      throw error(403, 'Unauthorized');
+    }
+
+    const data = await request.formData();
+    const paymentStatus = data.get('paymentStatus')?.toString() || 'dp_paid';
+
+    try {
+      await dbService.updateConsultation(params.id, {
+        paymentStatus,
+        milestonePaymentVerified: true
+      });
+    } catch (e) {
+      console.error('Error verifying payment:', e);
+      return fail(500, { error: 'Gagal memperbarui status pembayaran.' });
+    }
+
+    throw redirect(303, `/dashboard/${params.id}?success_payment=true`);
   }
 };

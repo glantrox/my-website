@@ -13,6 +13,7 @@ import {
   updateDoc, 
   deleteDoc 
 } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { IDatabaseService, Project, Consultation, Meeting } from './interface';
 
 const firebaseConfig = {
@@ -163,6 +164,22 @@ export class FirestoreDatabaseService implements IDatabaseService {
       createdAt: data.createdAt || new Date().toISOString()
     });
     return docRef.id;
+  }
+
+  async uploadPaymentProof(consultationId: string, fileBuffer: Buffer | Uint8Array, fileName: string, contentType: string): Promise<string> {
+    try {
+      const storage = getStorage(app);
+      const ext = fileName.split('.').pop() || 'jpg';
+      const storagePath = `payment_proofs/${consultationId}_${Date.now()}.${ext}`;
+      const storageRef = ref(storage, storagePath);
+      await uploadBytes(storageRef, fileBuffer, { contentType });
+      const downloadUrl = await getDownloadURL(storageRef);
+      return downloadUrl;
+    } catch (e) {
+      console.warn('Firebase Storage upload error, falling back to base64 data URL:', e);
+      const base64 = Buffer.from(fileBuffer).toString('base64');
+      return `data:${contentType};base64,${base64}`;
+    }
   }
 }
 

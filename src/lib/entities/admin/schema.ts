@@ -24,5 +24,10 @@ export const adminUpdateSchema = z.object({
   productionUrl: z.string().optional().default(''),
   codebaseTransferUrl: z.string().optional().default(''),
   archiveReason: z.string().optional().default(''),
-  archiveDate: z.string().optional().default('')
+  archiveDate: z.string().optional().default(''),
+  paymentProofUrl: z.string().optional().default(''),
+  paymentProofUploadedAt: z.string().optional().default(''),
+  paymentProofNotes: z.string().optional().default(''),
+  paymentProofBank: z.string().optional().default(''),
+  paymentProofSenderName: z.string().optional().default('')
 });
