@@ -234,7 +234,6 @@
                 </span>
             </div>
         </div>
-
         <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3 mt-4">
             <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
             <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-normal">
@@ -242,6 +241,4 @@
             </p>
         </div>
     </div>
-
-   
 </div>

@@ -3,48 +3,82 @@ import { setCookie } from '$lib/shared/cookies';
 export const featurePresets = {
   web_service: {
     basic: [
-      "Landing Page (1-3 Halaman)",
-      "Company Profile Statis",
-      "Integrasi Blog / CMS (Sederhana)",
-      "Desain Responsif (Mobile Friendly)",
-      "SEO Setup Dasar & Google Analytics"
+      "Landing Page Berkinerja Tinggi (1-3 Halaman)",
+      "Company Profile Statis Modern (3-5 Halaman)",
+      "Desain Responsif & Mobile-First",
+      "Formulir Kontak & Integrasi WhatsApp Otomatis",
+      "Integrasi Blog / CMS Sederhana",
+      "Optimasi SEO On-Page Dasar & Meta Tags",
+      "Integrasi Google Analytics & Search Console",
+      "Galeri Foto / Portofolio Produk Statis",
+      "Setup Keamanan SSL & Optimasi Kecepatan Loading (Lighthouse 90+)",
+      "Bantuan Setup Domain & DNS Hosting"
     ],
     intermediate: [
-      "E-commerce / Toko Online Lokal",
-      "Portal Berita / Blog Kompleks",
-      "Dashboard Admin Kustom (Multi-role)",
-      "Integrasi Database SQL/NoSQL",
-      "Sistem Autentikasi User (Auth)"
+      "E-commerce / Toko Online Lokal (Katalog, Keranjang, Checkout)",
+      "Portal Berita / Media Blog Multi-Kategori & Tag",
+      "Dashboard Admin Kustom (Multi-role & Manajemen Data)",
+      "Sistem Autentikasi User (Login, Register, Reset Password)",
+      "Integrasi Payment Gateway Otomatis (Midtrans / Xendit)",
+      "Integrasi Database SQL / NoSQL (PostgreSQL / Supabase / Firestore)",
+      "Integrasi Cek Ongkir Otomatis (RajaOngkir / Biteship)",
+      "Integrasi Notifikasi Email Transaksional (Nodemailer / Resend)",
+      "Role-Based Access Control (RBAC) & Manajemen Izin Pengguna",
+      "RESTful API & Webhook Endpoints Kustom",
+      "Fitur Pencarian & Filter Produk / Data Interaktif",
+      "Dark Mode & UI Component Library Kustom"
     ],
     industrial: [
-      "B2B SaaS Dashboard",
-      "Platform FinTech / Pembayaran Kompleks",
-      "Integrasi Multi-API Lanjutan",
-      "Dashboard Real-time Telemetri & IoT",
-      "Infrastruktur Cloud Autoscaling (AWS/GCP)"
+      "B2B SaaS Dashboard Multi-Tenant",
+      "Platform FinTech / Pembayaran Multi-Channel Kompleks",
+      "Real-time Analytics Dashboard & WebSocket Telemetri",
+      "Integrasi Multi-API Pihak Ketiga Lanjutan (ERP / CRM / SAP)",
+      "Sistem Audit Log, Keamanan Berlapis & Enkripsi Data AES",
+      "Otomasi Ekspor / Impor Data Skala Besar (Excel, CSV, PDF)",
+      "Infrastruktur Cloud Autoscaling (AWS / GCP / Cloudflare)",
+      "Arsitektur Microservices & Background Job Queues (Redis / BullMQ)",
+      "Enterprise Single Sign-On (SSO) & OAuth2 / SAML",
+      "Database Sharding, Caching Layer & Read Replicas",
+      "Automated CI/CD Pipeline & End-to-End Testing",
+      "Monitoring Server 24/7 & Disaster Recovery Plan"
     ]
   },
   mobile_service: {
     basic: [
-      "Aplikasi MVP (Minimum Viable Product)",
-      "Fungsionalitas Sederhana & UI Standar",
-      "Integrasi Database Basic (Firebase/Supabase)",
-      "Offline Caching Sederhana",
-      "Notifikasi Push Dasar"
+      "Aplikasi MVP (Minimum Viable Product) Cross-Platform",
+      "Fungsionalitas Inti & UI/UX Bersih Standar",
+      "Integrasi Database Real-time (Firebase / Supabase)",
+      "Sistem Login & Registrasi Dasar (Email & Google Sign-In)",
+      "Offline Caching Sederhana (Local Storage / SQLite)",
+      "Push Notifications Dasar (Firebase Cloud Messaging)",
+      "Navigasi Tab Bar & Drawer Menu Responsif",
+      "Formulir Input Data & Validasi Interaktif",
+      "Splash Screen Kustom & App Icon Siap Rilis",
+      "Panduan & Bantuan Publikasi ke Play Store / App Store"
     ],
     intermediate: [
-      "Aplikasi Bisnis Kustom",
-      "Integrasi Payment Gateway (Midtrans/Xendit)",
-      "Fitur Geolokasi & Peta (Maps)",
-      "Real-time Push Notifications",
-      "Arsitektur Dedicated Backend Server"
+      "Aplikasi Bisnis Kustom & E-Commerce Mobile",
+      "Integrasi Payment Gateway In-App (Midtrans / Xendit Snap)",
+      "Fitur Geolokasi, Peta Interaktif & Tracking Rute (Google Maps)",
+      "Push Notifications Tersegmentasi & Real-time Chat",
+      "Arsitektur Dedicated Backend Server & REST / GraphQL API",
+      "Autentikasi Biometrik (Fingerprint / Face ID)",
+      "Sinkronisasi Data Otomatis Online / Offline (Offline-First Sync)",
+      "Upload Media / Foto dengan Kompresi Gambar Otomatis",
+      "Filter Pencarian Produk, Riwayat Transaksi & Invoice PDF",
+      "In-App Rating & Deep Linking (Universal Links)"
     ],
     industrial: [
-      "Aplikasi IoT & Hardware Tracking",
-      "Keamanan Data Berlapis (JWT / OAuth)",
-      "High-performance App Engine (Fluid Animations)",
-      "Skalabilitas Infrastruktur Cloud",
-      "Sistem Offline-First & Sync Queue"
+      "Aplikasi Industri, Telemetri & IoT Hardware Tracking",
+      "Integrasi Konektivitas Bluetooth Low Energy (BLE) / NFC / RFID",
+      "Arsitektur High-Throughput & Background Data Synchronization",
+      "Keamanan Tingkat Tinggi (Jailbreak Detection, SSL Pinning, Token Encryption)",
+      "Animasi UI Super Halus (60/120 FPS Fluid Gestures)",
+      "Dashboard Monitoring Armada / Aset Skala Besar",
+      "Skalabilitas Cloud Backend Autoscaling & Load Balancing",
+      "Queue Offline-First dengan Resolusi Konflik Data Otomatis",
+      "Integrasi Pemindaian Barcode / QR Code Scanner Kecepatan Tinggi",
+      "Dukungan SLA Khusus, Crashlytics Monitoring & Analytics"
     ]
   }
 };
