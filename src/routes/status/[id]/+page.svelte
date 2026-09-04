@@ -181,32 +181,51 @@
 	}
 
 	function getClientBlockerStatus(proj: any) {
-		if (proj.status === 'pending' && !proj.meetingId) {
-			return {
-				title: 'Penjadwalan Pertemuan Konsultasi',
-				desc: 'Kami sedang menunggu Anda untuk menjadwalkan sesi konsultasi awal guna membahas ruang lingkup dan spesifikasi proyek.'
-			};
+		if (proj.status === 'pending') {
+			if (proj.googleMeetLink) {
+				return {
+					type: 'info',
+					title: 'Jadwal Pertemuan Konsultasi Dikonfirmasi',
+					desc: `Sesi konsultasi Anda telah dijadwalkan pada ${formatDate(proj.consultationDate)}${proj.consultationTime ? ` (${proj.consultationTime})` : ''}. Silakan bergabung ke Google Meet melalui tombol di bawah pada waktu yang telah ditentukan.`
+				};
+			} else if (proj.consultationDate) {
+				return {
+					type: 'info',
+					title: 'Permintaan Jadwal Konsultasi Tercatat',
+					desc: `Permintaan jadwal konsultasi Anda pada ${formatDate(proj.consultationDate)}${proj.consultationTime ? ` (${proj.consultationTime})` : ''} telah kami terima. Kami sedang menyiapkan tautan Google Meet dan akan segera mengonfirmasi jadwal pertemuan Anda.`
+				};
+			} else {
+				return {
+					type: 'warning',
+					title: 'Penjadwalan Pertemuan Konsultasi',
+					desc: 'Kami sedang menunggu Anda untuk menentukan tanggal konsultasi awal guna membahas ruang lingkup dan spesifikasi proyek.'
+				};
+			}
 		}
 		if (proj.paymentProofUrl && proj.paymentStatus === 'unpaid') {
 			return {
+				type: 'info',
 				title: 'Bukti Pembayaran Sedang Diverifikasi',
 				desc: 'Bukti transfer pembayaran Anda telah kami terima dan sedang dalam proses verifikasi. Status pengerjaan proyek akan diperbarui sesegera mungkin.'
 			};
 		}
 		if (proj.status === 'consulted' && proj.paymentStatus === 'unpaid') {
 			return {
+				type: 'action',
 				title: 'Persetujuan Proposal & Pembayaran DP',
 				desc: 'Proposal penawaran dan rincian Down Payment telah dikirimkan. Silakan transfer ke rekening yang tertera di bawah dan upload bukti bayar untuk memulai pengerjaan.'
 			};
 		}
 		if (proj.status === 'review' && (!proj.milestoneFrontendComplete || !proj.milestoneDbSynced)) {
 			return {
+				type: 'action',
 				title: 'Review Staging & Umpan Balik',
 				desc: 'Aplikasi saat ini aktif di server staging. Mohon periksa fungsionalitas dan berikan feedback Anda.'
 			};
 		}
 		if (['review', 'completed'].includes(proj.status) && proj.paymentStatus !== 'settled') {
 			return {
+				type: 'action',
 				title: 'Pelunasan Pembayaran Akhir (Fase 4)',
 				desc: 'Proyek telah memasuki tahap akhir / serah terima. Silakan lakukan pelunasan sisa kontrak pada Fase 4 untuk menerima repositori produksi dan aktivasi garansi penuh.'
 			};
@@ -246,86 +265,94 @@
 	<title>Project Status — {project.projectTitle || 'Portal Klien'}</title>
 </svelte:head>
 
-<div class="max-w-5xl mx-auto px-6 py-12 md:py-20 space-y-16 selection:bg-zinc-100 dark:selection:bg-zinc-800">
+<div class="max-w-5xl mx-auto px-6 py-10 md:py-16 space-y-10 md:space-y-12 selection:bg-zinc-100 dark:selection:bg-zinc-800">
 	
 	<!-- ==========================================
-	    BREADCRUMB & HEADER
+	    BREADCRUMB, HEADER & STATUS ALERT
 	    ========================================== -->
-	<header class="space-y-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-8">
-		<div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-			<span>Client Portal</span>
-			<span class="text-zinc-300 dark:text-zinc-700">/</span>
-			<span>Project Status</span>
-		</div>
-
-		<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-2">
-			<div class="space-y-3">
-				<h1 class="text-4xl md:text-5xl font-medium font-serif italic tracking-tight text-zinc-800 dark:text-zinc-100">
-					{project.projectTitle || 'Project Specification'}
-				</h1>
-				<p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-light">
-					Client Partner: <span class="text-zinc-800 dark:text-zinc-200 font-medium">{project.contactName}</span> ({project.contactEmail})
-				</p>
+	<div class="space-y-6">
+		<header class="space-y-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-6">
+			<div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
+				<span>Client Portal</span>
+				<span class="text-zinc-300 dark:text-zinc-700">/</span>
+				<span>Project Status</span>
 			</div>
-			
-			<div class="flex items-center gap-3">
-				{#if project.companyName}
-					<span class="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
-						<Building2 size={14} class="text-zinc-400" />
-						{project.companyName}
-					</span>
-				{/if}
-			</div>
-		</div>
-	</header>
 
-	<!-- ==========================================
-	    ACTION REQUIRED BLOCK
-	    ========================================== -->
-	{#if isClientBlocker}
-		<section class="p-6 rounded-2xl bg-amber-500/5 dark:bg-amber-500/[0.03] space-y-4 animate-in fade-in duration-300">
-			<div class="flex items-start gap-3">
-				<div class="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg shrink-0 mt-0.5">
-					<AlertTriangle size={16} />
-				</div>
-				<div class="space-y-1">
-					<span class="text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest block">Action Required</span>
-					<h3 class="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-						{isClientBlocker.title}
-					</h3>
-					<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-3xl">
-						{isClientBlocker.desc}
+			<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-2">
+				<div class="space-y-3">
+					<h1 class="text-4xl md:text-5xl font-medium font-serif italic tracking-tight text-zinc-800 dark:text-zinc-100">
+						{project.projectTitle || 'Project Specification'}
+					</h1>
+					<p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-light">
+						Client Partner: <span class="text-zinc-800 dark:text-zinc-200 font-medium">{project.contactName}</span> ({project.contactEmail})
 					</p>
 				</div>
+				
+				<div class="flex items-center gap-3">
+					{#if project.companyName}
+						<span class="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
+							<Building2 size={14} class="text-zinc-400" />
+							{project.companyName}
+						</span>
+					{/if}
+				</div>
 			</div>
+		</header>
 
-			{#if project.status === 'pending' && project.googleMeetLink}
-				<div class="pl-11">
-					<a
-						href={project.googleMeetLink}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold rounded-lg text-xs transition-colors shadow-sm"
-					>
-						<Calendar size={14} />
-						Buka Google Meet ({formatDate(project.consultationDate)})
-					</a>
+		<!-- ==========================================
+		    ACTION REQUIRED / STATUS NOTIFICATION BLOCK
+		    ========================================== -->
+		{#if isClientBlocker}
+			<section class="p-5 rounded-2xl {isClientBlocker.type === 'info' ? 'bg-blue-500/5 dark:bg-blue-500/[0.03]' : 'bg-amber-500/5 dark:bg-amber-500/[0.03]'} space-y-3 animate-in fade-in duration-300">
+				<div class="flex items-start gap-3">
+					<div class="p-2 {isClientBlocker.type === 'info' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'} rounded-lg shrink-0 mt-0.5">
+						{#if isClientBlocker.type === 'info'}
+							<Info size={16} />
+						{:else}
+							<AlertTriangle size={16} />
+						{/if}
+					</div>
+					<div class="space-y-1">
+						<span class="text-[9px] font-bold {isClientBlocker.type === 'info' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'} uppercase tracking-widest block">
+							{isClientBlocker.type === 'info' ? 'Status Information' : 'Action Required'}
+						</span>
+						<h3 class="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+							{isClientBlocker.title}
+						</h3>
+						<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-3xl">
+							{isClientBlocker.desc}
+						</p>
+					</div>
 				</div>
-			{:else if project.status === 'consulted' && project.proposalUrl}
-				<div class="pl-11 flex flex-wrap gap-4">
-					<a
-						href={project.proposalUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold rounded-lg text-xs transition-colors shadow-sm"
-					>
-						<FileText size={14} />
-						Tinjau Proposal Penawaran
-					</a>
-				</div>
-			{/if}
-		</section>
-	{/if}
+
+				{#if project.status === 'pending' && project.googleMeetLink}
+					<div class="pl-11">
+						<a
+							href={project.googleMeetLink}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold rounded-lg text-xs transition-colors shadow-sm"
+						>
+							<Calendar size={14} />
+							Buka Google Meet ({formatDate(project.consultationDate)})
+						</a>
+					</div>
+				{:else if project.status === 'consulted' && project.proposalUrl}
+					<div class="pl-11 flex flex-wrap gap-4">
+						<a
+							href={project.proposalUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold rounded-lg text-xs transition-colors shadow-sm"
+						>
+							<FileText size={14} />
+							Tinjau Proposal Penawaran
+						</a>
+					</div>
+				{/if}
+			</section>
+		{/if}
+	</div>
 
 	<!-- ==========================================
 	    TOTAL CONTRACT VALUE (If Quoted)

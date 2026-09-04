@@ -252,7 +252,15 @@
 		return colors[status] || 'bg-zinc-100 text-zinc-800';
 	}
 
-	let meetLink = $state('');
+	let meetDate = $state(
+		data.project.consultationDate ? data.project.consultationDate.split('T')[0] : ''
+	);
+	let meetTime = $state(
+		data.project.consultationDate && data.project.consultationDate.includes('T')
+			? data.project.consultationDate.split('T')[1].substring(0, 5)
+			: (data.project.consultationTime ? data.project.consultationTime.split(' ')[0] : '10:00')
+	);
+	let meetLink = $state(data.project.googleMeetLink || '');
 
 	function handleMeetLinkBlur() {
 		let val = meetLink.trim();
@@ -829,6 +837,7 @@
 											type="date"
 											name="meetDate"
 											form="schedule-form"
+											bind:value={meetDate}
 											required
 											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
 										/>
@@ -846,6 +855,7 @@
 											type="time"
 											name="meetTime"
 											form="schedule-form"
+											bind:value={meetTime}
 											required
 											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
 										/>

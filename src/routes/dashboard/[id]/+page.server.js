@@ -88,23 +88,28 @@ export const actions = {
       await dbService.updateConsultation(params.id, {
         status: 'consulted',
         consultationDate: meetDate + 'T' + meetTime,
+        consultationTime: meetTime + ' WIB',
         googleMeetLink: meetLink,
         meetingId: meetingId
       });
 
-      // Send confirmation email
+      // Send confirmation email safely
       if (project.contactEmail) {
-        await emailService.sendMeetingConfirmation(
-          project.contactEmail,
-          project.contactName || 'Client',
-          project.projectTitle || 'Project',
-          project.serviceType,
-          project.projectTier,
-          project.targetTimeline,
-          meetLink,
-          meetDate,
-          meetTime
-        );
+        try {
+          await emailService.sendMeetingConfirmation(
+            project.contactEmail,
+            project.contactName || 'Client',
+            project.projectTitle || 'Project',
+            project.serviceType,
+            project.projectTier,
+            project.targetTimeline,
+            meetLink,
+            meetDate,
+            meetTime
+          );
+        } catch (emailErr) {
+          console.error('Failed to send meeting confirmation email:', emailErr);
+        }
       }
     } catch (error) {
       console.error('Error scheduling meeting:', error);
@@ -291,7 +296,8 @@ export const actions = {
     try {
       await dbService.updateConsultation(params.id, {
         status: 'pending',
-        meetingId: '' // Clear meeting ID
+        meetingId: '',
+        googleMeetLink: ''
       });
     } catch (e) {
       console.error('Error restoring consultation lead:', e);
