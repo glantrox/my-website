@@ -33,10 +33,14 @@
 		Sparkles,
 		Figma,
 
-        Phone
+        Phone,
+
+        Info
+
 
 	} from 'lucide-svelte';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { toast } from '$lib/entities/toast';
 	import Spinner from '$lib/components/ui/spinner.svelte';
 	import { fade } from 'svelte/transition';
@@ -89,26 +93,41 @@
 		isFullPaymentScheme ? 'Full 100%' : (dpRatio === 0.5 ? '50% DP' : '30% DP')
 	);
 
-	function handleSwitchSchemeEnhance() {
+	function handleSwitchSchemeEnhance({ formData }: any) {
 		isUpdatingScheme = true;
+		const targetScheme = formData?.get('scheme')?.toString();
+		
+		// Optimistic update so UI immediately updates without waiting for server roundtrip
+		if (targetScheme) {
+			const price = Number(project.quotedPrice || 0);
+			if (targetScheme === '30% DP') {
+				project.downPaymentRequirement = `30% DP (Rp ${Math.round(price * 0.3).toLocaleString('id-ID')})`;
+			} else if (targetScheme === '50% DP') {
+				project.downPaymentRequirement = `50% DP (Rp ${Math.round(price * 0.5).toLocaleString('id-ID')})`;
+			} else if (targetScheme === 'Full 100%') {
+				project.downPaymentRequirement = `Full 100% (Rp ${price.toLocaleString('id-ID')})`;
+			}
+		}
+
+		// Close dropdown and modal immediately
+		isSchemeDropdownOpen = false;
+		showSchemeModal = false;
+
 		const toastId = toast.loading('Memperbarui skema pembayaran...');
+
 		return async ({ result, update }: any) => {
-			isUpdatingScheme = false;
-			showSchemeModal = false;
-			isSchemeDropdownOpen = false;
-			await update();
+			try {
+				await update({ reset: false });
+				await invalidateAll();
+			} finally {
+				isUpdatingScheme = false;
+				toast.dismiss(toastId);
+			}
+
 			if (result.type === 'success') {
-				toast.update(toastId, {
-					type: 'success',
-					message: 'Skema pembayaran berhasil diperbarui!',
-					duration: 4000
-				});
+				toast.success('Skema pembayaran berhasil diperbarui!');
 			} else {
-				toast.update(toastId, {
-					type: 'error',
-					message: result.data?.error || 'Gagal mengubah skema pembayaran.',
-					duration: 4000
-				});
+				toast.error(result.data?.error || 'Gagal mengubah skema pembayaran.');
 			}
 		};
 	}
@@ -455,7 +474,7 @@
 								? 'bg-zinc-800 dark:bg-zinc-200' 
 								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4 transition-all duration-300 {currentPhase !== 1 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
+					<div class="space-y-4 transition-all duration-300">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 1: Konsultasi & Pre-Development</h4>
 							
@@ -513,10 +532,12 @@
 
 												{#if isSchemeDropdownOpen}
 													<!-- Click-outside backdrop -->
-													<div 
-														class="fixed inset-0 z-20" 
+													<button 
+														type="button"
+														aria-label="Tutup menu skema"
+														class="fixed inset-0 z-20 w-full h-full bg-transparent border-0 cursor-default p-0 m-0"
 														onclick={() => isSchemeDropdownOpen = false}
-													></div>
+													></button>
 
 													<!-- Dropdown Panel -->
 													<div 
@@ -531,7 +552,7 @@
 																onclick={() => { isSchemeDropdownOpen = false; selectedScheme = currentSchemeKey; showSchemeModal = true; }}
 																class="text-[9px] text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer"
 															>
-																Rincian
+																<Info class="w-3 h-auto" ></Info>
 															</button>
 														</div>
 
@@ -810,7 +831,7 @@
 								? 'bg-zinc-800 dark:bg-zinc-200'
 								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4 transition-all duration-300 {currentPhase !== 2 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
+					<div class="space-y-4 transition-all duration-300 {currentPhase < 2 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 2: Proses Pengembangan</h4>
 							
@@ -970,7 +991,7 @@
 								? 'bg-zinc-800 dark:bg-zinc-200'
 								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4 transition-all duration-300 {currentPhase !== 3 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
+					<div class="space-y-4 transition-all duration-300 {currentPhase < 3 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 3: Pengujian & Tinjauan Klien (QA / UAT)</h4>
 							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
@@ -1130,7 +1151,7 @@
 							? 'bg-emerald-500 ring-4 ring-emerald-500/20'
 							: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4 transition-all duration-300 {currentPhase !== 4 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
+					<div class="space-y-4 transition-all duration-300 {currentPhase < 4 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 4: Peluncuran & Penyerahan</h4>
 							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
@@ -1855,9 +1876,13 @@
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
 		transition:fade={{ duration: 150 }}
 		onclick={() => { if (!isUpdatingScheme) showSchemeModal = false; }}
+		onkeydown={(e) => { if (e.key === 'Escape' && !isUpdatingScheme) showSchemeModal = false; }}
 		role="dialog"
+		tabindex="-1"
 		aria-modal="true"
 	>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div 
 			class="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-2xl p-6 space-y-6"
 			onclick={(e) => e.stopPropagation()}
