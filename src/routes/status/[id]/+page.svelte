@@ -67,6 +67,18 @@
 	const finalPaymentPercentDisplay = $derived(Math.round(finalPaymentRatio * 100));
 	const finalPaymentAmount = $derived(Math.max(0, (project.quotedPrice || 0) - dpAmount));
 
+	// Current active phase (1, 2, 3, or 4)
+	const currentPhase = $derived.by(() => {
+		if (project.status === 'completed') return 4;
+		if (project.status === 'review') return 3;
+		if (project.status === 'in_progress') return 2;
+		// If initial payment is verified (dp_paid or settled)
+		if (project.milestonePaymentVerified || project.paymentStatus === 'dp_paid' || project.paymentStatus === 'settled') {
+			return 2;
+		}
+		return 1;
+	});
+
 	// State for payment scheme switcher
 	let showSchemeModal = $state(false);
 	let isSchemeDropdownOpen = $state(false);
@@ -437,19 +449,16 @@
 				    ========================================== -->
 				<div class="relative">
 					<div class="absolute -left-[37px] top-1 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center
-						{['consulted', 'in_progress', 'review', 'completed'].includes(project.status) 
-							? 'bg-zinc-800 dark:bg-zinc-200' 
-							: 'bg-zinc-100 dark:bg-zinc-800'}">
+						{currentPhase === 1 
+							? 'bg-amber-500 ring-4 ring-amber-500/20' 
+							: currentPhase > 1 
+								? 'bg-zinc-800 dark:bg-zinc-200' 
+								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4">
+					<div class="space-y-4 transition-all duration-300 {currentPhase !== 1 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 1: Konsultasi & Pre-Development</h4>
-							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
-								{['consulted', 'in_progress', 'review', 'completed'].includes(project.status)
-									? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-									: 'bg-amber-500/10 text-amber-500'}">
-								{['consulted', 'in_progress', 'review', 'completed'].includes(project.status) ? 'Selesai' : 'Aktif'}
-							</span>
+							
 						</div>
 						<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg font-light">
 							Sesi konsultasi, penyusunan spesifikasi teknis, penentuan prioritas fitur, persetujuan penawaran harga, dan pembayaran Down Payment (DP).
@@ -617,7 +626,7 @@
 											<div class="p-2.5 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 rounded-xl flex items-center justify-between shadow-2xs">
 												<div>
 													<span class="text-[9px] font-bold text-sky-600 dark:text-sky-400 block">GOPAY</span>
-													<span class="font-mono text-xs font-semibold text-zinc-800 dark:text-zinc-200 select-all">0895630354422</span>
+													<span class=" text-xs font-semibold text-zinc-800 dark:text-zinc-200 select-all">0895630354422</span>
 												</div>
 												<button
 													type="button"
@@ -637,7 +646,7 @@
 											<div class="p-2.5 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 rounded-xl flex items-center justify-between shadow-2xs">
 												<div>
 													<span class="text-[9px] font-bold text-amber-600 dark:text-amber-400 block">BANK JAGO</span>
-													<span class="font-mono text-xs font-semibold text-zinc-800 dark:text-zinc-200 select-all">1089 5642 3736</span>
+													<span class=" text-xs font-semibold text-zinc-800 dark:text-zinc-200 select-all">1089 5642 3736</span>
 												</div>
 												<button
 													type="button"
@@ -795,21 +804,16 @@
 				    ========================================== -->
 				<div class="relative">
 					<div class="absolute -left-[37px] top-1 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center
-						{['in_progress', 'review', 'completed'].includes(project.status) 
-							? 'bg-zinc-800 dark:bg-zinc-200' 
-							: project.status === 'consulted' ? 'bg-amber-500' : 'bg-zinc-100 dark:bg-zinc-800'}">
+						{currentPhase === 2
+							? 'bg-blue-500 ring-4 ring-blue-500/20'
+							: currentPhase > 2
+								? 'bg-zinc-800 dark:bg-zinc-200'
+								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4">
+					<div class="space-y-4 transition-all duration-300 {currentPhase !== 2 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 2: Proses Pengembangan</h4>
-							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
-								{project.status === 'in_progress'
-									? 'bg-blue-500/10 text-blue-500'
-									: ['review', 'completed'].includes(project.status)
-										? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-										: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500'}">
-								{project.status === 'in_progress' ? 'Sedang Berjalan' : ['review', 'completed'].includes(project.status) ? 'Selesai' : 'Mendatang'}
-							</span>
+							
 						</div>
 						<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg font-light">
 							Tahap implementasi teknis yang terbagi dalam 3 tahapan kunci: finalisasi dokumen spesifikasi, pembuatan desain interaktif, dan penulisan kode program.
@@ -960,20 +964,22 @@
 				    ========================================== -->
 				<div class="relative">
 					<div class="absolute -left-[37px] top-1 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center
-						{['completed'].includes(project.status) 
-							? 'bg-zinc-800 dark:bg-zinc-200' 
-							: project.status === 'review' ? 'bg-amber-500' : 'bg-zinc-100 dark:bg-zinc-800'}">
+						{currentPhase === 3
+							? 'bg-amber-500 ring-4 ring-amber-500/20'
+							: currentPhase > 3
+								? 'bg-zinc-800 dark:bg-zinc-200'
+								: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4">
+					<div class="space-y-4 transition-all duration-300 {currentPhase !== 3 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 3: Pengujian & Tinjauan Klien (QA / UAT)</h4>
 							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
-								{project.status === 'review'
-									? 'bg-amber-500/10 text-amber-500'
-									: project.status === 'completed'
+								{currentPhase === 3
+									? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+									: currentPhase > 3
 										? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
 										: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500'}">
-								{project.status === 'review' ? 'Review Staging' : project.status === 'completed' ? 'Selesai' : 'Mendatang'}
+								{currentPhase === 3 ? 'Review Staging' : currentPhase > 3 ? 'Selesai' : 'Mendatang'}
 							</span>
 						</div>
 						<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg font-light">
@@ -1120,20 +1126,18 @@
 				    ========================================== -->
 				<div class="relative">
 					<div class="absolute -left-[37px] top-1 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center
-						{project.status === 'completed' 
-							? 'bg-zinc-800 dark:bg-zinc-200' 
-							: project.status === 'review' ? 'bg-amber-500' : 'bg-zinc-100 dark:bg-zinc-800'}">
+						{currentPhase === 4
+							? 'bg-emerald-500 ring-4 ring-emerald-500/20'
+							: 'bg-zinc-100 dark:bg-zinc-800'}">
 					</div>
-					<div class="space-y-4">
+					<div class="space-y-4 transition-all duration-300 {currentPhase !== 4 ? 'filter blur-[2.5px] opacity-40 select-none pointer-events-none' : ''}">
 						<div class="flex items-center gap-2">
 							<h4 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Fase 4: Peluncuran & Penyerahan</h4>
 							<span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
-								{project.status === 'completed'
-									? 'bg-emerald-500/10 text-emerald-500'
-									: project.status === 'review'
-										? 'bg-amber-500/10 text-amber-500'
-										: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500'}">
-								{project.status === 'completed' ? 'Selesai' : project.status === 'review' ? 'Tahap Pembayaran Final' : 'Mendatang'}
+								{currentPhase === 4
+									? (project.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20')
+									: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500'}">
+								{currentPhase === 4 ? (project.status === 'completed' ? 'Selesai' : 'Tahap Pembayaran Final') : 'Mendatang'}
 							</span>
 						</div>
 						<p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-lg font-light">
