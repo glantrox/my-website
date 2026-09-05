@@ -29,8 +29,10 @@
     X,
     AlertTriangle,
     Image as ImageIcon,
-    FileCheck
+    FileCheck,
+    Bell
   } from 'lucide-svelte';
+  import { notificationStore } from '$lib/entities/notifications/notifications.svelte';
 
   // 1. Zod Validation Schema
   const ProjectFormSchema = z.object({
@@ -288,6 +290,22 @@
 
     <!-- Actions / Tab Toggles -->
     <div class="flex items-center gap-3">
+      <!-- Notification Bell Button -->
+      <button
+        type="button"
+        onclick={() => notificationStore.toggleOpen()}
+        class="relative p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-xs flex items-center justify-center"
+        aria-label="Notifikasi Lead"
+        title="Notifikasi"
+      >
+        <Bell size={16} />
+        {#if notificationStore.unreadCount > 0}
+          <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-xs animate-pulse">
+            {notificationStore.unreadCount}
+          </span>
+        {/if}
+      </button>
+
       <div class="inline-flex rounded-lg bg-zinc-100 dark:bg-zinc-900 p-1 border border-zinc-200 dark:border-zinc-800">
         <button
           onclick={() => { activeTab = 'projects'; searchQuery = ''; }}

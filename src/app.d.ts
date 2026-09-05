@@ -12,4 +12,6 @@ declare global {
 	}
 }
 
+declare module 'nodemailer';
+
 export {};

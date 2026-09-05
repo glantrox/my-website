@@ -34,5 +34,27 @@ export const adminUpdateSchema = z.object({
   paymentProofUploadedAt: z.string().optional().default(''),
   paymentProofNotes: z.string().optional().default(''),
   paymentProofBank: z.string().optional().default(''),
-  paymentProofSenderName: z.string().optional().default('')
+  paymentProofSenderName: z.string().optional().default(''),
+  
+  // Phase 1: BRD & Specifications
+  brdUrl: z.string().optional().default(''),
+  brdApprovedAt: z.string().optional().default(''),
+
+  // Phase 2: Design & Development Deliverables
+  figmaUrl: z.string().optional().default(''),
+
+  // Phase 3: Staging Credentials & UAT
+  stagingCredentialsEmail: z.string().optional().default(''),
+  stagingCredentialsPassword: z.string().optional().default(''),
+  stagingCredentialsRole: z.string().optional().default('Admin / Test User'),
+  revisionRound: z.coerce.number().optional().default(1),
+  revisionMaxRounds: z.coerce.number().optional().default(2),
+  uatApprovedAt: z.string().optional().default(''),
+
+  // Phase 4: Final Payment Proofs (Pelunasan)
+  finalPaymentProofUrl: z.string().optional().default(''),
+  finalPaymentProofUploadedAt: z.string().optional().default(''),
+  finalPaymentProofNotes: z.string().optional().default(''),
+  finalPaymentProofBank: z.string().optional().default(''),
+  finalPaymentProofSenderName: z.string().optional().default('')
 });

@@ -3,6 +3,8 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import { page } from "$app/stores";
 	import Toaster from "$lib/components/ui/toast/Toaster.svelte";
+	import NotificationPopup from "$lib/components/notifications/NotificationPopup.svelte";
+	import { notificationStore } from "$lib/entities/notifications/notifications.svelte";
 	import { fade, slide } from "svelte/transition";
 
 	let { data, children } = $props();
@@ -32,6 +34,21 @@
 		const _url = $page.url;
 		checkDraftCookie();
 		isMobileMenuOpen = false;
+	});
+
+	$effect(() => {
+		if (data.notifications) {
+			notificationStore.setInitialNotifications(data.notifications);
+		}
+	});
+
+	$effect(() => {
+		if (data.isAdmin && typeof window !== 'undefined') {
+			const interval = setInterval(() => {
+				notificationStore.refresh();
+			}, 45000);
+			return () => clearInterval(interval);
+		}
 	});
 
 	// Body scroll lock and ESC / resize listener for mobile menu
@@ -335,6 +352,7 @@
 									{/if}
 								</a>
 							</li>
+
 							<li>
 								<a
 									href="/logout"
@@ -500,6 +518,7 @@
 								{/if}
 							</a>
 						</li>
+
 						<li>
 							<a
 								href="/logout"
@@ -521,5 +540,6 @@
 		{@render children()}
 	</main>
 
+	<NotificationPopup />
 	<Toaster />
 </div>

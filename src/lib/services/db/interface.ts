@@ -71,6 +71,20 @@ export interface Consultation {
   paymentProofNotes?: string;
   paymentProofBank?: string;
   paymentProofSenderName?: string;
+  brdUrl?: string;
+  brdApprovedAt?: string;
+  figmaUrl?: string;
+  stagingCredentialsEmail?: string;
+  stagingCredentialsPassword?: string;
+  stagingCredentialsRole?: string;
+  revisionRound?: number;
+  revisionMaxRounds?: number;
+  uatApprovedAt?: string;
+  finalPaymentProofUrl?: string;
+  finalPaymentProofUploadedAt?: string;
+  finalPaymentProofNotes?: string;
+  finalPaymentProofBank?: string;
+  finalPaymentProofSenderName?: string;
 }
 
 export interface Meeting {

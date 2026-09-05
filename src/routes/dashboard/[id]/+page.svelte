@@ -54,6 +54,12 @@
 	let isDeleting = $state(false);
 	let isVerifyingPayment = $state(false);
 	let showProofLightbox = $state(false);
+	let lightboxImage = $state('');
+
+	function openLightbox(url: string) {
+		lightboxImage = url;
+		showProofLightbox = true;
+	}
 
 	const { form, enhance: superEnhance } = superForm(data.form, {
 		onSubmit: () => {
@@ -254,6 +260,11 @@
 		return colors[status] || 'bg-zinc-100 text-zinc-800';
 	}
 
+	const isFullPaymentScheme = $derived(
+		(project.downPaymentRequirement || '').toLowerCase().includes('full') ||
+		(project.downPaymentRequirement || '').toLowerCase().includes('100%')
+	);
+
 	let meetDate = $state(
 		data.project.consultationDate ? data.project.consultationDate.split('T')[0] : ''
 	);
@@ -317,10 +328,22 @@
 <form id="restore-form" method="POST" action="?/restoreLead" use:enhance={handleRestoreEnhance}></form>
 <form id="delete-form" method="POST" action="?/deleteProject" use:enhance={handleDeleteEnhance}></form>
 <form id="verify-payment-dp-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentType" value="dp" />
+	<input type="hidden" name="actionType" value="approve" />
 	<input type="hidden" name="paymentStatus" value="dp_paid" />
 </form>
+<form id="reject-payment-dp-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentType" value="dp" />
+	<input type="hidden" name="actionType" value="reject" />
+</form>
 <form id="verify-payment-settled-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentType" value="final" />
+	<input type="hidden" name="actionType" value="approve" />
 	<input type="hidden" name="paymentStatus" value="settled" />
+</form>
+<form id="reject-payment-settled-form" method="POST" action="?/verifyPayment" use:enhance={handleVerifyPaymentEnhance}>
+	<input type="hidden" name="paymentType" value="final" />
+	<input type="hidden" name="actionType" value="reject" />
 </form>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -553,6 +576,723 @@
 					</div>
 				</div>
 
+				<!-- ==========================================
+				    DYNAMIC ACTION CARDS (MORPHED BY STATUS)
+				    ========================================== -->
+
+				<!-- 1. STATUS: pending (Menunggu) -->
+				{#if $form.status === 'pending'}
+					{#if project.alreadyConsulted}
+						<div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400 text-xs space-y-1">
+							<span class="font-bold flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+								<CheckCircle2 size={13} />
+								Sudah Konsultasi Sebelumnya
+							</span>
+							<p class="text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed">
+								Klien memilih opsi telah berkonsultasi sebelum mengisi formulir{project.consultationChannel ? ` (via ${project.consultationChannel})` : ''}. Anda dapat langsung menyiapkan proposal penawaran atau menjadwalkan Google Meet di bawah jika diperlukan.
+							</p>
+						</div>
+					{/if}
+					{#if project.meetingId && !isRescheduling}
+						<!-- Scheduled Consultation Session Details -->
+						<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+							<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10 flex flex-row items-center justify-between">
+								<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+									<CheckCircle2 class="h-4 w-4 shrink-0" />
+									Scheduled Session
+								</Card.Title>
+								<button
+									type="button"
+									onclick={() => (isRescheduling = true)}
+									class="text-[10px] font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
+								>
+									Reschedule
+								</button>
+							</Card.Header>
+							<Card.Content class="px-0 pt-4 space-y-4 text-left">
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Date & Time</span>
+										<span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block mt-0.5">
+											{formatMeetingDateTime(project.consultationDate)}
+										</span>
+									</div>
+									<div>
+										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Meeting ID Reference</span>
+										<code class="text-[10px] text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded block mt-0.5 font-mono select-all w-fit">
+											{project.meetingId}
+										</code>
+									</div>
+									<div class="sm:col-span-2">
+										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Google Meet Link</span>
+										<a
+											href={project.googleMeetLink}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-xs font-semibold text-blue-650 dark:text-blue-400 hover:underline block mt-0.5 break-all font-mono"
+										>
+											{project.googleMeetLink}
+										</a>
+									</div>
+								</div>
+								<a
+									href={project.googleMeetLink}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 text-center text-xs"
+								>
+									<Globe class="h-4 w-4" />
+									Join Google Meet
+								</a>
+							</Card.Content>
+						</Card.Root>
+					{:else}
+						<!-- Meeting Scheduler Form -->
+						<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+							<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10 flex flex-row items-center justify-between">
+								<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+									<Calendar class="h-4.5 w-4.5" />
+									Schedule Consultation
+								</Card.Title>
+								{#if isRescheduling}
+									<button
+										type="button"
+										onclick={() => (isRescheduling = false)}
+										class="text-[10px] font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
+									>
+										Cancel
+									</button>
+								{/if}
+							</Card.Header>
+							<Card.Content class="px-0 pt-4 space-y-5 text-left">
+								<!-- Date & Time selection -->
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div class="space-y-2">
+										<label for="meetDate" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Tanggal Meeting
+										</label>
+										<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+											<input
+												id="meetDate"
+												type="date"
+												name="meetDate"
+												form="schedule-form"
+												bind:value={meetDate}
+												required
+												class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+											/>
+										</div>
+									</div>
+									
+									<div class="space-y-2">
+										<label for="meetTime" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Jam Meeting (GMT+7)
+										</label>
+										<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+											<input
+												id="meetTime"
+												type="time"
+												name="meetTime"
+												form="schedule-form"
+												bind:value={meetTime}
+												required
+												class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+											/>
+										</div>
+									</div>
+								</div>
+
+								<!-- Link selection -->
+								<div class="space-y-2">
+									<div class="flex items-center justify-between">
+										<label for="meetLink" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											Google Meet Link / Code
+										</label>
+										<a
+											href="https://meet.new"
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-450 hover:underline cursor-pointer"
+										>
+											Create Meet (meet.new)
+										</a>
+									</div>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="meetLink"
+											type="text"
+											name="meetLink"
+											form="schedule-form"
+											bind:value={meetLink}
+											onblur={handleMeetLinkBlur}
+											placeholder="xxx-yyyy-zzz atau https://meet.google.com/xxx-yyyy-zzz"
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+								
+								<Button
+									type="submit"
+									form="schedule-form"
+									disabled={isScheduling}
+									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{#if isScheduling}
+										<Spinner size={16} class="text-white" />
+										Scheduling...
+									{:else}
+										<Mail class="h-4 w-4" />
+										Schedule & Send Email
+									{/if}
+								</Button>
+							</Card.Content>
+						</Card.Root>
+					{/if}
+
+				<!-- 2. STATUS: consulted (Sudah Konsultasi) -->
+				{:else if $form.status === 'consulted'}
+					<Card.Root class="border border-blue-500/25 bg-blue-500/[0.01] dark:bg-blue-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+						<Card.Header class="px-0 pt-0 pb-4 border-b border-blue-500/10">
+							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+								<Briefcase class="h-4.5 w-4.5" />
+								Proposal & Quotation
+							</Card.Title>
+						</Card.Header>
+						<Card.Content class="px-0 pt-4 space-y-5 text-left">
+							<div class="space-y-2">
+								<label for="proposalUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Proposal / Scope URL
+								</label>
+								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+									<input
+										id="proposalUrl"
+										type="url"
+										name="proposalUrl"
+										form="proposal-form"
+										bind:value={$form.proposalUrl}
+										placeholder="https://notion.so/..."
+										required
+										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									/>
+								</div>
+							</div>
+
+							<div class="space-y-2">
+								<label for="proposalBrdUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center justify-between">
+									<span>Business Requirements Document (BRD) URL (Opsional)</span>
+									{#if project.brdApprovedAt}
+										<span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Telah Disetujui Klien</span>
+									{/if}
+								</label>
+								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+									<input
+										id="proposalBrdUrl"
+										type="url"
+										name="brdUrl"
+										form="proposal-form"
+										bind:value={$form.brdUrl}
+										placeholder="https://docs.google.com/... atau Notion BRD"
+										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									/>
+								</div>
+							</div>
+
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div class="space-y-2">
+									<label for="quotedPriceProposal" class="text-[10px] font-bold uppercase tracking-wider text-zinc-405 dark:text-zinc-500">
+										Finalized Price (Rp)
+									</label>
+									<div class="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<span class="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mr-2 select-none">Rp</span>
+										<input
+											id="quotedPriceProposal"
+											type="number"
+											min="0"
+											name="quotedPrice"
+											form="proposal-form"
+											bind:value={$form.quotedPrice}
+											placeholder="0"
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+
+								<div class="space-y-2">
+									<div class="flex items-center justify-between">
+										<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+											DP Requirement
+										</span>
+									</div>
+									<div class="flex items-center justify-between rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-3.5 py-2.5 min-h-[46px]">
+										<div class="flex items-center gap-2">
+											<span class="text-sm font-semibold text-zinc-900 dark:text-white">
+												Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')}
+											</span>
+										</div>
+										<span class="text-xs text-zinc-400 dark:text-zinc-500 font-medium">
+											30% dari {($form.quotedPrice && $form.quotedPrice > 0) ? 'Rp ' + Number($form.quotedPrice).toLocaleString('id-ID') : 'Rp 0'}
+										</span>
+									</div>
+									<input
+										type="hidden"
+										name="downPaymentRequirement"
+										form="proposal-form"
+										value="30% DP (Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')})"
+									/>
+								</div>
+							</div>
+
+							<Button
+								type="submit"
+								form="proposal-form"
+								disabled={isSendingProposal}
+								class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{#if isSendingProposal}
+									<Spinner size={16} class="text-white" />
+									Sending...
+								{:else}
+									<Briefcase class="h-4 w-4" />
+									Send Proposal & DP Invoice
+								{/if}
+							</Button>
+						</Card.Content>
+					</Card.Root>
+
+				<!-- 3. STATUS: in_progress (Dalam Pengerjaan) -->
+				{:else if $form.status === 'in_progress'}
+					<Card.Root class="border border-purple-500/25 bg-purple-500/[0.01] dark:bg-purple-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+						<Card.Header class="px-0 pt-0 pb-4 border-b border-purple-500/10">
+							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+								<Rocket class="h-4.5 w-4.5" />
+								Development Workspace
+							</Card.Title>
+						</Card.Header>
+						<Card.Content class="px-0 pt-4 space-y-5 text-left">
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div class="space-y-2">
+									<label for="progressBrdUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center justify-between">
+										<span>Milestone 2.1: BRD URL</span>
+										{#if project.brdApprovedAt}
+											<span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Signed Off</span>
+										{/if}
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="progressBrdUrl"
+											type="url"
+											name="brdUrl"
+											form="progress-form"
+											bind:value={$form.brdUrl}
+											placeholder="https://docs.google.com/..."
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+
+								<div class="space-y-2">
+									<label for="figmaUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Milestone 2.2: Figma Design URL
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="figmaUrl"
+											type="url"
+											name="figmaUrl"
+											form="progress-form"
+											bind:value={$form.figmaUrl}
+											placeholder="https://figma.com/design/..."
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div class="space-y-2">
+								<label for="repoLink" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Milestone 2.3: Repository Git URL
+								</label>
+								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+									<input
+										id="repoLink"
+										type="url"
+										name="repoLink"
+										form="progress-form"
+										bind:value={$form.repoLink}
+										placeholder="https://github.com/..."
+										required
+										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									/>
+								</div>
+							</div>
+
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div class="space-y-2">
+									<label for="stagingUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Staging Server URL
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="stagingUrl"
+											type="url"
+											name="stagingUrl"
+											form="progress-form"
+											bind:value={$form.stagingUrl}
+											placeholder="https://staging.mewmewwo.com"
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+
+								<div class="space-y-2">
+									<label for="managementBoardUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Task Management Board
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="managementBoardUrl"
+											type="url"
+											name="managementBoardUrl"
+											form="progress-form"
+											bind:value={$form.managementBoardUrl}
+											placeholder="https://linear.app/..."
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<Button
+								type="submit"
+								form="progress-form"
+								disabled={isPushingProgress}
+								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{#if isPushingProgress}
+									<Spinner size={16} class="text-white" />
+									Updating...
+								{:else}
+									<Rocket class="h-4 w-4" />
+									Push Progress Update
+								{/if}
+							</Button>
+						</Card.Content>
+					</Card.Root>
+
+				<!-- 4. STATUS: review (Dalam Review) -->
+				{:else if $form.status === 'review'}
+					<Card.Root class="border border-orange-500/25 bg-orange-500/[0.01] dark:bg-orange-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+						<Card.Header class="px-0 pt-0 pb-4 border-b border-orange-500/10">
+							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+								<Beaker class="h-4.5 w-4.5" />
+								QA & Client Review
+							</Card.Title>
+						</Card.Header>
+						<Card.Content class="px-0 pt-4 space-y-5 text-left">
+							{#if $form.stagingUrl}
+								<div>
+									<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1.5">Staging Environment</span>
+									<a
+										href={$form.stagingUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-orange-500/20 bg-orange-500/5 text-xs text-orange-605 dark:text-orange-400 font-semibold hover:bg-orange-500/10 transition-colors"
+									>
+										Open Staging Site
+										<ExternalLink size={12} />
+									</a>
+								</div>
+							{/if}
+
+							{#if project.uatApprovedAt}
+								<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl flex items-center gap-2">
+									<CheckCircle2 size={16} class="shrink-0" />
+									<span>Klien telah menyetujui hasil testing (UAT Sign-off) pada: <strong>{formatMeetingDateTime(project.uatApprovedAt)}</strong></span>
+								</div>
+							{/if}
+
+							<div class="space-y-2">
+								<label for="feedbackTrackerUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Feedback Tracker / Loom URL
+								</label>
+								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+									<input
+										id="feedbackTrackerUrl"
+										type="url"
+										name="feedbackTrackerUrl"
+										form="signoff-form"
+										bind:value={$form.feedbackTrackerUrl}
+										placeholder="https://loom.com/..."
+										required
+										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									/>
+								</div>
+							</div>
+
+							<!-- Staging Demo Credentials Vault for Client -->
+							<div class="p-4 rounded-xl border border-orange-500/20 bg-orange-500/5 space-y-3">
+								<span class="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
+									<Lock size={12} />
+									Kredensial Testing Staging (Akan Muncul di Tracker Klien)
+								</span>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="space-y-1">
+										<label for="stagingRole" class="text-[9px] font-bold uppercase text-zinc-500">Role Akun</label>
+										<input
+											id="stagingRole"
+											type="text"
+											name="stagingCredentialsRole"
+											form="signoff-form"
+											bind:value={$form.stagingCredentialsRole}
+											placeholder="Admin / QA Tester"
+											class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white focus:outline-none"
+										/>
+									</div>
+									<div class="space-y-1">
+										<label for="stagingEmail" class="text-[9px] font-bold uppercase text-zinc-500">Email Demo</label>
+										<input
+											id="stagingEmail"
+											type="text"
+											name="stagingCredentialsEmail"
+											form="signoff-form"
+											bind:value={$form.stagingCredentialsEmail}
+											placeholder="demo@client.com"
+											class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white focus:outline-none"
+										/>
+									</div>
+									<div class="space-y-1">
+										<label for="stagingPassword" class="text-[9px] font-bold uppercase text-zinc-500">Password Demo</label>
+										<input
+											id="stagingPassword"
+											type="text"
+											name="stagingCredentialsPassword"
+											form="signoff-form"
+											bind:value={$form.stagingCredentialsPassword}
+											placeholder="DemoPass123!"
+											class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-900 dark:text-white focus:outline-none"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Revision Round Counter -->
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div class="space-y-1">
+									<label for="revRound" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Putaran Revisi Saat Ini
+									</label>
+									<input
+										id="revRound"
+										type="number"
+										min="1"
+										max="10"
+										name="revisionRound"
+										form="signoff-form"
+										bind:value={$form.revisionRound}
+										placeholder="1"
+										class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none"
+									/>
+								</div>
+								<div class="space-y-1">
+									<label for="maxRevRound" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Batas Maksimal Revisi
+									</label>
+									<input
+										id="maxRevRound"
+										type="number"
+										min="1"
+										max="10"
+										name="revisionMaxRounds"
+										form="signoff-form"
+										bind:value={$form.revisionMaxRounds}
+										placeholder="3"
+										class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-sm font-medium text-zinc-900 dark:text-white focus:outline-none"
+									/>
+								</div>
+							</div>
+
+							<div class="space-y-2">
+								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Milestones Completed</span>
+								<div class="space-y-1.5 text-xs">
+									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+										<input
+											type="checkbox"
+											name="milestoneFrontendComplete"
+											form="signoff-form"
+											value="true"
+											bind:checked={$form.milestoneFrontendComplete}
+											class="rounded border-zinc-300 dark:border-zinc-750 text-orange-600 focus:ring-orange-500 bg-transparent"
+										/>
+										Frontend Complete
+									</label>
+									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+										<input
+											type="checkbox"
+											name="milestoneDbSynced"
+											form="signoff-form"
+											value="true"
+											bind:checked={$form.milestoneDbSynced}
+											class="rounded border-zinc-300 dark:border-zinc-755 text-orange-600 focus:ring-orange-500 bg-transparent"
+										/>
+										Database Synced
+									</label>
+									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+										<input
+											type="checkbox"
+											name="milestonePaymentVerified"
+											form="signoff-form"
+											value="true"
+											bind:checked={$form.milestonePaymentVerified}
+											class="rounded border-zinc-300 dark:border-zinc-755 text-orange-600 focus:ring-orange-500 bg-transparent"
+										/>
+										Payment Gateway Verified
+									</label>
+								</div>
+							</div>
+
+							<Button
+								type="submit"
+								form="signoff-form"
+								disabled={isRequestingSignoff}
+								class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{#if isRequestingSignoff}
+									<Spinner size={16} class="text-white" />
+									Requesting...
+								{:else}
+									<Beaker class="h-4 w-4" />
+									Request Form Sign-Off
+								{/if}
+							</Button>
+						</Card.Content>
+					</Card.Root>
+
+				<!-- 5. STATUS: completed (Selesai) -->
+				{:else if $form.status === 'completed'}
+					<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.01] dark:bg-emerald-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+						<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10">
+							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+								<Gift class="h-4.5 w-4.5" />
+								Project Handover
+							</Card.Title>
+						</Card.Header>
+						<Card.Content class="px-0 pt-4 space-y-5 text-left">
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div class="space-y-2">
+									<label for="productionUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Production Live URL
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="productionUrl"
+											type="url"
+											name="productionUrl"
+											form="handover-form"
+											bind:value={$form.productionUrl}
+											placeholder="https://mewmewwo.com"
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+
+								<div class="space-y-2">
+									<label for="codebaseTransferUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										Codebase ZIP / Repo Link
+									</label>
+									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
+										<input
+											id="codebaseTransferUrl"
+											type="url"
+											name="codebaseTransferUrl"
+											form="handover-form"
+											bind:value={$form.codebaseTransferUrl}
+											placeholder="https://github.com/transfers/..."
+											required
+											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div>
+								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Warranty Support Period</span>
+								<span class="text-xs text-zinc-600 dark:text-zinc-400 block font-semibold">
+									Free Support Ends: {project.warrantyEndDate || getWarrantyExpiryDate()}
+								</span>
+							</div>
+
+							<Button
+								type="submit"
+								form="handover-form"
+								disabled={isSendingHandover}
+								class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{#if isSendingHandover}
+									<Spinner size={16} class="text-white" />
+									Sending...
+								{:else}
+									<Gift class="h-4 w-4" />
+									Send Handover Package
+								{/if}
+							</Button>
+						</Card.Content>
+					</Card.Root>
+
+				<!-- 6. STATUS: rejected (Ditolak) & archived (Diarsipkan) -->
+				{:else if $form.status === 'rejected' || $form.status === 'archived'}
+					<Card.Root class="border border-zinc-500/25 bg-zinc-500/[0.01] dark:bg-zinc-500/[0.02] p-6 sm:p-8 shadow-xs rounded-2xl">
+						<Card.Header class="px-0 pt-0 pb-4 border-b border-zinc-500/10">
+							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+								<FolderArchive class="h-4.5 w-4.5" />
+								Archived Lead
+							</Card.Title>
+						</Card.Header>
+						<Card.Content class="px-0 pt-4 space-y-5 text-left">
+							<div class="space-y-2">
+								<label for="archiveReason" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+									Reason for Rejection / Archive
+								</label>
+								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-3">
+									<textarea
+										id="archiveReason"
+										name="archiveReason"
+										bind:value={$form.archiveReason}
+										placeholder="Budget mismatch, timeline issues..."
+										class="w-full min-h-[80px] bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									></textarea>
+								</div>
+							</div>
+
+							<div>
+								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Archive State Log</span>
+								<span class="text-xs text-zinc-600 dark:text-zinc-400 block font-semibold">
+									Lead closed on: {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID')}
+								</span>
+							</div>
+
+							<Button
+								type="submit"
+								form="restore-form"
+								disabled={isRestoring}
+								class="w-full bg-zinc-800 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{#if isRestoring}
+									<Spinner size={16} class="text-white dark:text-zinc-950" />
+									Restoring...
+								{:else}
+									<FolderArchive class="h-4 w-4" />
+									Restore to Active Leads
+								{/if}
+							</Button>
+						</Card.Content>
+					</Card.Root>
+				{/if}
+
 				<!-- Bento Card 3: Administrasi & Keuangan -->
 				<div class="border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/10 p-6 sm:p-8 rounded-2xl space-y-6">
 					<div class="flex items-center justify-between">
@@ -577,7 +1317,7 @@
 						<div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400 text-xs flex items-start gap-2.5">
 							<AlertTriangle size={16} class="shrink-0 mt-0.5" />
 							<p class="leading-relaxed">
-								Harga penawaran belum pernah diisi. Kolom administrasi & status pembayaran saat ini dinonaktifkan dan akan terbuka otomatis setelah Anda menentukan harga dan mengirimkan penawaran melalui panel <strong>Proposal & Quotation</strong> di sebelah kanan.
+								Harga penawaran belum pernah diisi. Kolom administrasi & status pembayaran saat ini dinonaktifkan dan akan terbuka otomatis setelah Anda menentukan harga dan mengirimkan penawaran melalui panel <strong>Proposal & Quotation</strong> di atas.
 							</p>
 						</div>
 					{/if}
@@ -631,117 +1371,261 @@
 						</div>
 					</div>
 
-					<!-- Bukti Pembayaran Klien Section -->
-					<div class="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-3">
+					<!-- Bukti Pembayaran Klien Section: DP & Pelunasan -->
+					<div class="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-6">
 						<div class="flex items-center justify-between">
-							<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
-								<FileCheck class="w-3.5 h-3.5 text-zinc-400" />
-								Bukti Transfer dari Klien
+							<span class="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
+								<FileCheck class="w-4 h-4 text-zinc-400" />
+								Verifikasi Pembayaran Klien
 							</span>
-							{#if project.paymentProofUrl}
-								<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase
-									{project.paymentStatus === 'settled' || project.paymentStatus === 'dp_paid'
-										? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-										: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}">
-									{project.paymentStatus === 'settled' || project.paymentStatus === 'dp_paid' ? 'Terverifikasi' : 'Menunggu Verifikasi'}
-								</span>
-							{/if}
 						</div>
 
-						{#if project.paymentProofUrl}
-							<div class="p-4 bg-zinc-50/50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4">
-								<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-									<!-- Proof Thumbnail with Zoom -->
-									<div class="relative group">
-										{#if project.paymentProofUrl.startsWith('data:application/pdf') || project.paymentProofUrl.endsWith('.pdf')}
-											<div class="w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center text-zinc-500 shrink-0">
-												<FileText size={28} />
-												<span class="text-[9px] font-bold uppercase mt-1">PDF</span>
-											</div>
-										{:else}
-											<button
-												type="button"
-												onclick={() => (showProofLightbox = true)}
-												class="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 relative cursor-pointer bg-zinc-100 dark:bg-zinc-800 block"
-												title="Klik untuk memperbesar bukti transfer"
-											>
-												<img
-													src={project.paymentProofUrl}
-													alt="Bukti Transfer Klien"
-													class="w-full h-full object-cover group-hover:scale-105 transition-transform"
-												/>
-												<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-													<Maximize2 size={16} />
-												</div>
-											</button>
-										{/if}
-									</div>
+						<!-- 1. BUKTI TRANSFER DP (OR FULL) -->
+						<div class="space-y-3">
+							<div class="flex items-center justify-between">
+								<span class="text-[11px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
+									{isFullPaymentScheme ? 'Tahap 1: Pembayaran Penuh (100% di Awal)' : `Tahap 1: Pembayaran DP (${project.downPaymentRequirement || '30% DP'})`}
+								</span>
+								{#if project.paymentStatus === 'settled'}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+										{isFullPaymentScheme ? 'Lunas 100% (Terverifikasi)' : 'Lunas 100%'}
+									</span>
+								{:else if project.paymentStatus === 'dp_paid'}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+										DP Terverifikasi
+									</span>
+								{:else if project.paymentProofUrl}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+										Menunggu Verifikasi {isFullPaymentScheme ? 'Pembayaran Penuh' : 'DP'}
+									</span>
+								{:else}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+										Belum Ada Bukti {isFullPaymentScheme ? 'Pembayaran' : 'DP'}
+									</span>
+								{/if}
+							</div>
 
-									<!-- Metadata & Sender info -->
-									<div class="space-y-1.5 flex-1 min-w-0 text-xs">
-										<div class="flex items-center gap-2">
-											<span class="font-bold text-zinc-900 dark:text-white">
-												{project.paymentProofBank || 'Bank Transfer'}
-											</span>
-											{#if project.paymentProofSenderName}
-												<span class="text-zinc-400">·</span>
-												<span class="text-zinc-600 dark:text-zinc-300 font-medium">{project.paymentProofSenderName}</span>
+							{#if project.paymentProofUrl}
+								<div class="p-4 bg-zinc-50/50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4">
+									<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+										<!-- Proof Thumbnail with Zoom -->
+										<div class="relative group">
+											{#if project.paymentProofUrl.startsWith('data:application/pdf') || project.paymentProofUrl.endsWith('.pdf')}
+												<div class="w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center text-zinc-500 shrink-0">
+													<FileText size={28} />
+													<span class="text-[9px] font-bold uppercase mt-1">PDF</span>
+												</div>
+											{:else}
+												<button
+													type="button"
+													onclick={() => openLightbox(project.paymentProofUrl!)}
+													class="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 relative cursor-pointer bg-zinc-100 dark:bg-zinc-800 block"
+													title="Klik untuk memperbesar bukti transfer"
+												>
+													<img
+														src={project.paymentProofUrl}
+														alt="Bukti Transfer DP Klien"
+														class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+													/>
+													<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+														<Maximize2 size={16} />
+													</div>
+												</button>
 											{/if}
 										</div>
 
-										<p class="text-[11px] text-zinc-500 dark:text-zinc-400">
-											Diunggah pada: <span class="text-zinc-700 dark:text-zinc-300 font-medium">{formatMeetingDateTime(project.paymentProofUploadedAt)}</span>
-										</p>
+										<!-- Metadata & Sender info -->
+										<div class="space-y-1.5 flex-1 min-w-0 text-xs">
+											<div class="flex items-center gap-2">
+												<span class="font-bold text-zinc-900 dark:text-white">
+													{project.paymentProofBank || 'Metode Pembayaran'}
+												</span>
+												{#if project.paymentProofSenderName}
+													<span class="text-zinc-400">·</span>
+													<span class="text-zinc-600 dark:text-zinc-300 font-medium">{project.paymentProofSenderName}</span>
+												{/if}
+											</div>
 
-										{#if project.paymentProofNotes}
-											<p class="text-[11px] text-zinc-600 dark:text-zinc-300 italic bg-white dark:bg-zinc-900 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
-												"{project.paymentProofNotes}"
+											<p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+												Diunggah pada: <span class="text-zinc-700 dark:text-zinc-300 font-medium">{formatMeetingDateTime(project.paymentProofUploadedAt)}</span>
 											</p>
-										{/if}
 
-										{#if project.paymentProofUrl.startsWith('http')}
-											<a
-												href={project.paymentProofUrl}
-												target="_blank"
-												rel="noopener noreferrer"
-												class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
-											>
-												<ExternalLink size={12} />
-												Buka file di tab baru
-											</a>
-										{/if}
+											{#if project.paymentProofNotes}
+												<p class="text-[11px] text-zinc-600 dark:text-zinc-300 italic bg-white dark:bg-zinc-900 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+													"{project.paymentProofNotes}"
+												</p>
+											{/if}
+
+											{#if project.paymentProofUrl.startsWith('http')}
+												<a
+													href={project.paymentProofUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
+												>
+													<ExternalLink size={12} />
+													Buka file di tab baru
+												</a>
+											{/if}
+										</div>
+									</div>
+
+									<!-- Verification Buttons -->
+									<div class="pt-3 border-t border-zinc-200/60 dark:border-zinc-800 flex flex-wrap items-center gap-2.5">
+										<button
+											type="submit"
+											form="verify-payment-dp-form"
+											disabled={isVerifyingPayment || project.paymentStatus === 'dp_paid' || project.paymentStatus === 'settled'}
+											class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+										>
+											<Check size={13} />
+											{isFullPaymentScheme ? 'Setujui Pembayaran Penuh (100%)' : 'Setujui Pembayaran DP'}
+										</button>
+
+										<button
+											type="submit"
+											form="reject-payment-dp-form"
+											disabled={isVerifyingPayment || project.paymentStatus === 'dp_paid' || project.paymentStatus === 'settled'}
+											class="px-3.5 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+										>
+											<X size={13} />
+											Tolak Bukti {isFullPaymentScheme ? 'Pembayaran' : 'DP'}
+										</button>
 									</div>
 								</div>
-
-								<!-- Quick Verification Buttons -->
-								<div class="pt-3 border-t border-zinc-200/60 dark:border-zinc-800 flex flex-wrap items-center gap-2.5">
-									<button
-										type="submit"
-										form="verify-payment-dp-form"
-										disabled={isVerifyingPayment || project.paymentStatus === 'dp_paid'}
-										class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-									>
-										<Check size={13} />
-										Setujui & Tandai DP Dibayar
-									</button>
-
-									<button
-										type="submit"
-										form="verify-payment-settled-form"
-										disabled={isVerifyingPayment || project.paymentStatus === 'settled'}
-										class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-									>
-										<CheckCircle2 size={13} />
-										Setujui & Tandai Lunas (100%)
-									</button>
+							{:else}
+								<div class="p-3.5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+									<CreditCard size={14} class="shrink-0" />
+									<span>Klien belum mengunggah bukti {isFullPaymentScheme ? 'pembayaran penuh 100%' : (project.downPaymentRequirement || 'transfer DP 30%')}.</span>
 								</div>
+							{/if}
+						</div>
+
+						<!-- 2. BUKTI TRANSFER PELUNASAN (SISA KONTRAK) -->
+						<div class="space-y-3 pt-2">
+							<div class="flex items-center justify-between">
+								<span class="text-[11px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
+									Tahap 2: Pelunasan Akhir (Sisa Kontrak)
+								</span>
+								{#if isFullPaymentScheme}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+										Bebas Tagihan (Skema Full)
+									</span>
+								{:else if project.paymentStatus === 'settled'}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+										Lunas 100%
+									</span>
+								{:else if project.finalPaymentProofUrl}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+										Menunggu Verifikasi Pelunasan
+									</span>
+								{:else}
+									<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+										Belum Ada Bukti Pelunasan
+									</span>
+								{/if}
 							</div>
-						{:else}
-							<div class="p-3.5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-								<CreditCard size={14} class="shrink-0" />
-								<span>Klien belum mengunggah bukti transfer melalui portal status proyek.</span>
-							</div>
-						{/if}
+
+							{#if isFullPaymentScheme}
+								<div class="p-3.5 rounded-xl border border-dashed border-emerald-500/30 bg-emerald-500/5 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+									<CheckCircle2 size={14} class="shrink-0 text-emerald-600 dark:text-emerald-400" />
+									<span>Klien menggunakan skema <strong>Bayar Penuh 100% di Awal</strong>. Tidak ada tagihan pelunasan di tahap 2.</span>
+								</div>
+							{:else if project.finalPaymentProofUrl}
+								<div class="p-4 bg-zinc-50/50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4">
+									<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+										<!-- Proof Thumbnail with Zoom -->
+										<div class="relative group">
+											{#if project.finalPaymentProofUrl.startsWith('data:application/pdf') || project.finalPaymentProofUrl.endsWith('.pdf')}
+												<div class="w-20 h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center text-zinc-500 shrink-0">
+													<FileText size={28} />
+													<span class="text-[9px] font-bold uppercase mt-1">PDF</span>
+												</div>
+											{:else}
+												<button
+													type="button"
+													onclick={() => openLightbox(project.finalPaymentProofUrl!)}
+													class="w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0 relative cursor-pointer bg-zinc-100 dark:bg-zinc-800 block"
+													title="Klik untuk memperbesar bukti transfer"
+												>
+													<img
+														src={project.finalPaymentProofUrl}
+														alt="Bukti Transfer Pelunasan Klien"
+														class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+													/>
+													<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+														<Maximize2 size={16} />
+													</div>
+												</button>
+											{/if}
+										</div>
+
+										<!-- Metadata & Sender info -->
+										<div class="space-y-1.5 flex-1 min-w-0 text-xs">
+											<div class="flex items-center gap-2">
+												<span class="font-bold text-zinc-900 dark:text-white">
+													{project.finalPaymentProofBank || 'Metode Pembayaran'}
+												</span>
+												{#if project.finalPaymentProofSenderName}
+													<span class="text-zinc-400">·</span>
+													<span class="text-zinc-600 dark:text-zinc-300 font-medium">{project.finalPaymentProofSenderName}</span>
+												{/if}
+											</div>
+
+											<p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+												Diunggah pada: <span class="text-zinc-700 dark:text-zinc-300 font-medium">{formatMeetingDateTime(project.finalPaymentProofUploadedAt)}</span>
+											</p>
+
+											{#if project.finalPaymentProofNotes}
+												<p class="text-[11px] text-zinc-600 dark:text-zinc-300 italic bg-white dark:bg-zinc-900 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+													"{project.finalPaymentProofNotes}"
+												</p>
+											{/if}
+
+											{#if project.finalPaymentProofUrl.startsWith('http')}
+												<a
+													href={project.finalPaymentProofUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
+												>
+													<ExternalLink size={12} />
+													Buka file di tab baru
+												</a>
+											{/if}
+										</div>
+									</div>
+
+									<!-- Verification Buttons -->
+									<div class="pt-3 border-t border-zinc-200/60 dark:border-zinc-800 flex flex-wrap items-center gap-2.5">
+										<button
+											type="submit"
+											form="verify-payment-settled-form"
+											disabled={isVerifyingPayment || project.paymentStatus === 'settled'}
+											class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+										>
+											<CheckCircle2 size={13} />
+											Setujui Pelunasan (Tandai Lunas 100%)
+										</button>
+
+										<button
+											type="submit"
+											form="reject-payment-settled-form"
+											disabled={isVerifyingPayment || project.paymentStatus === 'settled'}
+											class="px-3.5 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+										>
+											<X size={13} />
+											Tolak Bukti Pelunasan
+										</button>
+									</div>
+								</div>
+							{:else}
+								<div class="p-3.5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+									<CreditCard size={14} class="shrink-0" />
+									<span>Klien belum mengunggah bukti pelunasan sisa kontrak.</span>
+								</div>
+							{/if}
+						</div>
 					</div>
 				</div>
 
@@ -834,572 +1718,7 @@
 			</div>
 
 			<!-- Right Column: Actions side panel -->
-			<div class="flex flex-col gap-6 lg:w-1/3">
-				
-				<!-- ==========================================
-				    DYNAMIC ACTION CARDS (MORPHED BY STATUS)
-				    ========================================== -->
-
-				<!-- 1. STATUS: pending (Menunggu) -->
-				{#if $form.status === 'pending'}
-					{#if project.alreadyConsulted}
-						<div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400 text-xs space-y-1">
-							<span class="font-bold flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
-								<CheckCircle2 size={13} />
-								Sudah Konsultasi Sebelumnya
-							</span>
-							<p class="text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed">
-								Klien memilih opsi telah berkonsultasi sebelum mengisi formulir{project.consultationChannel ? ` (via ${project.consultationChannel})` : ''}. Anda dapat langsung menyiapkan proposal penawaran atau menjadwalkan Google Meet di bawah jika diperlukan.
-							</p>
-						</div>
-					{/if}
-					{#if project.meetingId && !isRescheduling}
-						<!-- Scheduled Consultation Session Details -->
-						<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.02] p-6 shadow-sm rounded-2xl">
-							<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10 flex flex-row items-center justify-between">
-								<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-									<CheckCircle2 class="h-4 w-4 shrink-0" />
-									Scheduled Session
-								</Card.Title>
-								<button
-									type="button"
-									onclick={() => (isRescheduling = true)}
-									class="text-[10px] font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
-								>
-									Reschedule
-								</button>
-							</Card.Header>
-							<Card.Content class="px-0 pt-4 space-y-4 text-left">
-								<div class="space-y-3">
-									<div>
-										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Date & Time</span>
-										<span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block mt-0.5">
-											{formatMeetingDateTime(project.consultationDate)}
-										</span>
-									</div>
-									<div>
-										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Google Meet Link</span>
-										<a
-											href={project.googleMeetLink}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="text-xs font-semibold text-blue-650 dark:text-blue-400 hover:underline block mt-0.5 break-all font-mono"
-										>
-											{project.googleMeetLink}
-										</a>
-									</div>
-									<div>
-										<span class="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Meeting ID Reference</span>
-										<code class="text-[10px] text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded block mt-0.5 font-mono select-all w-fit">
-											{project.meetingId}
-										</code>
-									</div>
-								</div>
-								<a
-									href={project.googleMeetLink}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 text-center text-xs"
-								>
-									<Globe class="h-4 w-4" />
-									Join Google Meet
-								</a>
-							</Card.Content>
-						</Card.Root>
-					{:else}
-						<!-- Meeting Scheduler Form -->
-						<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.02] p-6 shadow-sm rounded-2xl">
-							<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10 flex flex-row items-center justify-between">
-								<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-									<Calendar class="h-4.5 w-4.5" />
-									Schedule Consultation
-								</Card.Title>
-								{#if isRescheduling}
-									<button
-										type="button"
-										onclick={() => (isRescheduling = false)}
-										class="text-[10px] font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
-									>
-										Cancel
-									</button>
-								{/if}
-							</Card.Header>
-							<Card.Content class="px-0 pt-4 space-y-5 text-left">
-								<!-- Date selection -->
-								<div class="space-y-2">
-									<label for="meetDate" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-										Tanggal Meeting
-									</label>
-									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-										<input
-											id="meetDate"
-											type="date"
-											name="meetDate"
-											form="schedule-form"
-											bind:value={meetDate}
-											required
-											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
-										/>
-									</div>
-								</div>
-								
-								<!-- Time selection -->
-								<div class="space-y-2">
-									<label for="meetTime" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-										Jam Meeting (GMT+7)
-									</label>
-									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-										<input
-											id="meetTime"
-											type="time"
-											name="meetTime"
-											form="schedule-form"
-											bind:value={meetTime}
-											required
-											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
-										/>
-									</div>
-								</div>
-
-								<!-- Link selection -->
-								<div class="space-y-2">
-									<div class="flex items-center justify-between">
-										<label for="meetLink" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-											Google Meet Link / Code
-										</label>
-										<a
-											href="https://meet.new"
-											target="_blank"
-											rel="noopener noreferrer"
-											class="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-450 hover:underline cursor-pointer"
-										>
-											Create Meet (meet.new)
-										</a>
-									</div>
-									<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-										<input
-											id="meetLink"
-											type="text"
-											name="meetLink"
-											form="schedule-form"
-											bind:value={meetLink}
-											onblur={handleMeetLinkBlur}
-											placeholder="xxx-yyyy-zzz atau https://meet.google.com/xxx-yyyy-zzz"
-											required
-											class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-										/>
-									</div>
-								</div>
-								
-								<Button
-									type="submit"
-									form="schedule-form"
-									disabled={isScheduling}
-									class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{#if isScheduling}
-										<Spinner size={16} class="text-white" />
-										Scheduling...
-									{:else}
-										<Mail class="h-4 w-4" />
-										Schedule & Send Email
-									{/if}
-								</Button>
-							</Card.Content>
-						</Card.Root>
-					{/if}
-
-				<!-- 2. STATUS: consulted (Sudah Konsultasi) -->
-				{:else if $form.status === 'consulted'}
-					<Card.Root class="border border-blue-500/25 bg-blue-500/[0.01] p-6 shadow-sm rounded-2xl">
-						<Card.Header class="px-0 pt-0 pb-4 border-b border-blue-500/10">
-							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-								<Briefcase class="h-4.5 w-4.5" />
-								Proposal & Quotation
-							</Card.Title>
-						</Card.Header>
-						<Card.Content class="px-0 pt-4 space-y-5 text-left">
-							<div class="space-y-2">
-								<label for="proposalUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-405 dark:text-zinc-500">
-									Proposal / Scope URL
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="proposalUrl"
-										type="url"
-										name="proposalUrl"
-										form="proposal-form"
-										bind:value={$form.proposalUrl}
-										placeholder="https://notion.so/..."
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<label for="quotedPriceProposal" class="text-[10px] font-bold uppercase tracking-wider text-zinc-405 dark:text-zinc-500">
-									Finalized Price (Rp)
-								</label>
-								<div class="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<span class="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mr-2 select-none">Rp</span>
-									<input
-										id="quotedPriceProposal"
-										type="number"
-										min="0"
-										name="quotedPrice"
-										form="proposal-form"
-										bind:value={$form.quotedPrice}
-										placeholder="0"
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<div class="flex items-center justify-between">
-									<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-										DP Requirement
-									</span>
-									
-								</div>
-								<div class="flex items-center justify-between rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-3.5 py-2.5">
-									<div class="flex items-center gap-2">
-										<span class="text-sm font-semibold text-zinc-900 dark:text-white">
-											Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')}
-										</span>
-									</div>
-									<span class="text-xs text-zinc-400 dark:text-zinc-500 font-medium">
-										30% dari {($form.quotedPrice && $form.quotedPrice > 0) ? 'Rp ' + Number($form.quotedPrice).toLocaleString('id-ID') : 'Rp 0'}
-									</span>
-								</div>
-								<input
-									type="hidden"
-									name="downPaymentRequirement"
-									form="proposal-form"
-									value="30% DP (Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')})"
-								/>
-							</div>
-
-							<Button
-								type="submit"
-								form="proposal-form"
-								disabled={isSendingProposal}
-								class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if isSendingProposal}
-									<Spinner size={16} class="text-white" />
-									Sending...
-								{:else}
-									<Briefcase class="h-4 w-4" />
-									Send Proposal & DP Invoice
-								{/if}
-							</Button>
-						</Card.Content>
-					</Card.Root>
-
-				<!-- 3. STATUS: in_progress (Dalam Pengerjaan) -->
-				{:else if $form.status === 'in_progress'}
-					<Card.Root class="border border-purple-500/25 bg-purple-500/[0.01] p-6 shadow-sm rounded-2xl">
-						<Card.Header class="px-0 pt-0 pb-4 border-b border-purple-500/10">
-							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-								<Rocket class="h-4.5 w-4.5" />
-								Development Workspace
-							</Card.Title>
-						</Card.Header>
-						<Card.Content class="px-0 pt-4 space-y-5 text-left">
-							<div class="space-y-2">
-								<label for="repoLink" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Repository URL
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="repoLink"
-										type="url"
-										name="repoLink"
-										form="progress-form"
-										bind:value={$form.repoLink}
-										placeholder="https://github.com/..."
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<label for="stagingUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Staging Server URL
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="stagingUrl"
-										type="url"
-										name="stagingUrl"
-										form="progress-form"
-										bind:value={$form.stagingUrl}
-										placeholder="https://staging.mewmewwo.com"
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<label for="managementBoardUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Task Management Board
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="managementBoardUrl"
-										type="url"
-										name="managementBoardUrl"
-										form="progress-form"
-										bind:value={$form.managementBoardUrl}
-										placeholder="https://linear.app/..."
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<Button
-								type="submit"
-								form="progress-form"
-								disabled={isPushingProgress}
-								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if isPushingProgress}
-									<Spinner size={16} class="text-white" />
-									Updating...
-								{:else}
-									<Rocket class="h-4 w-4" />
-									Push Progress Update
-								{/if}
-							</Button>
-						</Card.Content>
-					</Card.Root>
-
-				<!-- 4. STATUS: review (Dalam Review) -->
-				{:else if $form.status === 'review'}
-					<Card.Root class="border border-orange-500/25 bg-orange-500/[0.01] p-6 shadow-sm rounded-2xl">
-						<Card.Header class="px-0 pt-0 pb-4 border-b border-orange-500/10">
-							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-								<Beaker class="h-4.5 w-4.5" />
-								QA & Client Review
-							</Card.Title>
-						</Card.Header>
-						<Card.Content class="px-0 pt-4 space-y-5 text-left">
-							
-							{#if $form.stagingUrl}
-								<div>
-									<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1.5">Staging Environment</span>
-									<a
-										href={$form.stagingUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-orange-500/20 bg-orange-500/5 text-xs text-orange-605 dark:text-orange-400 font-semibold hover:bg-orange-500/10 transition-colors"
-									>
-										Open Staging Site
-										<ExternalLink size={12} />
-									</a>
-								</div>
-							{/if}
-
-							<div class="space-y-2">
-								<label for="feedbackTrackerUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Feedback Tracker URL
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="feedbackTrackerUrl"
-										type="url"
-										name="feedbackTrackerUrl"
-										form="signoff-form"
-										bind:value={$form.feedbackTrackerUrl}
-										placeholder="https://loom.com/..."
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Milestones Completed</span>
-								<div class="space-y-1.5 text-xs">
-									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-										<input
-											type="checkbox"
-											name="milestoneFrontendComplete"
-											form="signoff-form"
-											value="true"
-											bind:checked={$form.milestoneFrontendComplete}
-											class="rounded border-zinc-300 dark:border-zinc-750 text-orange-600 focus:ring-orange-500 bg-transparent"
-										/>
-										Frontend Complete
-									</label>
-									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-										<input
-											type="checkbox"
-											name="milestoneDbSynced"
-											form="signoff-form"
-											value="true"
-											bind:checked={$form.milestoneDbSynced}
-											class="rounded border-zinc-300 dark:border-zinc-755 text-orange-600 focus:ring-orange-500 bg-transparent"
-										/>
-										Database Synced
-									</label>
-									<label class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-										<input
-											type="checkbox"
-											name="milestonePaymentVerified"
-											form="signoff-form"
-											value="true"
-											bind:checked={$form.milestonePaymentVerified}
-											class="rounded border-zinc-300 dark:border-zinc-755 text-orange-600 focus:ring-orange-500 bg-transparent"
-										/>
-										Payment Gateway Verified
-									</label>
-								</div>
-							</div>
-
-							<Button
-								type="submit"
-								form="signoff-form"
-								disabled={isRequestingSignoff}
-								class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if isRequestingSignoff}
-									<Spinner size={16} class="text-white" />
-									Requesting...
-								{:else}
-									<Beaker class="h-4 w-4" />
-									Request Form Sign-Off
-								{/if}
-							</Button>
-						</Card.Content>
-					</Card.Root>
-
-				<!-- 5. STATUS: completed (Selesai) -->
-				{:else if $form.status === 'completed'}
-					<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.01] p-6 shadow-sm rounded-2xl">
-						<Card.Header class="px-0 pt-0 pb-4 border-b border-emerald-500/10">
-							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-								<Gift class="h-4.5 w-4.5" />
-								Project Handover
-							</Card.Title>
-						</Card.Header>
-						<Card.Content class="px-0 pt-4 space-y-5 text-left">
-							<div class="space-y-2">
-								<label for="productionUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Production Live URL
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="productionUrl"
-										type="url"
-										name="productionUrl"
-										form="handover-form"
-										bind:value={$form.productionUrl}
-										placeholder="https://mewmewwo.com"
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div class="space-y-2">
-								<label for="codebaseTransferUrl" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Codebase ZIP / Repo Link
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2.5">
-									<input
-										id="codebaseTransferUrl"
-										type="url"
-										name="codebaseTransferUrl"
-										form="handover-form"
-										bind:value={$form.codebaseTransferUrl}
-										placeholder="https://github.com/transfers/..."
-										required
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									/>
-								</div>
-							</div>
-
-							<div>
-								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Warranty Support Period</span>
-								<span class="text-xs text-zinc-600 dark:text-zinc-400 block font-semibold">
-									Free Support Ends: {project.warrantyEndDate || getWarrantyExpiryDate()}
-								</span>
-							</div>
-
-							<Button
-								type="submit"
-								form="handover-form"
-								disabled={isSendingHandover}
-								class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if isSendingHandover}
-									<Spinner size={16} class="text-white" />
-									Sending...
-								{:else}
-									<Gift class="h-4 w-4" />
-									Send Handover Package
-								{/if}
-							</Button>
-						</Card.Content>
-					</Card.Root>
-
-				<!-- 6. STATUS: rejected (Ditolak) & archived (Diarsipkan) -->
-				{:else if $form.status === 'rejected' || $form.status === 'archived'}
-					<Card.Root class="border border-zinc-500/25 bg-zinc-500/[0.01] p-6 shadow-sm rounded-2xl">
-						<Card.Header class="px-0 pt-0 pb-4 border-b border-zinc-500/10">
-							<Card.Title class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
-								<FolderArchive class="h-4.5 w-4.5" />
-								Archived Lead
-							</Card.Title>
-						</Card.Header>
-						<Card.Content class="px-0 pt-4 space-y-5 text-left">
-							<div class="space-y-2">
-								<label for="archiveReason" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-									Reason for Rejection / Archive
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-3">
-									<textarea
-										id="archiveReason"
-										name="archiveReason"
-										bind:value={$form.archiveReason}
-										placeholder="Budget mismatch, timeline issues..."
-										class="w-full min-h-[80px] bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
-									></textarea>
-								</div>
-							</div>
-
-							<div>
-								<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block mb-1">Archive State Log</span>
-								<span class="text-xs text-zinc-600 dark:text-zinc-400 block font-semibold">
-									Lead closed on: {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID')}
-								</span>
-							</div>
-
-							<Button
-								type="submit"
-								form="restore-form"
-								disabled={isRestoring}
-								class="w-full bg-zinc-800 hover:bg-zinc-700 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if isRestoring}
-									<Spinner size={16} class="text-white dark:text-zinc-950" />
-									Restoring...
-								{:else}
-									<FolderArchive class="h-4 w-4" />
-									Restore to Active Leads
-								{/if}
-							</Button>
-						</Card.Content>
-					</Card.Root>
-				{/if}
-
+			<div class="flex flex-col gap-6 lg:w-1/3 lg:sticky lg:top-24 h-fit">
 				<!-- Standard Project Action Updates Card -->
 				<Card.Root class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 shadow-sm rounded-2xl">
 					<Card.Header class="px-0 pt-0 pb-4 border-b border-zinc-100 dark:border-zinc-900">
@@ -1541,7 +1860,7 @@
 <!-- ==========================================
     MODAL: LIGHTBOX ZOOM BUKTI PEMBAYARAN
     ========================================== -->
-{#if showProofLightbox && project.paymentProofUrl}
+{#if showProofLightbox && lightboxImage}
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" transition:fade={{ duration: 150 }}>
 		<button
 			type="button"
@@ -1554,7 +1873,7 @@
 
 		<div class="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl">
 			<img
-				src={project.paymentProofUrl}
+				src={lightboxImage}
 				alt="Bukti Transfer Klien"
 				class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
 			/>

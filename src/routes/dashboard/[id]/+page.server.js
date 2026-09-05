@@ -126,6 +126,7 @@ export const actions = {
 
     const data = await request.formData();
     const proposalUrl = data.get('proposalUrl')?.toString() || '';
+    const brdUrl = data.get('brdUrl')?.toString() || '';
     const quotedPriceVal = data.get('quotedPrice');
     const quotedPrice = quotedPriceVal ? Number(quotedPriceVal) : 0;
     const downPaymentRequirement = data.get('downPaymentRequirement')?.toString() || (quotedPrice > 0 ? `30% DP (Rp ${Math.round(quotedPrice * 0.3).toLocaleString('id-ID')})` : '30% DP');
@@ -139,6 +140,7 @@ export const actions = {
       await dbService.updateConsultation(params.id, {
         status: 'consulted',
         proposalUrl,
+        brdUrl,
         quotedPrice,
         downPaymentRequirement
       });
@@ -170,6 +172,8 @@ export const actions = {
     const repoLink = data.get('repoLink')?.toString() || '';
     const stagingUrl = data.get('stagingUrl')?.toString() || '';
     const managementBoardUrl = data.get('managementBoardUrl')?.toString() || '';
+    const figmaUrl = data.get('figmaUrl')?.toString() || '';
+    const brdUrl = data.get('brdUrl')?.toString() || '';
 
     const project = await dbService.getConsultation(params.id);
     if (!project) {
@@ -177,12 +181,20 @@ export const actions = {
     }
 
     try {
-      await dbService.updateConsultation(params.id, {
+      /** @type {Record<string, any>} */
+      const updatePayload = {
         status: 'in_progress',
         repoLink,
         stagingUrl,
-        managementBoardUrl
-      });
+        managementBoardUrl,
+        figmaUrl
+      };
+
+      if (brdUrl) {
+        updatePayload.brdUrl = brdUrl;
+      }
+
+      await dbService.updateConsultation(params.id, updatePayload);
 
       if (project.contactEmail) {
         await emailService.sendProgressUpdateEmail(
@@ -209,6 +221,11 @@ export const actions = {
 
     const data = await request.formData();
     const feedbackTrackerUrl = data.get('feedbackTrackerUrl')?.toString() || '';
+    const stagingCredentialsEmail = data.get('stagingCredentialsEmail')?.toString() || '';
+    const stagingCredentialsPassword = data.get('stagingCredentialsPassword')?.toString() || '';
+    const stagingCredentialsRole = data.get('stagingCredentialsRole')?.toString() || 'Client / QA Tester';
+    const revisionRound = data.get('revisionRound') ? Number(data.get('revisionRound')) : 1;
+    const revisionMaxRounds = data.get('revisionMaxRounds') ? Number(data.get('revisionMaxRounds')) : 3;
     const milestoneFrontendComplete = data.get('milestoneFrontendComplete') === 'true';
     const milestoneDbSynced = data.get('milestoneDbSynced') === 'true';
     const milestonePaymentVerified = data.get('milestonePaymentVerified') === 'true';
@@ -222,6 +239,11 @@ export const actions = {
       await dbService.updateConsultation(params.id, {
         status: 'review',
         feedbackTrackerUrl,
+        stagingCredentialsEmail,
+        stagingCredentialsPassword,
+        stagingCredentialsRole,
+        revisionRound,
+        revisionMaxRounds,
         milestoneFrontendComplete,
         milestoneDbSynced,
         milestonePaymentVerified
@@ -327,13 +349,41 @@ export const actions = {
     }
 
     const data = await request.formData();
-    const paymentStatus = data.get('paymentStatus')?.toString() || 'dp_paid';
+    const paymentType = data.get('paymentType')?.toString() || 'dp'; // 'dp' | 'final'
+    const actionType = data.get('actionType')?.toString() || 'approve'; // 'approve' | 'reject'
+    const paymentStatus = data.get('paymentStatus')?.toString();
 
     try {
-      await dbService.updateConsultation(params.id, {
-        paymentStatus,
-        milestonePaymentVerified: true
-      });
+      if (actionType === 'reject') {
+        if (paymentType === 'final') {
+          await dbService.updateConsultation(params.id, {
+            finalPaymentProofUrl: '',
+            finalPaymentProofNotes: 'Bukti pelunasan ditolak oleh admin. Silakan periksa atau upload ulang bukti transfer yang sah.'
+          });
+        } else {
+          await dbService.updateConsultation(params.id, {
+            paymentProofUrl: '',
+            paymentProofNotes: 'Bukti transfer DP ditolak oleh admin. Silakan periksa atau upload ulang bukti transfer yang valid.',
+            paymentStatus: 'unpaid'
+          });
+        }
+      } else {
+        // approve
+        if (paymentType === 'final') {
+          await dbService.updateConsultation(params.id, {
+            paymentStatus: 'settled',
+            milestonePaymentVerified: true
+          });
+        } else {
+          const project = await dbService.getConsultation(params.id);
+          const req = (project?.downPaymentRequirement || '').toLowerCase();
+          const isFullPayment = req.includes('full') || req.includes('100%');
+          await dbService.updateConsultation(params.id, {
+            paymentStatus: paymentStatus || (isFullPayment ? 'settled' : 'dp_paid'),
+            milestonePaymentVerified: true
+          });
+        }
+      }
     } catch (e) {
       console.error('Error verifying payment:', e);
       return fail(500, { error: 'Gagal memperbarui status pembayaran.' });
