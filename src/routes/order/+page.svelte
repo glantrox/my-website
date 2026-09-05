@@ -10,7 +10,16 @@
         Info, 
         User, 
         Mail,
-        ChevronRight
+        ChevronRight,
+        CalendarDays,
+        MessageSquareCheck,
+        CheckCircle2,
+        Search,
+        Check,
+        XCircle,
+        Sparkles,
+        AlertCircle,
+        Phone
     } from "lucide-svelte";
     import { Button } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
@@ -24,6 +33,12 @@
 
     let isSubmitting = $state(false);
     let activeToastId = $state("");
+
+    // Domain Check state
+    let domainSearchInput = $state(data.form?.data?.requestedDomain || '');
+    let isCheckingDomain = $state(false);
+    let domainCheckResult = $state<any>(null);
+    let domainCheckError = $state('');
 
     // Initialize superForm
     const { form, errors, enhance, message } = superForm(data.form, {
@@ -53,6 +68,48 @@
 
     // Initialize domain state class with superform store
     const consultationState = initConsultationState(form);
+
+    // Initialize domainSetupType if not yet set
+    $effect(() => {
+        if (consultationState.serviceType === 'web_service' && (!consultationState.domainSetupType || consultationState.domainSetupType === 'none')) {
+            consultationState.domainSetupType = 'new_domain';
+        }
+    });
+
+    async function handleCheckDomain() {
+        const query = (domainSearchInput || '').trim();
+        if (!query) {
+            domainCheckError = 'Silakan ketik nama domain yang ingin dicari (contoh: bisnisanda.com)';
+            return;
+        }
+        isCheckingDomain = true;
+        domainCheckError = '';
+        domainCheckResult = null;
+        try {
+            const res = await fetch(`/api/domain-check?domain=${encodeURIComponent(query)}`);
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Gagal memeriksa domain');
+            }
+            const data = await res.json();
+            domainCheckResult = data;
+            if (data.primary) {
+                consultationState.requestedDomain = data.primary.domain;
+                consultationState.domainEstimatedPrice = data.primary.priceFormatted;
+            }
+        } catch (err: any) {
+            domainCheckError = err.message || 'Terjadi kesalahan saat memeriksa domain';
+        } finally {
+            isCheckingDomain = false;
+        }
+    }
+
+    function selectDomain(domain: string, priceFormatted: string) {
+        consultationState.requestedDomain = domain;
+        consultationState.domainEstimatedPrice = priceFormatted;
+        domainSearchInput = domain;
+        toast.success(`Domain ${domain} dipilih!`);
+    }
 
     function goBack() {
         consultationState.step = 1;
@@ -164,6 +221,23 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-2" id="contactPhone">
+                                    <Label for="contactPhoneInput">Nomor HP / WhatsApp</Label>
+                                    <div class="relative">
+                                        <Input 
+                                            type="tel" 
+                                            id="contactPhoneInput" 
+                                            name="contactPhone" 
+                                            bind:value={consultationState.contactPhone} 
+                                            placeholder="e.g. 081234567890 / +6281234567890" 
+                                        />
+                                        <span class="absolute right-3 top-3 text-zinc-400"><Phone size={16} /></span>
+                                    </div>
+                                    {#if consultationState.errors.contactPhone || $errors.contactPhone}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.contactPhone || $errors.contactPhone}</p>
+                                    {/if}
+                                </div>
+
                                 <div class="space-y-2" id="companyName">
                                     <Label for="companyNameInput">Nama Perusahaan / Organisasi</Label>
                                     <Input 
@@ -177,7 +251,9 @@
                                         <p class="text-xs text-destructive mt-1">{consultationState.errors.companyName || $errors.companyName}</p>
                                     {/if}
                                 </div>
+                            </div>
 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div class="space-y-2" id="industry">
                                     <Label for="industryInput">Bidang Industri / Sektor</Label>
                                     <Input 
@@ -191,23 +267,23 @@
                                         <p class="text-xs text-destructive mt-1">{consultationState.errors.industry || $errors.industry}</p>
                                     {/if}
                                 </div>
-                            </div>
 
-                            <div class="space-y-2" id="websiteUrl">
-                                <Label for="websiteUrlInput">URL Platform / Website Saat Ini (Jika ada)</Label>
-                                <div class="relative">
-                                    <Input 
-                                        type="text" 
-                                        id="websiteUrlInput" 
-                                        name="websiteUrl" 
-                                        bind:value={consultationState.websiteUrl} 
-                                        placeholder="https://company.com" 
-                                    />
-                                    <span class="absolute right-3 top-3 text-zinc-400"><Globe size={16} /></span>
+                                <div class="space-y-2" id="websiteUrl">
+                                    <Label for="websiteUrlInput">URL Platform / Website Saat Ini (Jika ada)</Label>
+                                    <div class="relative">
+                                        <Input 
+                                            type="text" 
+                                            id="websiteUrlInput" 
+                                            name="websiteUrl" 
+                                            bind:value={consultationState.websiteUrl} 
+                                            placeholder="https://company.com" 
+                                        />
+                                        <span class="absolute right-3 top-3 text-zinc-400"><Globe size={16} /></span>
+                                    </div>
+                                    {#if consultationState.errors.websiteUrl || $errors.websiteUrl}
+                                        <p class="text-xs text-destructive mt-1">{consultationState.errors.websiteUrl || $errors.websiteUrl}</p>
+                                    {/if}
                                 </div>
-                                {#if consultationState.errors.websiteUrl || $errors.websiteUrl}
-                                    <p class="text-xs text-destructive mt-1">{consultationState.errors.websiteUrl || $errors.websiteUrl}</p>
-                                {/if}
                             </div>
                         </Card.Content>
                     </Card.Root>
@@ -280,6 +356,259 @@
                                     <p class="text-xs text-destructive mt-1">{consultationState.errors.coreObjective || $errors.coreObjective}</p>
                                 {/if}
                             </div>
+
+                            <!-- Domain Request Form (Only if Website Service) -->
+                            {#if consultationState.serviceType === 'web_service'}
+                                <div class="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/[0.03] dark:bg-blue-500/[0.02] space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <Globe class="w-4 h-4 text-blue-500" />
+                                            <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                                                Permintaan Domain Website
+                                            </span>
+                                        </div>
+                                        
+                                    </div>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                                        Tentukan domain yang Anda inginkan. Anda dapat mendaftarkan domain baru bersama kami, menggunakan domain yang sudah ada, atau berdiskusi saat sesi konsultasi.
+                                    </p>
+
+                                    <!-- Option Selection Tabs -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <button
+                                            type="button"
+                                            onclick={() => {
+                                                consultationState.domainSetupType = 'new_domain';
+                                                if (!consultationState.requestedDomain && domainSearchInput) {
+                                                    consultationState.requestedDomain = domainSearchInput;
+                                                }
+                                            }}
+                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'new_domain' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
+                                        >
+                                            <span class="text-xs font-bold flex items-center gap-1.5">
+                                                <Sparkles size={12} class="text-blue-500" />
+                                                Beli Domain Baru
+                                            </span>
+                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                Cek ketersediaan & harga
+                                            </span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onclick={() => {
+                                                consultationState.domainSetupType = 'existing_domain';
+                                                consultationState.domainEstimatedPrice = 'Rp 0 (Milik Sendiri)';
+                                            }}
+                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'existing_domain' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
+                                        >
+                                            <span class="text-xs font-bold flex items-center gap-1.5">
+                                                <CheckCircle2 size={12} class="text-emerald-500" />
+                                                Sudah Punya Domain
+                                            </span>
+                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                Tinggal pointing DNS (Gratis)
+                                            </span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onclick={() => {
+                                                consultationState.domainSetupType = 'need_consultation';
+                                                consultationState.requestedDomain = 'Diskusikan saat konsultasi';
+                                                consultationState.domainEstimatedPrice = 'Akan diestimasi';
+                                            }}
+                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'need_consultation' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
+                                        >
+                                            <span class="text-xs font-bold flex items-center gap-1.5">
+                                                <MessageSquareCheck size={12} class="text-amber-500" />
+                                                Butuh Rekomendasi
+                                            </span>
+                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                Saran saat konsultasi
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Panel 1: Beli Domain Baru -->
+                                    {#if consultationState.domainSetupType === 'new_domain'}
+                                        <div class="space-y-3 pt-1">
+                                            <div class="flex flex-col sm:flex-row gap-2">
+                                                <div class="relative flex-1">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Ketik nama domain impian (e.g. brandanda.com / bisnis.id)"
+                                                        bind:value={domainSearchInput}
+                                                        oninput={() => {
+                                                            consultationState.requestedDomain = domainSearchInput;
+                                                        }}
+                                                        onkeydown={(e: KeyboardEvent) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                handleCheckDomain();
+                                                            }
+                                                        }}
+                                                        class="w-full pr-10 font-mono text-sm"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    disabled={isCheckingDomain}
+                                                    onclick={handleCheckDomain}
+                                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                                                >
+                                                    {#if isCheckingDomain}
+                                                        <Spinner size={14} class="text-white" />
+                                                        Mengecek...
+                                                    {:else}
+                                                        <Search size={14} />
+                                                        Cek Domain & Harga
+                                                    {/if}
+                                                </Button>
+                                            </div>
+
+                                            {#if domainCheckError}
+                                                <div class="p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+                                                    <AlertCircle size={14} class="shrink-0" />
+                                                    <span>{domainCheckError}</span>
+                                                </div>
+                                            {/if}
+
+                                            {#if domainCheckResult}
+                                                <!-- Primary Domain Result Card -->
+                                                <div class="p-4 rounded-xl border {domainCheckResult.primary.available ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-amber-500/30 bg-amber-500/[0.04]'} space-y-3">
+                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                        <div class="space-y-0.5">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="text-base font-bold font-mono text-zinc-900 dark:text-white">
+                                                                    {domainCheckResult.primary.domain}
+                                                                </span>
+                                                                {#if domainCheckResult.primary.available === true}
+                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                                                                        <Check size={11} /> Tersedia
+                                                                    </span>
+                                                                {:else if domainCheckResult.primary.available === false}
+                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-1">
+                                                                        <XCircle size={11} /> Sudah Digunakan
+                                                                    </span>
+                                                                {:else}
+                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                                                                        Cek Manual
+                                                                    </span>
+                                                                {/if}
+                                                            </div>
+                                                            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                                                                {domainCheckResult.primary.note}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="text-left sm:text-right">
+                                                            <span class="text-sm font-bold text-zinc-900 dark:text-white block">
+                                                                {domainCheckResult.primary.priceFormatted}
+                                                            </span>
+                                                            <span class="text-[10px] text-zinc-400">Estimasi registrasi 1 tahun</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {#if domainCheckResult.primary.available === true}
+                                                        <div class="pt-2 border-t border-emerald-500/20 flex items-center justify-between">
+                                                            <span class="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                                                                ✓ Domain ini terpilih untuk briefing proyek Anda
+                                                            </span>
+                                                        </div>
+                                                    {/if}
+                                                </div>
+
+                                                <!-- Suggestions / Alternatives Grid -->
+                                                {#if domainCheckResult.suggestions && domainCheckResult.suggestions.length > 0}
+                                                    <div class="space-y-2 pt-2">
+                                                        <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block">
+                                                            Rekomendasi Ekstensi Lain:
+                                                        </span>
+                                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            {#each domainCheckResult.suggestions as item}
+                                                                <label class="p-3 rounded-xl border {consultationState.requestedDomain === item.domain ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/30 ring-1 ring-blue-500/20' : 'border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/60'} flex items-center justify-between gap-3 hover:border-blue-500/40 transition-all {item.available === false ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}">
+                                                                    <div class="space-y-0.5 min-w-0">
+                                                                        <div class="flex items-center gap-1.5">
+                                                                            <span class="text-xs font-bold font-mono truncate text-zinc-900 dark:text-white">
+                                                                                {item.domain}
+                                                                            </span>
+                                                                            {#if item.available === false}
+                                                                                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 shrink-0">
+                                                                                    Terpakai
+                                                                                </span>
+                                                                            {/if}
+                                                                        </div>
+                                                                        <span class="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 block">
+                                                                            {item.priceFormatted}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="selectedDomainSuggestion"
+                                                                        disabled={item.available === false}
+                                                                        checked={consultationState.requestedDomain === item.domain}
+                                                                        onchange={() => {
+                                                                            if (item.available !== false) {
+                                                                                selectDomain(item.domain, item.priceFormatted);
+                                                                            }
+                                                                        }}
+                                                                        class="h-4 w-4 text-blue-600 border-zinc-300 dark:border-zinc-700 focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                                                                    />
+                                                                </label>
+                                                            {/each}
+                                                        </div>
+                                                    </div>
+                                                {/if}
+                                            {/if}
+                                        </div>
+
+                                    <!-- Panel 2: Sudah Punya Domain Sendiri -->
+                                    {:else if consultationState.domainSetupType === 'existing_domain'}
+                                        <div class="space-y-3 pt-1">
+                                            <div class="space-y-1">
+                                                <Label for="existingDomainInput" class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                                                    Nama Domain yang Sudah Dimiliki
+                                                </Label>
+                                                <Input
+                                                    type="text"
+                                                    id="existingDomainInput"
+                                                    placeholder="e.g. perusahaananda.com"
+                                                    bind:value={consultationState.requestedDomain}
+                                                    class="font-mono text-sm"
+                                                />
+                                            </div>
+                                            <div class="p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-700 dark:text-blue-300 text-xs leading-relaxed space-y-1">
+                                                <span class="font-bold flex items-center gap-1">
+                                                    <CheckCircle2 size={12} />
+                                                    Setup DNS & SSL Gratis
+                                                </span>
+                                                <p class="text-zinc-600 dark:text-zinc-400 text-[11px]">
+                                                    Anda tidak perlu mengeluarkan biaya pendaftaran domain lagi. Tim kami akan memberikan panduan praktis untuk menghubungkan (pointing) DNS A Record atau CNAME domain Anda ke server kami saat website siap rilis.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    <!-- Panel 3: Butuh Saran / Belum Tahu -->
+                                    {:else if consultationState.domainSetupType === 'need_consultation'}
+                                        <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-zinc-600 dark:text-zinc-400 space-y-1 leading-relaxed">
+                                            <span class="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                                                <MessageSquareCheck size={13} />
+                                                Konsultasikan Nama & Ekstensi Terbaik
+                                            </span>
+                                            <p class="text-[11px] text-zinc-600 dark:text-zinc-400">
+                                                Kami akan membantu meriset dan memberikan rekomendasi nama domain yang berbobot, mudah diingat, serta sesuai dengan target audiens & regulasi bisnis Anda pada saat sesi konsultasi.
+                                            </p>
+                                        </div>
+                                    {/if}
+
+                                    <!-- Hidden Inputs for Form Submission -->
+                                    <input type="hidden" name="requestedDomain" value={consultationState.requestedDomain} />
+                                    <input type="hidden" name="domainSetupType" value={consultationState.domainSetupType} />
+                                    <input type="hidden" name="domainEstimatedPrice" value={consultationState.domainEstimatedPrice} />
+                                </div>
+                            {/if}
 
                             <!-- Dynamic Scope Checkboxes -->
                             <div class="space-y-3" id="keyFeatures">
@@ -400,70 +729,211 @@
                         <Card.Header>
                             <Card.Title class="flex items-center gap-2 text-lg text-zinc-800 dark:text-zinc-200">
                                 <Calendar class="w-5 h-5 text-blue-500" />
-                                Pilih Jadwal Pertemuan Konsultasi
+                                {consultationState.alreadyConsulted ? 'Konfirmasi Briefing & Konsultasi' : 'Pilih Jadwal Pertemuan Konsultasi'}
                             </Card.Title>
                             <Card.Description>
-                                Tentukan tanggal dan waktu yang nyaman bagi Anda untuk sesi diskusi teknis 1-on-1 (via Google Meet).
+                                {consultationState.alreadyConsulted 
+                                    ? 'Lengkapi catatan diskusi sebelumnya untuk langsung memproses penawaran dan spesifikasi proyek.' 
+                                    : 'Tentukan tanggal dan waktu yang nyaman bagi Anda untuk sesi diskusi teknis 1-on-1 (via Google Meet).'}
                             </Card.Description>
                         </Card.Header>
                         <Card.Content class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Date Input -->
-                                <div class="space-y-2">
-                                    <Label for="consultationDateInput">Tanggal Pertemuan yang Diinginkan <span class="text-red-500">*</span></Label>
-                                    <Input 
-                                        type="date" 
-                                        id="consultationDateInput" 
-                                        name="consultationDate" 
-                                        bind:value={consultationState.consultationDate} 
-                                        min={new Date().toISOString().split('T')[0]}
-                                        required
-                                        class="cursor-pointer"
-                                    />
-                                    {#if $errors.consultationDate}
-                                        <p class="text-xs text-destructive mt-1">{$errors.consultationDate}</p>
-                                    {/if}
-                                </div>
+                            <!-- Hidden inputs for superform state -->
+                            <input type="hidden" name="alreadyConsulted" value={consultationState.alreadyConsulted ? 'true' : 'false'} />
 
-                                <!-- Time Slot Selection -->
-                                <div class="space-y-2">
-                                    <Label for="consultationTimeSelect">Pilihan Jam / Slot Waktu (WIB)</Label>
-                                    <select 
-                                        id="consultationTimeSelect"
-                                        name="consultationTime" 
-                                        bind:value={consultationState.consultationTime} 
-                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800 cursor-pointer"
+                            <!-- Consultation Mode Selection -->
+                            <div class="space-y-3">
+                                <Label class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Status Konsultasi Proyek:</Label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- Option 1: Jadwalkan Baru -->
+                                    <button
+                                        type="button"
+                                        onclick={() => { consultationState.alreadyConsulted = false; }}
+                                        class="flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer select-none {
+                                            !consultationState.alreadyConsulted 
+                                                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-xs ring-1 ring-blue-500/30' 
+                                                : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                        }"
                                     >
-                                        <option value="09:00 - 10:00 WIB">Pagi (09:00 - 10:00 WIB)</option>
-                                        <option value="10:00 - 11:00 WIB">Pagi (10:00 - 11:00 WIB)</option>
-                                        <option value="13:30 - 14:30 WIB">Siang (13:30 - 14:30 WIB)</option>
-                                        <option value="15:30 - 16:30 WIB">Sore (15:30 - 16:30 WIB)</option>
-                                        <option value="19:30 - 20:30 WIB">Malam (19:30 - 20:30 WIB)</option>
-                                        <option value="flexible">Fleksibel / Sesuai Kesepakatan</option>
-                                    </select>
+                                        <div class="p-2 rounded-lg shrink-0 mt-0.5 {!consultationState.alreadyConsulted ? 'bg-blue-500 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}">
+                                            <CalendarDays size={18} />
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-bold {!consultationState.alreadyConsulted ? 'text-blue-900 dark:text-blue-300' : 'text-zinc-800 dark:text-zinc-200'}">
+                                                    Jadwalkan Konsultasi Baru
+                                                </span>
+                                                {#if !consultationState.alreadyConsulted}
+                                                    <CheckCircle2 size={14} class="text-blue-600 dark:text-blue-400" />
+                                                {/if}
+                                            </div>
+                                            <p class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">
+                                                Pilih tanggal & waktu luang untuk sesi meeting 1-on-1 via Google Meet.
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    <!-- Option 2: Sudah Konsultasi Sebelumnya -->
+                                    <button
+                                        type="button"
+                                        onclick={() => { consultationState.alreadyConsulted = true; }}
+                                        class="flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer select-none {
+                                            consultationState.alreadyConsulted 
+                                                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-xs ring-1 ring-blue-500/30' 
+                                                : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                        }"
+                                    >
+                                        <div class="p-2 rounded-lg shrink-0 mt-0.5 {consultationState.alreadyConsulted ? 'bg-blue-500 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}">
+                                            <MessageSquareCheck size={18} />
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-bold {consultationState.alreadyConsulted ? 'text-blue-900 dark:text-blue-300' : 'text-zinc-800 dark:text-zinc-200'}">
+                                                    Sudah Berkonsultasi
+                                                </span>
+                                                {#if consultationState.alreadyConsulted}
+                                                    <CheckCircle2 size={14} class="text-blue-600 dark:text-blue-400" />
+                                                {/if}
+                                            </div>
+                                            <p class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">
+                                                Sudah berdiskusi sebelumnya (WhatsApp / DM / Tatap Muka) dan langsung mengajukan formulir.
+                                            </p>
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Meeting Notes -->
-                            <div class="space-y-2">
-                                <Label for="meetingNotesInput">Catatan / Topik Khusus yang Ingin Dibahas (Opsional)</Label>
-                                <textarea 
-                                    id="meetingNotesInput" 
-                                    name="meetingNotes" 
-                                    bind:value={consultationState.meetingNotes} 
-                                    placeholder="Contoh: Kami sudah punya wireframe Figma / Butuh integrasi khusus dengan payment gateway..." 
-                                    class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
-                                ></textarea>
-                            </div>
+                            {#if consultationState.alreadyConsulted}
+                                <!-- Already Consulted Section -->
+                                <div class="space-y-5 p-5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/[0.03] animate-in fade-in duration-200">
+                                    <div class="flex items-start gap-3">
+                                        <CheckCircle2 class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                                        <div class="space-y-1">
+                                            <h4 class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                                                Diskusi Awal Telah Dilakukan
+                                            </h4>
+                                            <p class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">
+                                                Anda tidak perlu memesan slot jadwal Google Meet baru. Silakan lengkapi media diskusi dan catatan kesepakatan di bawah ini:
+                                            </p>
+                                        </div>
+                                    </div>
 
-                            <!-- Notice Box -->
-                            <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3">
-                                <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
-                                    <p class="font-semibold text-zinc-700 dark:text-zinc-300">Konfirmasi Pertemuan</p>
-                                    <p>Setelah Anda mengirimkan formulir ini, briefing dan jadwal pilihan Anda akan tersimpan langsung ke sistem kami. Kami akan mengonfirmasi tautan Google Meet melalui email <strong>{consultationState.contactEmail || 'kontak Anda'}</strong>.</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                                        <div class="space-y-2">
+                                            <Label for="consultationChannelSelect">Media / Saluran Diskusi Sebelumnya</Label>
+                                            <select
+                                                id="consultationChannelSelect"
+                                                name="consultationChannel"
+                                                bind:value={consultationState.consultationChannel}
+                                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800 cursor-pointer"
+                                            >
+                                                <option value="">Pilih Saluran Diskusi...</option>
+                                                <option value="WhatsApp">WhatsApp Chat / Call</option>
+                                                <option value="Instagram DM">Instagram DM</option>
+                                                <option value="LinkedIn">LinkedIn Message</option>
+                                                <option value="Pertemuan Tatap Muka (Offline)">Pertemuan Tatap Muka (Offline)</option>
+                                                <option value="Telepon / Voice Call">Telepon Pribadi</option>
+                                                <option value="Email">Korespondensi Email</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <Label for="consultationDatePrevInput">Tanggal Diskusi Sebelumnya (Opsional)</Label>
+                                            <Input 
+                                                type="date" 
+                                                id="consultationDatePrevInput" 
+                                                name="consultationDate" 
+                                                bind:value={consultationState.consultationDate} 
+                                                max={new Date().toISOString().split('T')[0]}
+                                                class="cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Meeting / Discussion Notes -->
+                                    <div class="space-y-2">
+                                        <Label for="meetingNotesInputPrev">Catatan Kesepakatan / Poin Tambahan dari Diskusi (Opsional)</Label>
+                                        <textarea 
+                                            id="meetingNotesInputPrev" 
+                                            name="meetingNotes" 
+                                            bind:value={consultationState.meetingNotes} 
+                                            placeholder="Contoh: Sudah diskusi dengan PIC Hamas via WhatsApp, target launching akhir bulan..." 
+                                            class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
+                                        ></textarea>
+                                    </div>
                                 </div>
-                            </div>
+
+                                <!-- Notice Box for Already Consulted -->
+                                <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3">
+                                    <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                    <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
+                                        <p class="font-semibold text-zinc-700 dark:text-zinc-300">Konfirmasi Pengajuan Proyek</p>
+                                        <p>Data briefing ini akan langsung diproses ke tahap verifikasi & penyusunan proposal. Kami akan mengirimkan detail penawaran resmi serta tautan pelacakan proyek ke email <strong>{consultationState.contactEmail || 'kontak Anda'}</strong>.</p>
+                                    </div>
+                                </div>
+                            {:else}
+                                <!-- New Consultation Booking Form -->
+                                <div class="space-y-6 animate-in fade-in duration-200">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Date Input -->
+                                        <div class="space-y-2">
+                                            <Label for="consultationDateInput">Tanggal Pertemuan yang Diinginkan <span class="text-red-500">*</span></Label>
+                                            <Input 
+                                                type="date" 
+                                                id="consultationDateInput" 
+                                                name="consultationDate" 
+                                                bind:value={consultationState.consultationDate} 
+                                                min={new Date().toISOString().split('T')[0]}
+                                                required
+                                                class="cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                                            />
+                                            {#if $errors.consultationDate}
+                                                <p class="text-xs text-destructive mt-1">{$errors.consultationDate}</p>
+                                            {/if}
+                                        </div>
+
+                                        <!-- Time Slot Selection -->
+                                        <div class="space-y-2">
+                                            <Label for="consultationTimeSelect">Pilihan Jam / Slot Waktu (WIB)</Label>
+                                            <select 
+                                                id="consultationTimeSelect"
+                                                name="consultationTime" 
+                                                bind:value={consultationState.consultationTime} 
+                                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800 cursor-pointer"
+                                            >
+                                                <option value="09:00 - 10:00 WIB">Pagi (09:00 - 10:00 WIB)</option>
+                                                <option value="10:00 - 11:00 WIB">Pagi (10:00 - 11:00 WIB)</option>
+                                                <option value="13:30 - 14:30 WIB">Siang (13:30 - 14:30 WIB)</option>
+                                                <option value="15:30 - 16:30 WIB">Sore (15:30 - 16:30 WIB)</option>
+                                                <option value="19:30 - 20:30 WIB">Malam (19:30 - 20:30 WIB)</option>
+                                                <option value="flexible">Fleksibel / Sesuai Kesepakatan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Meeting Notes -->
+                                    <div class="space-y-2">
+                                        <Label for="meetingNotesInput">Catatan / Topik Khusus yang Ingin Dibahas (Opsional)</Label>
+                                        <textarea 
+                                            id="meetingNotesInput" 
+                                            name="meetingNotes" 
+                                            bind:value={consultationState.meetingNotes} 
+                                            placeholder="Contoh: Kami sudah punya wireframe Figma / Butuh integrasi khusus dengan payment gateway..." 
+                                            class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-zinc-700 dark:text-zinc-300 dark:bg-zinc-950 dark:border-zinc-800"
+                                        ></textarea>
+                                    </div>
+
+                                    <!-- Notice Box -->
+                                    <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3">
+                                        <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                        <div class="text-xs text-zinc-500 dark:text-zinc-400 space-y-1">
+                                            <p class="font-semibold text-zinc-700 dark:text-zinc-300">Konfirmasi Pertemuan</p>
+                                            <p>Setelah Anda mengirimkan formulir ini, briefing dan jadwal pilihan Anda akan tersimpan langsung ke sistem kami. Kami akan mengonfirmasi tautan Google Meet melalui email <strong>{consultationState.contactEmail || 'kontak Anda'}</strong>.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {/if}
                         </Card.Content>
                     </Card.Root>
 
@@ -483,7 +953,7 @@
                                 <Spinner size={16} class="text-white mr-1" />
                                 Memproses...
                             {:else}
-                                Kirim Briefing & Simpan Jadwal
+                                {consultationState.alreadyConsulted ? 'Kirim Briefing Proyek' : 'Kirim Briefing & Simpan Jadwal'}
                                 <ChevronRight size={16} class="group-hover:translate-x-0.5 transition-transform" />
                             {/if}
                         </Button>

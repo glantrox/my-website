@@ -188,6 +188,12 @@
 					title: 'Jadwal Pertemuan Konsultasi Dikonfirmasi',
 					desc: `Sesi konsultasi Anda telah dijadwalkan pada ${formatDate(proj.consultationDate)}${proj.consultationTime ? ` (${proj.consultationTime})` : ''}. Silakan bergabung ke Google Meet melalui tombol di bawah pada waktu yang telah ditentukan.`
 				};
+			} else if (proj.alreadyConsulted) {
+				return {
+					type: 'info',
+					title: 'Briefing Kebutuhan Sedang Ditinjau',
+					desc: `Formulir briefing proyek Anda telah kami terima berdasarkan konsultasi awal yang telah dilakukan${proj.consultationChannel ? ` (via ${proj.consultationChannel})` : ''}. Tim kami sedang meninjau spesifikasi teknis dan menyusun proposal penawaran.`
+				};
 			} else if (proj.consultationDate) {
 				return {
 					type: 'info',

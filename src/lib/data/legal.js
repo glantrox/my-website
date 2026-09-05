@@ -167,7 +167,7 @@ export const termsOfService = [
                 content: "Syarat dan Ketentuan Layanan ini diatur oleh dan ditafsirkan sesuai dengan hukum yang berlaku di negara Indonesia."
             },
             {
-                content: "Jika terjadi perbedaan pendapat atau perselisihan sehubungan dengan pelaksanaan layanan ini, kedua belah pihak sepakat untuk mengupayakan penyelesaian musyawarah secara kekeluargaan terlebih dahulu. Apabila mufakat tidak tercapai dalam waktu 30 hari, perselisihan akan diselesaikan di pengadilan hukum wilayah Sleman, Yogyakarta."
+                content: "Jika terjadi perbedaan pendapat atau perselisihan sehubungan dengan pelaksanaan layanan ini, kedua belah pihak sepakat untuk mengupayakan penyelesaian musyawarah secara kekeluargaan terlebih dahulu. Apabila mufakat tidak tercapai dalam waktu 30 hari, perselisihan akan diselesaikan melalui yurisdiksi pengadilan hukum wilayah Tangerang, Banten."
             }
         ]
     }

@@ -126,10 +126,9 @@ export const actions = {
 
     const data = await request.formData();
     const proposalUrl = data.get('proposalUrl')?.toString() || '';
-    const quotedPriceVal = data.get('quotedPrice')?.toString() || '';
-    const downPaymentRequirement = data.get('downPaymentRequirement')?.toString() || '';
-
+    const quotedPriceVal = data.get('quotedPrice');
     const quotedPrice = quotedPriceVal ? Number(quotedPriceVal) : 0;
+    const downPaymentRequirement = data.get('downPaymentRequirement')?.toString() || (quotedPrice > 0 ? `30% DP (Rp ${Math.round(quotedPrice * 0.3).toLocaleString('id-ID')})` : '30% DP');
 
     const project = await dbService.getConsultation(params.id);
     if (!project) {

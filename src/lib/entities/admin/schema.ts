@@ -4,6 +4,8 @@ export const adminUpdateSchema = z.object({
   status: z.enum(['pending', 'consulted', 'in_progress', 'review', 'completed', 'rejected', 'archived']),
   adminNotes: z.string().optional().default(''),
   quotedPrice: z.preprocess((val) => val === '' || val === undefined || val === null ? undefined : Number(val), z.number().min(0).optional()),
+  alreadyConsulted: z.boolean().optional().default(false),
+  consultationChannel: z.string().optional().default(''),
   consultationDate: z.string().optional().default(''),
   consultationTime: z.string().optional().default(''),
   googleMeetLink: z.string().optional().default(''),

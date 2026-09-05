@@ -23,6 +23,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* PASTE 'b0' LIGHT MODE VARIABLES HERE */
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -47,6 +48,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* PASTE 'b0' DARK MODE VARIABLES HERE */
     --background: 240 5.9% 10%; /* zinc-900 */
     --foreground: 240 5% 96%; /* zinc-100 */

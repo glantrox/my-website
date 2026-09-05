@@ -15,7 +15,9 @@
         Check,
         ExternalLink,
         BookmarkCheck,
-        ShieldCheck
+        ShieldCheck,
+        Globe,
+        Phone
     } from "lucide-svelte";
     import { toast } from "$lib/entities/toast";
 
@@ -23,11 +25,16 @@
     $: projectId = $page.url.searchParams.get("id") || "";
     $: name = $page.url.searchParams.get("name") || "Klien";
     $: email = $page.url.searchParams.get("email") || "";
+    $: phone = $page.url.searchParams.get("phone") || "";
     $: projectTitle = $page.url.searchParams.get("title") || "Project Specification";
     $: tier = $page.url.searchParams.get("tier") || "basic";
     $: serviceType = $page.url.searchParams.get("service_type") || "web_service";
     $: consultationDate = $page.url.searchParams.get("date") || "";
     $: consultationTime = $page.url.searchParams.get("time") || "";
+    $: alreadyConsulted = $page.url.searchParams.get("already_consulted") === "true";
+    $: domain = $page.url.searchParams.get("domain") || "";
+    $: domainType = $page.url.searchParams.get("domain_type") || "";
+    $: domainPrice = $page.url.searchParams.get("domain_price") || "";
 
     // Format human-readable names
     $: formattedTier = {
@@ -43,6 +50,7 @@
 
     /** @param {string | null | undefined} d */
     function formatDateDisplay(d) {
+        if (alreadyConsulted) return "Sudah Berkonsultasi Sebelumnya";
         if (!d) return "Sesuai kesepakatan";
         try {
             return new Date(d).toLocaleDateString('id-ID', {
@@ -87,7 +95,7 @@
             }
         }
     });
-
+    
     async function copyProjectId() {
         if (!projectId) return;
         try {
@@ -218,6 +226,16 @@
                 </div>
             {/if}
 
+            {#if phone}
+                <div class="space-y-1">
+                    <span class="text-xs text-zinc-400 dark:text-zinc-500 block">WhatsApp / HP</span>
+                    <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                        <Phone size={14} class="text-emerald-500" />
+                        {phone}
+                    </span>
+                </div>
+            {/if}
+
             <div class="space-y-1">
                 <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Jenis Layanan & Tier</span>
                 <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
@@ -227,17 +245,40 @@
             </div>
 
             <div class="space-y-1">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">Jadwal Pertemuan</span>
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block">{alreadyConsulted ? 'Status Konsultasi' : 'Jadwal Pertemuan'}</span>
                 <span class="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                     <Calendar size={14} class="text-blue-500" />
-                    {formatDateDisplay(consultationDate)} {consultationTime ? `(${consultationTime})` : ''}
+                    {formatDateDisplay(consultationDate)} {!alreadyConsulted && consultationTime ? `(${consultationTime})` : ''}
                 </span>
             </div>
+
+            {#if serviceType === 'web_service' && domain}
+                <div class="space-y-1 sm:col-span-2 p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/[0.02]">
+                    <span class="text-xs text-blue-600 dark:text-blue-400 font-semibold block flex items-center gap-1.5">
+                        <Globe size={14} />
+                        Permintaan Domain Website
+                    </span>
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                            {domain}
+                        </span>
+                        {#if domainPrice}
+                            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                {domainPrice}
+                            </span>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
         </div>
         <div class="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-start gap-3 mt-4">
             <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
             <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-normal">
-                Jadwal konsultasi Anda telah dicatat di sistem kami. Link Google Meet dan update progress akan terus diperbarui melalui portal status serta dikirimkan ke email Anda sebelum sesi dimulai.
+                {#if alreadyConsulted}
+                    Briefing kebutuhan Anda telah kami terima berdasarkan hasil diskusi awal. Tim kami akan segera meninjau detail dan mengirimkan proposal penawaran serta tautan pengerjaan ke email Anda.
+                {:else}
+                    Jadwal konsultasi Anda telah dicatat di sistem kami. Link Google Meet dan update progress akan terus diperbarui melalui portal status serta dikirimkan ke email Anda sebelum sesi dimulai.
+                {/if}
             </p>
         </div>
     </div>

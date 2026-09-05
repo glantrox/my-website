@@ -8,7 +8,8 @@ export interface IEmailService {
     consultationDate: string,
     consultationTime: string,
     projectId: string,
-    trackingUrl: string
+    trackingUrl: string,
+    alreadyConsulted?: boolean
   ): Promise<void>;
 
   sendMeetingConfirmation(

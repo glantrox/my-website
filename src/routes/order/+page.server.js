@@ -15,6 +15,7 @@ export async function load({ url, cookies }) {
   // Prefill fields from cookies or fallback to query parameters / defaults
   form.data.contactName = cookies.get('contactName') || '';
   form.data.contactEmail = cookies.get('contactEmail') || '';
+  form.data.contactPhone = cookies.get('contactPhone') || '';
   form.data.companyName = cookies.get('companyName') || '';
   form.data.industry = cookies.get('industry') || '';
   form.data.websiteUrl = cookies.get('websiteUrl') || '';
@@ -22,6 +23,11 @@ export async function load({ url, cookies }) {
   form.data.serviceType = serviceType === 'mobile_service' ? 'mobile_service' : 'web_service';
   form.data.projectTier = ['basic', 'intermediate', 'industrial'].includes(tier) ? tier : 'basic';
   form.data.coreObjective = cookies.get('coreObjective') || '';
+  form.data.requestedDomain = cookies.get('requestedDomain') || '';
+  form.data.domainSetupType = cookies.get('domainSetupType') || 'none';
+  form.data.domainEstimatedPrice = cookies.get('domainEstimatedPrice') || '';
+  form.data.alreadyConsulted = cookies.get('alreadyConsulted') === 'true';
+  form.data.consultationChannel = cookies.get('consultationChannel') || '';
   form.data.consultationDate = cookies.get('consultationDate') || '';
   form.data.consultationTime = cookies.get('consultationTime') || '10:00 - 11:00 WIB';
   form.data.meetingNotes = cookies.get('meetingNotes') || '';
@@ -64,7 +70,7 @@ export const actions = {
     try {
       consultationId = await dbService.createConsultation({
         ...form.data,
-        status: 'pending'
+        status: form.data.alreadyConsulted ? 'consulted' : 'pending'
       });
     } catch (e) {
       console.error('Error saving consultation request:', e);
@@ -84,7 +90,8 @@ export const actions = {
           form.data.consultationDate || '',
           form.data.consultationTime || '',
           consultationId,
-          trackingUrl
+          trackingUrl,
+          form.data.alreadyConsulted
         );
       } catch (emailErr) {
         console.error('Failed to send order confirmation email:', emailErr);
@@ -95,6 +102,7 @@ export const actions = {
     const draftCookies = [
       'contactName', 
       'contactEmail', 
+      'contactPhone',
       'companyName', 
       'industry', 
       'websiteUrl', 
@@ -102,7 +110,12 @@ export const actions = {
       'serviceType', 
       'projectTier', 
       'coreObjective', 
+      'requestedDomain',
+      'domainSetupType',
+      'domainEstimatedPrice',
       'keyFeatures',
+      'alreadyConsulted',
+      'consultationChannel',
       'consultationDate',
       'consultationTime',
       'meetingNotes'
@@ -111,7 +124,7 @@ export const actions = {
 
     // Redirect to success page with Project ID
     const formData = /** @type {any} */(form.data);
-    throw redirect(303, `/order/success?id=${encodeURIComponent(consultationId)}&name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&title=${encodeURIComponent(formData.projectTitle || '')}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}&date=${encodeURIComponent(formData.consultationDate || '')}&time=${encodeURIComponent(formData.consultationTime || '')}`);
+    throw redirect(303, `/order/success?id=${encodeURIComponent(consultationId)}&name=${encodeURIComponent(formData.contactName)}&email=${encodeURIComponent(formData.contactEmail)}&phone=${encodeURIComponent(formData.contactPhone || '')}&title=${encodeURIComponent(formData.projectTitle || '')}&tier=${encodeURIComponent(formData.projectTier)}&service_type=${encodeURIComponent(formData.serviceType)}&date=${encodeURIComponent(formData.consultationDate || '')}&time=${encodeURIComponent(formData.consultationTime || '')}&already_consulted=${encodeURIComponent(formData.alreadyConsulted ? 'true' : 'false')}&domain=${encodeURIComponent(formData.requestedDomain || '')}&domain_type=${encodeURIComponent(formData.domainSetupType || '')}&domain_price=${encodeURIComponent(formData.domainEstimatedPrice || '')}`);
   }
 };
 

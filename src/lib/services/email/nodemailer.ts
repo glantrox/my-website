@@ -83,13 +83,14 @@ export class NodemailerEmailService implements IEmailService {
     consultationDate: string,
     consultationTime: string,
     projectId: string,
-    trackingUrl: string
+    trackingUrl: string,
+    alreadyConsulted?: boolean
   ): Promise<void> {
     const serviceTypeStr = readableLabels[serviceType] || serviceType || 'Website Development';
     const projectTitleStr = projectTitle ? `${projectTitle} (${serviceTypeStr})` : serviceTypeStr;
     const servicePackage = readableLabels[projectTier] || projectTier || 'Basic MVP';
 
-    let formattedDate = 'Akan Dikonfirmasi';
+    let formattedDate = alreadyConsulted ? 'Sudah Berkonsultasi Sebelumnya' : 'Akan Dikonfirmasi';
     if (consultationDate) {
       try {
         formattedDate = new Date(consultationDate).toLocaleDateString('id-ID', {

@@ -20,6 +20,7 @@ export interface Consultation {
   id: string;
   contactName: string;
   contactEmail: string;
+  contactPhone?: string;
   companyName: string;
   industry: string;
   websiteUrl?: string;
@@ -27,6 +28,9 @@ export interface Consultation {
   serviceType: 'web_service' | 'mobile_service';
   projectTier: 'basic' | 'intermediate' | 'industrial';
   coreObjective: string;
+  requestedDomain?: string;
+  domainSetupType?: 'new_domain' | 'existing_domain' | 'need_consultation' | 'none';
+  domainEstimatedPrice?: string;
   keyFeatures: string[];
   targetTimeline: string;
   infrastructureAck: boolean;
@@ -42,6 +46,8 @@ export interface Consultation {
   priority?: string;
   archiveReason?: string;
   archiveDate?: string;
+  alreadyConsulted?: boolean;
+  consultationChannel?: string;
   consultationDate?: string;
   consultationTime?: string;
   meetingNotes?: string;

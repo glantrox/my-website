@@ -8,6 +8,7 @@
 		Building2,
 		Globe,
 		Mail,
+		Phone,
 		Sparkles,
 		FileText,
 		Clock,
@@ -28,7 +29,8 @@
 		Maximize2,
 		X,
 		FileCheck,
-		Check
+		Check,
+		Lock
 	} from 'lucide-svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -37,6 +39,7 @@
 
 	let { data } = $props();
 	const project = $derived(data.project);
+	const isFinanceActive = $derived(Boolean(project.quotedPrice && project.quotedPrice > 0));
 
 	import { toast } from '$lib/entities/toast';
 	import Spinner from '$lib/components/ui/spinner.svelte';
@@ -209,8 +212,7 @@
 		($form.startDate || '') !== (data.form.data.startDate || '') ||
 		($form.estimatedDelivery || '') !== (data.form.data.estimatedDelivery || '') ||
 		($form.actualDelivery || '') !== (data.form.data.actualDelivery || '') ||
-		($form.paymentStatus || 'unpaid') !== (data.form.data.paymentStatus || 'unpaid') ||
-		($form.priority || 'normal') !== (data.form.data.priority || 'normal')
+		($form.paymentStatus || 'unpaid') !== (data.form.data.paymentStatus || 'unpaid')
 	);
 
 	// Mapped Human Readable Labels
@@ -384,10 +386,26 @@
 						</div>
 						<div>
 							<span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Email Address</span>
-							<span class="text-sm font-semibold text-zinc-805 dark:text-zinc-200 flex items-center gap-1.5">
+							<span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
 								<Mail class="w-3.5 h-3.5 text-zinc-400 shrink-0" />
 								{project.contactEmail || '—'}
 							</span>
+						</div>
+						<div>
+							<span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">WhatsApp / HP</span>
+							{#if project.contactPhone}
+								<a
+									href="https://wa.me/{project.contactPhone.replace(/[^0-9]/g, '').replace(/^0/, '62')}"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5"
+								>
+									<Phone class="w-3.5 h-3.5 shrink-0" />
+									{project.contactPhone}
+								</a>
+							{:else}
+								<span class="text-sm font-semibold text-zinc-400 dark:text-zinc-500">—</span>
+							{/if}
 						</div>
 						<div>
 							<span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Perusahaan</span>
@@ -421,10 +439,24 @@
 
 				<!-- Bento Card 2: Project Specifications -->
 				<div class="border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/10 p-6 sm:p-8 rounded-2xl space-y-6">
-					<h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-						<Briefcase class="w-4 h-4 text-zinc-400" />
-						Spesifikasi Proyek
-					</h2>
+					<div class="flex items-center justify-between">
+						<h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+							<Briefcase class="w-4 h-4 text-zinc-400" />
+							Spesifikasi Proyek
+						</h2>
+						<div class="flex items-center gap-2 flex-wrap">
+							<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {statusColor($form.status)}">
+								{formatStatus($form.status)}
+							</span>
+							{#if project.alreadyConsulted}
+								<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+									<CheckCircle2 size={12} />
+									Sudah Konsultasi {project.consultationChannel ? `(${project.consultationChannel})` : ''}
+								</span>
+							{/if}
+						</div>
+					</div>
+
 					<div class="space-y-6">
 						<div>
 							<span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Judul Proyek</span>
@@ -461,6 +493,51 @@
 							</div>
 						{/if}
 
+						{#if project.serviceType === 'web_service' && (project.requestedDomain || project.domainSetupType)}
+							<div class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/[0.02] space-y-1.5">
+								<div class="flex items-center justify-between">
+									<span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+										<Globe class="w-3.5 h-3.5" />
+										Domain Website yang Diminta
+									</span>
+									{#if project.domainSetupType === 'new_domain'}
+										<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+											Beli Baru
+										</span>
+									{:else if project.domainSetupType === 'existing_domain'}
+										<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300">
+											Milik Sendiri
+										</span>
+									{:else if project.domainSetupType === 'need_consultation'}
+										<span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300">
+											Butuh Saran
+										</span>
+									{/if}
+								</div>
+								<div class="flex items-center justify-between flex-wrap gap-2 pt-0.5">
+									<span class="text-sm font-bold font-mono text-zinc-900 dark:text-white">
+										{project.requestedDomain || 'Belum ditentukan'}
+									</span>
+									{#if project.domainEstimatedPrice}
+										<span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+											Est: {project.domainEstimatedPrice}
+										</span>
+									{/if}
+								</div>
+							</div>
+						{/if}
+
+						{#if project.meetingNotes}
+							<div class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/[0.02] space-y-1">
+								<span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
+									Catatan Tambahan / Kesepakatan Konsultasi
+								</span>
+								<p class="break-words whitespace-pre-wrap text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+									{project.meetingNotes}
+								</p>
+							</div>
+						{/if}
+
 						{#if project.keyFeatures && project.keyFeatures.length > 0}
 							<div>
 								<span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Fitur Utama</span>
@@ -478,66 +555,77 @@
 
 				<!-- Bento Card 3: Administrasi & Keuangan -->
 				<div class="border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/10 p-6 sm:p-8 rounded-2xl space-y-6">
-					<h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-						<Coins class="w-4.5 h-4.5 text-zinc-400" />
-						Administrasi & Keuangan
-					</h2>
-					<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+					<div class="flex items-center justify-between">
+						<h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+							<Coins class="w-4.5 h-4.5 text-zinc-400" />
+							Administrasi & Keuangan
+						</h2>
+						{#if !isFinanceActive}
+							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
+								<Lock size={11} />
+								Terkunci (Belum Ada Penawaran)
+							</span>
+						{:else}
+							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+								<CheckCircle2 size={11} />
+								Penawaran Aktif
+							</span>
+						{/if}
+					</div>
+
+					{#if !isFinanceActive}
+						<div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400 text-xs flex items-start gap-2.5">
+							<AlertTriangle size={16} class="shrink-0 mt-0.5" />
+							<p class="leading-relaxed">
+								Harga penawaran belum pernah diisi. Kolom administrasi & status pembayaran saat ini dinonaktifkan dan akan terbuka otomatis setelah Anda menentukan harga dan mengirimkan penawaran melalui panel <strong>Proposal & Quotation</strong> di sebelah kanan.
+							</p>
+						</div>
+					{/if}
+
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 						<!-- Harga Penawaran -->
 						<div class="space-y-2">
-							<label for="quotedPrice" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Harga Penawaran
+							<label for="quotedPrice" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center justify-between">
+								<span>Harga Penawaran</span>
+								{#if !isFinanceActive}
+									<span class="text-[9px] text-zinc-400 normal-case font-normal">(Tidak dapat diedit)</span>
+								{/if}
 							</label>
-							<div class="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 px-3.5 py-2.5 transition-colors focus-within:border-zinc-400 dark:focus-within:border-zinc-500">
+							<div class="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 {!isFinanceActive ? 'bg-zinc-100/70 dark:bg-zinc-900/60 cursor-not-allowed opacity-60' : 'bg-zinc-50/20 dark:bg-zinc-950'} px-3.5 py-2.5 transition-colors focus-within:border-zinc-400 dark:focus-within:border-zinc-500">
 								<span class="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mr-2 select-none">Rp</span>
 								<input
 									id="quotedPrice"
 									type="number"
 									min="0"
+									disabled={!isFinanceActive}
 									bind:value={$form.quotedPrice}
 									name="quotedPrice"
 									placeholder="0"
-									class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500"
+									class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none placeholder-zinc-400 dark:placeholder-zinc-500 disabled:cursor-not-allowed"
 								/>
 							</div>
 						</div>
 
 						<!-- Status Pembayaran -->
 						<div class="space-y-2">
-							<label for="paymentStatus" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Status Pembayaran
+							<label for="paymentStatus" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center justify-between">
+								<span>Status Pembayaran</span>
+								{#if !isFinanceActive}
+									<span class="text-[9px] text-zinc-400 normal-case font-normal">(Tidak dapat diedit)</span>
+								{/if}
 							</label>
-							<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 px-3.5 py-2">
+							<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 {!isFinanceActive ? 'bg-zinc-100/70 dark:bg-zinc-900/60 cursor-not-allowed opacity-60' : 'bg-zinc-50/20 dark:bg-zinc-950'} px-3.5 py-2">
 								<select
 									id="paymentStatus"
+									disabled={!isFinanceActive}
 									bind:value={$form.paymentStatus}
 									name="paymentStatus"
-									class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer py-1"
+									class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer py-1 disabled:cursor-not-allowed"
 								>
 									<option value="unpaid" class="bg-white dark:bg-zinc-900">Belum Bayar</option>
 									<option value="dp_paid" class="bg-white dark:bg-zinc-900">DP Dibayar</option>
 									<option value="partial" class="bg-white dark:bg-zinc-900">Sebagian</option>
 									<option value="settled" class="bg-white dark:bg-zinc-900">Lunas</option>
-								</select>
-							</div>
-						</div>
-
-						<!-- Prioritas -->
-						<div class="space-y-2">
-							<label for="priority" class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-								Prioritas Proyek
-							</label>
-							<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-950 px-3.5 py-2">
-								<select
-									id="priority"
-									bind:value={$form.priority}
-									name="priority"
-									class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer py-1"
-								>
-									<option value="low" class="bg-white dark:bg-zinc-900">Low</option>
-									<option value="normal" class="bg-white dark:bg-zinc-900">Normal</option>
-									<option value="high" class="bg-white dark:bg-zinc-900">High</option>
-									<option value="urgent" class="bg-white dark:bg-zinc-900">Urgent</option>
 								</select>
 							</div>
 						</div>
@@ -754,6 +842,17 @@
 
 				<!-- 1. STATUS: pending (Menunggu) -->
 				{#if $form.status === 'pending'}
+					{#if project.alreadyConsulted}
+						<div class="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400 text-xs space-y-1">
+							<span class="font-bold flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+								<CheckCircle2 size={13} />
+								Sudah Konsultasi Sebelumnya
+							</span>
+							<p class="text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed">
+								Klien memilih opsi telah berkonsultasi sebelum mengisi formulir{project.consultationChannel ? ` (via ${project.consultationChannel})` : ''}. Anda dapat langsung menyiapkan proposal penawaran atau menjadwalkan Google Meet di bawah jika diperlukan.
+							</p>
+						</div>
+					{/if}
 					{#if project.meetingId && !isRescheduling}
 						<!-- Scheduled Consultation Session Details -->
 						<Card.Root class="border border-emerald-500/25 bg-emerald-500/[0.02] p-6 shadow-sm rounded-2xl">
@@ -959,23 +1058,28 @@
 							</div>
 
 							<div class="space-y-2">
-								<label for="downPaymentRequirement" class="text-[10px] font-bold uppercase tracking-wider text-zinc-405 dark:text-zinc-500">
-									DP Requirement
-								</label>
-								<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2">
-									<select
-										id="downPaymentRequirement"
-										name="downPaymentRequirement"
-										form="proposal-form"
-										bind:value={$form.downPaymentRequirement}
-										class="w-full bg-transparent text-sm font-medium text-zinc-900 dark:text-white focus:outline-none cursor-pointer py-1"
-									>
-										<option value="30% DP" class="bg-white dark:bg-zinc-900">30% DP (Start Milestone)</option>
-										<option value="40% DP" class="bg-white dark:bg-zinc-900">40% DP</option>
-										<option value="50% DP" class="bg-white dark:bg-zinc-900">50% DP (Equal Splits)</option>
-										<option value="Full upfront" class="bg-white dark:bg-zinc-900">100% Full Upfront</option>
-									</select>
+								<div class="flex items-center justify-between">
+									<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+										DP Requirement
+									</span>
+									
 								</div>
+								<div class="flex items-center justify-between rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-3.5 py-2.5">
+									<div class="flex items-center gap-2">
+										<span class="text-sm font-semibold text-zinc-900 dark:text-white">
+											Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')}
+										</span>
+									</div>
+									<span class="text-xs text-zinc-400 dark:text-zinc-500 font-medium">
+										30% dari {($form.quotedPrice && $form.quotedPrice > 0) ? 'Rp ' + Number($form.quotedPrice).toLocaleString('id-ID') : 'Rp 0'}
+									</span>
+								</div>
+								<input
+									type="hidden"
+									name="downPaymentRequirement"
+									form="proposal-form"
+									value="30% DP (Rp {Math.round(($form.quotedPrice || 0) * 0.3).toLocaleString('id-ID')})"
+								/>
 							</div>
 
 							<Button

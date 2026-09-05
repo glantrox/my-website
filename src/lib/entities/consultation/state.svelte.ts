@@ -115,6 +115,9 @@ export class ConsultationState {
   get contactEmail() { return this.getVal('contactEmail', ''); }
   set contactEmail(v) { this.setVal('contactEmail', v); }
 
+  get contactPhone() { return this.getVal('contactPhone', ''); }
+  set contactPhone(v) { this.setVal('contactPhone', v); }
+
   get companyName() { return this.getVal('companyName', ''); }
   set companyName(v) { this.setVal('companyName', v); }
 
@@ -136,6 +139,15 @@ export class ConsultationState {
   get coreObjective() { return this.getVal('coreObjective', ''); }
   set coreObjective(v) { this.setVal('coreObjective', v); }
 
+  get requestedDomain() { return this.getVal('requestedDomain', ''); }
+  set requestedDomain(v) { this.setVal('requestedDomain', v); }
+
+  get domainSetupType() { return this.getVal('domainSetupType', 'none'); }
+  set domainSetupType(v) { this.setVal('domainSetupType', v); }
+
+  get domainEstimatedPrice() { return this.getVal('domainEstimatedPrice', ''); }
+  set domainEstimatedPrice(v) { this.setVal('domainEstimatedPrice', v); }
+
   get keyFeatures() { return this.getVal('keyFeatures', []); }
   set keyFeatures(v) { this.setVal('keyFeatures', v); }
 
@@ -147,6 +159,12 @@ export class ConsultationState {
 
   get termsAck() { return this.getVal('termsAck', false); }
   set termsAck(v) { this.setVal('termsAck', v); }
+
+  get alreadyConsulted() { return this.getVal('alreadyConsulted', false); }
+  set alreadyConsulted(v) { this.setVal('alreadyConsulted', v); }
+
+  get consultationChannel() { return this.getVal('consultationChannel', ''); }
+  set consultationChannel(v) { this.setVal('consultationChannel', v); }
 
   get consultationDate() { return this.getVal('consultationDate', ''); }
   set consultationDate(v) { this.setVal('consultationDate', v); }
@@ -167,7 +185,12 @@ export class ConsultationState {
   }
 
   get briefingText(): string {
-    return `Briefing Awal:\n- Perusahaan: ${this.companyName} (${this.industry})\n- Proyek: ${this.projectTitle} (Tier: ${this.projectTier})\n- Tujuan: ${this.coreObjective}\n- Fitur Utama: ${this.keyFeatures.join(", ")}`;
+    let text = `Briefing Awal:\n- Perusahaan: ${this.companyName} (${this.industry})\n- Proyek: ${this.projectTitle} (Tier: ${this.projectTier})\n- Tujuan: ${this.coreObjective}`;
+    if (this.serviceType === 'web_service' && this.requestedDomain) {
+      text += `\n- Domain: ${this.requestedDomain} (${this.domainSetupType === 'existing_domain' ? 'Milik Sendiri' : 'Pengajuan Baru'}${this.domainEstimatedPrice ? ' - ' + this.domainEstimatedPrice : ''})`;
+    }
+    text += `\n- Fitur Utama: ${this.keyFeatures.join(", ")}`;
+    return text;
   }
 
   // Mutator Actions
@@ -185,6 +208,9 @@ export class ConsultationState {
     }
     if (!val.contactEmail || !/^\S+@\S+\.\S+$/.test(val.contactEmail)) {
       this.errors.contactEmail = "Format email tidak valid";
+    }
+    if (!val.contactPhone || val.contactPhone.trim().length < 8) {
+      this.errors.contactPhone = "Nomor WhatsApp wajib diisi (minimal 8 digit)";
     }
     if (!val.companyName || val.companyName.trim().length < 2) {
       this.errors.companyName = "Nama perusahaan minimal 2 karakter";
@@ -232,6 +258,7 @@ export class ConsultationState {
     if (!val) return;
     setCookie('contactName', val.contactName || '');
     setCookie('contactEmail', val.contactEmail || '');
+    setCookie('contactPhone', val.contactPhone || '');
     setCookie('companyName', val.companyName || '');
     setCookie('industry', val.industry || '');
     setCookie('websiteUrl', val.websiteUrl || '');
@@ -239,7 +266,12 @@ export class ConsultationState {
     setCookie('serviceType', val.serviceType || 'web_service');
     setCookie('projectTier', val.projectTier || 'basic');
     setCookie('coreObjective', val.coreObjective || '');
+    setCookie('requestedDomain', val.requestedDomain || '');
+    setCookie('domainSetupType', val.domainSetupType || 'none');
+    setCookie('domainEstimatedPrice', val.domainEstimatedPrice || '');
     setCookie('keyFeatures', JSON.stringify(val.keyFeatures || []));
+    setCookie('alreadyConsulted', String(val.alreadyConsulted || false));
+    setCookie('consultationChannel', val.consultationChannel || '');
     setCookie('consultationDate', val.consultationDate || '');
     setCookie('consultationTime', val.consultationTime || '');
     setCookie('meetingNotes', val.meetingNotes || '');
