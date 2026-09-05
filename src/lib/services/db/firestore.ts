@@ -17,13 +17,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { IDatabaseService, Project, Consultation, Meeting } from './interface';
 
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.VITE_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID,
-  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || process.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: env.VITE_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || import.meta.env?.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || process.env.VITE_FIREBASE_AUTH_DOMAIN || import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || import.meta.env?.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID || import.meta.env?.VITE_FIREBASE_APP_ID,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || process.env.VITE_FIREBASE_MEASUREMENT_ID || import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -71,10 +71,20 @@ export class FirestoreDatabaseService implements IDatabaseService {
   }
 
   async createConsultation(data: Omit<Consultation, 'id'>): Promise<string> {
-    const docRef = await addDoc(collection(db, 'pending_consultations'), {
+    const cleanedData: any = {
       ...data,
       createdAt: data.createdAt || new Date().toISOString()
-    });
+    };
+    
+    // Remove undefined values to prevent FirebaseError
+    const keys = Object.keys(cleanedData) as Array<keyof typeof cleanedData>;
+    for (const key of keys) {
+      if (cleanedData[key] === undefined) {
+        delete cleanedData[key];
+      }
+    }
+
+    const docRef = await addDoc(collection(db, 'pending_consultations'), cleanedData);
     return docRef.id;
   }
 
@@ -120,18 +130,23 @@ export class FirestoreDatabaseService implements IDatabaseService {
   }
 
   async createProject(data: Omit<Project, 'id'>): Promise<string> {
-    const projectData = {
-      title: data.title,
-      tagline: data.tagline,
-      description: data.description,
-      role: data.role,
-      date: data.timeline, // map to database field
-      status: data.status,
-      image: data.imageUrl, // map to database field
-      techStack: data.techStack,
-      links: data.links,
+    const projectData: any = {
+      title: data.title ?? '',
+      tagline: data.tagline ?? '',
+      description: data.description ?? '',
+      role: data.role ?? '',
+      date: data.timeline ?? '', // map to database field
+      status: data.status ?? 'In Progress',
+      image: data.imageUrl ?? '', // map to database field
+      techStack: data.techStack ?? [],
+      links: data.links ?? { live: '', github: '' },
       createdAt: data.createdAt || new Date().toISOString()
     };
+    for (const key of Object.keys(projectData)) {
+      if (projectData[key] === undefined) {
+        delete projectData[key];
+      }
+    }
     const docRef = await addDoc(collection(db, 'selected-projects'), projectData);
     return docRef.id;
   }

@@ -68,13 +68,21 @@ export const actions = {
 
     let consultationId = '';
     try {
+      const cleanedData = { ...form.data };
+      for (const [key, value] of Object.entries(cleanedData)) {
+        if (value === undefined) {
+          delete cleanedData[key];
+        }
+      }
+
       consultationId = await dbService.createConsultation({
-        ...form.data,
+        ...cleanedData,
         status: form.data.alreadyConsulted ? 'consulted' : 'pending'
       });
     } catch (e) {
       console.error('Error saving consultation request:', e);
-      return fail(500, { form, error: 'Database write failed' });
+      const err = /** @type {any} */ (e);
+      return fail(500, { form, error: `Gagal menyimpan ke database: ${err?.message || err}` });
     }
 
     // Send project submission confirmation email with tracking ID & URL

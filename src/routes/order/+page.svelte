@@ -57,10 +57,38 @@
                     duration: 2000
                 });
             } else if (result.type === "failure" || result.type === "error") {
+                let errorMsg = "Gagal menyimpan pengajuan. Silakan periksa kembali formulir Anda.";
+                const res = result as any;
+                if (res.data?.error) {
+                    errorMsg = res.data.error;
+                } else if (res.data?.form?.errors) {
+                    const errorKeys = Object.keys(res.data.form.errors);
+                    if (errorKeys.length > 0) {
+                        const firstErrorField = errorKeys[0];
+                        const rawError = res.data.form.errors[firstErrorField];
+                        errorMsg = Array.isArray(rawError) ? rawError[0] : String(rawError);
+
+                        // If the error is on a Step 1 field and currently in Step 2, switch back to Step 1
+                        const step1Fields = [
+                            'contactName', 'contactEmail', 'contactPhone', 'companyName',
+                            'industry', 'websiteUrl', 'projectTitle', 'coreObjective',
+                            'keyFeatures', 'targetTimeline', 'infrastructureAck', 'termsAck'
+                        ];
+                        if (step1Fields.includes(firstErrorField)) {
+                            consultationState.step = 1;
+                            setTimeout(() => {
+                                const el = document.getElementById(firstErrorField);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 150);
+                        }
+                    }
+                } else if (res.error?.message) {
+                    errorMsg = res.error.message;
+                }
                 toast.update(activeToastId, {
                     type: "error",
-                    message: "Gagal menyimpan pengajuan. Silakan coba lagi.",
-                    duration: 4000
+                    message: errorMsg,
+                    duration: 6000
                 });
             }
         }
