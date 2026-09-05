@@ -357,90 +357,41 @@
                                 {/if}
                             </div>
 
-                            <!-- Domain Request Form (Only if Website Service) -->
+                            <!-- Domain Request Section (Only if Website Service) -->
                             {#if consultationState.serviceType === 'web_service'}
-                                <div class="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/[0.03] dark:bg-blue-500/[0.02] space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <Globe class="w-4 h-4 text-blue-500" />
-                                            <span class="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                                                Permintaan Domain Website
-                                            </span>
-                                        </div>
-                                        
-                                    </div>
-                                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                                        Tentukan domain yang Anda inginkan. Anda dapat mendaftarkan domain baru bersama kami, menggunakan domain yang sudah ada, atau berdiskusi saat sesi konsultasi.
-                                    </p>
+                                <div class="p-4 sm:p-5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 space-y-3.5">
+                                    
+                                    <!-- Case 1: Primary New Domain Search (80% path) -->
+                                    {#if consultationState.domainSetupType === 'new_domain' || !consultationState.domainSetupType || consultationState.domainSetupType === 'none'}
+                                        <div class="space-y-2.5">
+                                            <div class="flex items-baseline justify-between gap-2">
+                                                <div>
+                                                    <label for="domainSearchInput" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                        Nama Domain
+                                                    </label>
+                                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                        Cari nama domain untuk website Anda. Sudah termasuk konfigurasi DNS & SSL.
+                                                    </p>
+                                                </div>
+                                                <span class="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
+                                                    mulai Rp 95rb/tahun
+                                                </span>
+                                            </div>
 
-                                    <!-- Option Selection Tabs -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                        <button
-                                            type="button"
-                                            onclick={() => {
-                                                consultationState.domainSetupType = 'new_domain';
-                                                if (!consultationState.requestedDomain && domainSearchInput) {
-                                                    consultationState.requestedDomain = domainSearchInput;
-                                                }
-                                            }}
-                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'new_domain' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
-                                        >
-                                            <span class="text-xs font-bold flex items-center gap-1.5">
-                                                <Sparkles size={12} class="text-blue-500" />
-                                                Beli Domain Baru
-                                            </span>
-                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                                                Cek ketersediaan & harga
-                                            </span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onclick={() => {
-                                                consultationState.domainSetupType = 'existing_domain';
-                                                consultationState.domainEstimatedPrice = 'Rp 0 (Milik Sendiri)';
-                                            }}
-                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'existing_domain' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
-                                        >
-                                            <span class="text-xs font-bold flex items-center gap-1.5">
-                                                <CheckCircle2 size={12} class="text-emerald-500" />
-                                                Sudah Punya Domain
-                                            </span>
-                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                                                Tinggal pointing DNS (Gratis)
-                                            </span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onclick={() => {
-                                                consultationState.domainSetupType = 'need_consultation';
-                                                consultationState.requestedDomain = 'Diskusikan saat konsultasi';
-                                                consultationState.domainEstimatedPrice = 'Akan diestimasi';
-                                            }}
-                                            class="flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer {consultationState.domainSetupType === 'need_consultation' ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/40 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'}"
-                                        >
-                                            <span class="text-xs font-bold flex items-center gap-1.5">
-                                                <MessageSquareCheck size={12} class="text-amber-500" />
-                                                Butuh Rekomendasi
-                                            </span>
-                                            <span class="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                                                Saran saat konsultasi
-                                            </span>
-                                        </button>
-                                    </div>
-
-                                    <!-- Panel 1: Beli Domain Baru -->
-                                    {#if consultationState.domainSetupType === 'new_domain'}
-                                        <div class="space-y-3 pt-1">
+                                            <!-- Asymmetric Search Bar: Input flexible width with CTA button on right -->
                                             <div class="flex flex-col sm:flex-row gap-2">
                                                 <div class="relative flex-1">
                                                     <Input
                                                         type="text"
-                                                        placeholder="Ketik nama domain impian (e.g. brandanda.com / bisnis.id)"
+                                                        id="domainSearchInput"
+                                                        placeholder="tokosepatu.com"
                                                         bind:value={domainSearchInput}
                                                         oninput={() => {
                                                             consultationState.requestedDomain = domainSearchInput;
+                                                            if (!domainSearchInput) {
+                                                                domainCheckResult = null;
+                                                                domainCheckError = '';
+                                                            }
                                                         }}
                                                         onkeydown={(e: KeyboardEvent) => {
                                                             if (e.key === 'Enter') {
@@ -448,158 +399,186 @@
                                                                 handleCheckDomain();
                                                             }
                                                         }}
-                                                        class="w-full pr-10 font-mono text-sm"
+                                                        class="w-full font-mono text-sm h-10 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus-visible:ring-blue-500 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
                                                     />
                                                 </div>
                                                 <Button
                                                     type="button"
                                                     disabled={isCheckingDomain}
                                                     onclick={handleCheckDomain}
-                                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                                                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-4 h-10 rounded-md flex items-center justify-center gap-1.5 cursor-pointer shrink-0 transition-colors"
                                                 >
                                                     {#if isCheckingDomain}
-                                                        <Spinner size={14} class="text-white" />
+                                                        <Spinner size={13} class="text-white" />
                                                         Mengecek...
                                                     {:else}
-                                                        <Search size={14} />
-                                                        Cek Domain & Harga
+                                                        <Search size={13} />
+                                                        Cek Domain
                                                     {/if}
                                                 </Button>
                                             </div>
 
+                                            <!-- Secondary Actions: quiet inline links with unequal visual weight -->
+                                            <div class="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-4 pt-1 text-xs">
+                                                <button
+                                                    type="button"
+                                                    onclick={() => {
+                                                        consultationState.domainSetupType = 'existing_domain';
+                                                        consultationState.requestedDomain = domainSearchInput || '';
+                                                        consultationState.domainEstimatedPrice = 'Rp 0 (Milik Sendiri)';
+                                                        domainCheckResult = null;
+                                                        domainCheckError = '';
+                                                    }}
+                                                    class="text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 font-medium transition-colors cursor-pointer text-left"
+                                                >
+                                                    Sudah punya domain? Pointing saja →
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onclick={() => {
+                                                        consultationState.domainSetupType = 'need_consultation';
+                                                        consultationState.requestedDomain = 'Diskusikan saat konsultasi';
+                                                        consultationState.domainEstimatedPrice = 'Akan diestimasi';
+                                                        domainCheckResult = null;
+                                                        domainCheckError = '';
+                                                    }}
+                                                    class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer text-left"
+                                                >
+                                                    Bingung memilih? Tim kami bantu saat konsultasi
+                                                </button>
+                                            </div>
+
                                             {#if domainCheckError}
-                                                <div class="p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
-                                                    <AlertCircle size={14} class="shrink-0" />
-                                                    <span>{domainCheckError}</span>
-                                                </div>
+                                                <p class="text-xs text-red-500 dark:text-red-400 pt-1">
+                                                    {domainCheckError}
+                                                </p>
                                             {/if}
 
+                                            <!-- Results: clean, grounded, single accent color -->
                                             {#if domainCheckResult}
-                                                <!-- Primary Domain Result Card -->
-                                                <div class="p-4 rounded-xl border {domainCheckResult.primary.available ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-amber-500/30 bg-amber-500/[0.04]'} space-y-3">
-                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                                        <div class="space-y-0.5">
-                                                            <div class="flex items-center gap-2">
-                                                                <span class="text-base font-bold font-mono text-zinc-900 dark:text-white">
-                                                                    {domainCheckResult.primary.domain}
+                                                <div class="pt-2 border-t border-zinc-200/70 dark:border-zinc-800/70 space-y-2.5">
+                                                    <div class="flex items-center justify-between gap-3 p-3 rounded-lg border bg-white dark:bg-zinc-950 {domainCheckResult.primary.available ? 'border-zinc-200 dark:border-zinc-800' : 'border-zinc-200 dark:border-zinc-800 opacity-90'}">
+                                                        <div class="flex items-center gap-2.5 min-w-0">
+                                                            <span class="font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                                                {domainCheckResult.primary.domain}
+                                                            </span>
+                                                            {#if domainCheckResult.primary.available === true}
+                                                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40 shrink-0">
+                                                                    Tersedia
                                                                 </span>
-                                                                {#if domainCheckResult.primary.available === true}
-                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
-                                                                        <Check size={11} /> Tersedia
-                                                                    </span>
-                                                                {:else if domainCheckResult.primary.available === false}
-                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-1">
-                                                                        <XCircle size={11} /> Sudah Digunakan
-                                                                    </span>
-                                                                {:else}
-                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                                                                        Cek Manual
-                                                                    </span>
-                                                                {/if}
-                                                            </div>
-                                                            <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                                                                {domainCheckResult.primary.note}
-                                                            </p>
+                                                            {:else if domainCheckResult.primary.available === false}
+                                                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 shrink-0">
+                                                                    Sudah terpakai
+                                                                </span>
+                                                            {/if}
                                                         </div>
 
-                                                        <div class="text-left sm:text-right">
-                                                            <span class="text-sm font-bold text-zinc-900 dark:text-white block">
+                                                        <div class="text-right shrink-0">
+                                                            <span class="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                                                 {domainCheckResult.primary.priceFormatted}
                                                             </span>
-                                                            <span class="text-[10px] text-zinc-400">Estimasi registrasi 1 tahun</span>
                                                         </div>
                                                     </div>
 
-                                                    {#if domainCheckResult.primary.available === true}
-                                                        <div class="pt-2 border-t border-emerald-500/20 flex items-center justify-between">
-                                                            <span class="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                                                                ✓ Domain ini terpilih untuk briefing proyek Anda
+                                                    {#if domainCheckResult.suggestions && domainCheckResult.suggestions.length > 0}
+                                                        <div class="space-y-1.5 pt-1">
+                                                            <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 block">
+                                                                {domainCheckResult.primary.available ? 'Pilihan ekstensi lainnya:' : 'Alternatif domain yang masih tersedia:'}
                                                             </span>
-                                                        </div>
-                                                    {/if}
-                                                </div>
-
-                                                <!-- Suggestions / Alternatives Grid -->
-                                                {#if domainCheckResult.suggestions && domainCheckResult.suggestions.length > 0}
-                                                    <div class="space-y-2 pt-2">
-                                                        <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400 block">
-                                                            Rekomendasi Ekstensi Lain:
-                                                        </span>
-                                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                            {#each domainCheckResult.suggestions as item}
-                                                                <label class="p-3 rounded-xl border {consultationState.requestedDomain === item.domain ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/30 ring-1 ring-blue-500/20' : 'border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/60'} flex items-center justify-between gap-3 hover:border-blue-500/40 transition-all {item.available === false ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}">
-                                                                    <div class="space-y-0.5 min-w-0">
-                                                                        <div class="flex items-center gap-1.5">
-                                                                            <span class="text-xs font-bold font-mono truncate text-zinc-900 dark:text-white">
-                                                                                {item.domain}
-                                                                            </span>
-                                                                            {#if item.available === false}
-                                                                                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 shrink-0">
-                                                                                    Terpakai
-                                                                                </span>
-                                                                            {/if}
-                                                                        </div>
-                                                                        <span class="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 block">
-                                                                            {item.priceFormatted}
-                                                                        </span>
-                                                                    </div>
-
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="selectedDomainSuggestion"
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                                                {#each domainCheckResult.suggestions as item}
+                                                                    <button
+                                                                        type="button"
                                                                         disabled={item.available === false}
-                                                                        checked={consultationState.requestedDomain === item.domain}
-                                                                        onchange={() => {
+                                                                        onclick={() => {
                                                                             if (item.available !== false) {
                                                                                 selectDomain(item.domain, item.priceFormatted);
                                                                             }
                                                                         }}
-                                                                        class="h-4 w-4 text-blue-600 border-zinc-300 dark:border-zinc-700 focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed shrink-0"
-                                                                    />
-                                                                </label>
-                                                            {/each}
+                                                                        class="flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 {consultationState.requestedDomain === item.domain ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100' : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'}"
+                                                                    >
+                                                                        <span class="font-mono font-medium truncate">{item.domain}</span>
+                                                                        <span class="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 shrink-0">{item.priceFormatted.replace(' / tahun', '/thn')}</span>
+                                                                    </button>
+                                                                {/each}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                {/if}
+                                                    {/if}
+                                                </div>
                                             {/if}
                                         </div>
 
-                                    <!-- Panel 2: Sudah Punya Domain Sendiri -->
+                                    <!-- Case 2: Existing Domain Mode ("Sudah Punya Domain") -->
                                     {:else if consultationState.domainSetupType === 'existing_domain'}
-                                        <div class="space-y-3 pt-1">
-                                            <div class="space-y-1">
-                                                <Label for="existingDomainInput" class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                                                    Nama Domain yang Sudah Dimiliki
-                                                </Label>
-                                                <Input
-                                                    type="text"
-                                                    id="existingDomainInput"
-                                                    placeholder="e.g. perusahaananda.com"
-                                                    bind:value={consultationState.requestedDomain}
-                                                    class="font-mono text-sm"
-                                                />
+                                        <div class="space-y-2.5">
+                                            <div class="flex items-baseline justify-between gap-2">
+                                                <div>
+                                                    <label for="existingDomainInput" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                        Domain yang Sudah Dimiliki
+                                                    </label>
+                                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                        Tinggal hubungkan DNS ke server kami saat website selesai rilis.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onclick={() => {
+                                                        consultationState.domainSetupType = 'new_domain';
+                                                        consultationState.domainEstimatedPrice = '';
+                                                    }}
+                                                    class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer shrink-0"
+                                                >
+                                                    ← Beli domain baru
+                                                </button>
                                             </div>
-                                            <div class="p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-700 dark:text-blue-300 text-xs leading-relaxed space-y-1">
-                                                <span class="font-bold flex items-center gap-1">
-                                                    <CheckCircle2 size={12} />
-                                                    Setup DNS & SSL Gratis
-                                                </span>
-                                                <p class="text-zinc-600 dark:text-zinc-400 text-[11px]">
-                                                    Anda tidak perlu mengeluarkan biaya pendaftaran domain lagi. Tim kami akan memberikan panduan praktis untuk menghubungkan (pointing) DNS A Record atau CNAME domain Anda ke server kami saat website siap rilis.
-                                                </p>
+
+                                            <Input
+                                                type="text"
+                                                id="existingDomainInput"
+                                                placeholder="tokosepatu.com"
+                                                bind:value={consultationState.requestedDomain}
+                                                class="w-full font-mono text-sm h-10 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus-visible:ring-blue-500"
+                                            />
+
+                                            <div class="flex flex-wrap items-center justify-between gap-y-1 gap-x-2 text-xs pt-0.5 text-zinc-400 dark:text-zinc-500">
+                                                <span>Gratis konfigurasi DNS A/CNAME & SSL</span>
+                                                <button
+                                                    type="button"
+                                                    onclick={() => {
+                                                        consultationState.domainSetupType = 'need_consultation';
+                                                        consultationState.requestedDomain = 'Diskusikan saat konsultasi';
+                                                        consultationState.domainEstimatedPrice = 'Akan diestimasi';
+                                                    }}
+                                                    class="hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
+                                                >
+                                                    Bingung? Bantu saat konsultasi
+                                                </button>
                                             </div>
                                         </div>
 
-                                    <!-- Panel 3: Butuh Saran / Belum Tahu -->
+                                    <!-- Case 3: Need Consultation Mode ("Belum Yakin") -->
                                     {:else if consultationState.domainSetupType === 'need_consultation'}
-                                        <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-zinc-600 dark:text-zinc-400 space-y-1 leading-relaxed">
-                                            <span class="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                                                <MessageSquareCheck size={13} />
-                                                Konsultasikan Nama & Ekstensi Terbaik
-                                            </span>
-                                            <p class="text-[11px] text-zinc-600 dark:text-zinc-400">
-                                                Kami akan membantu meriset dan memberikan rekomendasi nama domain yang berbobot, mudah diingat, serta sesuai dengan target audiens & regulasi bisnis Anda pada saat sesi konsultasi.
-                                            </p>
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs py-1">
+                                            <div>
+                                                <span class="font-semibold text-zinc-900 dark:text-zinc-100">
+                                                    Nama domain akan ditentukan saat sesi konsultasi.
+                                                </span>
+                                                <p class="text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                    Bingung memilih? Tim kami bantu carikan nama saat konsultasi gratis.
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onclick={() => {
+                                                    consultationState.domainSetupType = 'new_domain';
+                                                    consultationState.requestedDomain = '';
+                                                    consultationState.domainEstimatedPrice = '';
+                                                }}
+                                                class="text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer shrink-0 self-start sm:self-auto"
+                                            >
+                                                Cari domain sendiri →
+                                            </button>
                                         </div>
                                     {/if}
 
